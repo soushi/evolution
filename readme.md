@@ -11,7 +11,7 @@ A project need rules, if there is more than one developer involved.
 ### PHP ###
 * Functions and procedures do only have one exit.
 * Classes, functions and procedures should have a PHPDoc header.
-* Unit tests for PHP with PHPUnit are a must.
+* Unit tests for PHP with PHPUnit should be done.
 * Function brackets are starting in a new line.
 * IF conditions are always with brackets.
 * Concatenate string with a space on the left and the right side of the concatanator.
@@ -23,9 +23,11 @@ A project need rules, if there is more than one developer involved.
 
 ## Jobs, that should be done ##
 ### Change the database class ###
-This has do be done, to use other RDBMS than MySQL, for example PostrgreSQL
+This has do be done, to use other RDBMS than MySQL with MyISAM, for example 
+MySQL with InnoDB and PostrgreSQL. On MySQL with InnoDB and PostgreSQL connection
+between tables should be done with foreign key constraints.
 
-### Make Evo and its core components run on other REMBS ###
+### Make Evo and its core components run on other RDMBS ###
 Make Evo and its core components should run on PostgreSQL and MySQL with Innno DB using 
 transactions and constraints. Other databases as, for example, SQL Server are possible, too.
 
