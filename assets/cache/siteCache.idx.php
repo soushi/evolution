@@ -105,8 +105,8 @@ $this->aliasListing = array();
 $a = &$this->aliasListing;
 $d = &$this->documentListing;
 $m = &$this->documentMap;
-$d['minimal-base'] = 1;
-$a[1] = array('id' => 1, 'alias' => 'minimal-base', 'path' => '', 'parent' => 0);
+$d['index'] = 1;
+$a[1] = array('id' => 1, 'alias' => 'index', 'path' => '', 'parent' => 0);
 $m[] = array('0' => '1');
 $c = &$this->contentTypes;
 $c = &$this->chunkCache;
@@ -4126,49 +4126,6 @@ if($event_name == \'OnManagerAuthentication\' && $hash && $username) {
 }
 
 $modx->Event->output($output);';
-$p['ManagerManager'] = '//<?php
-/**
- * ManagerManager
- * 
- * Customize the MODx Manager to offer bespoke admin functions for end users.
- *
- * @category 	plugin
- * @version 	0.3.11
- * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
- * @internal	@properties &config_chunk=Configuration Chunk;text;mm_demo_rules; &remove_deprecated_tv_types_pref=Remove deprecated TV types;list;yes,no;yes &which_jquery=jQuery source;list;local (assets/js),remote (google code),manual url (specify below);local (assets/js) &js_src_type=jQuery URL override;text;
- * @internal	@events OnDocFormRender,OnDocFormPrerender,OnBeforeDocFormSave,OnPluginFormRender,OnTVFormRender
- * @internal	@modx_category Manager and Admin
- * @internal    @legacy_names Image TV Preview, Show Image TVs
- */
-
-// You can put your ManagerManager rules EITHER in a chunk OR in an external file - whichever suits your development style the best
-
-// To use an external file, put your rules in /assets/plugins/managermanager/mm_rules.inc.php 
-// (you can rename default.mm_rules.inc.php and use it as an example)
-// The chunk SHOULD have php opening tags at the beginning and end
-
-// If you want to put your rules in a chunk (so you can edit them through the Manager),
-// create the chunk, and enter its name in the configuration tab.
-// The chunk should NOT have php tags at the beginning or end
-
-// ManagerManager requires jQuery 1.3+
-// The URL to the jQuery library. Choose from the configuration tab whether you want to use 
-// a local copy (which defaults to the jQuery library distributed with ModX 1.0.1)
-// a remote copy (which defaults to the Google Code hosted version)
-// or specify a URL to a custom location.
-// Here we set some default values, because this is a convenient place to change them if we need to,
-// but you should configure your preference via the Configuration tab.
-$js_default_url_local = $modx->config[\'site_url\']. \'/assets/js/jquery-1.7.2.min.js\';
-$js_default_url_remote = \'http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js\';
-
-// You don\'t need to change anything else from here onwards
-//-------------------------------------------------------
-
-// Run the main code
-$asset_path = $modx->config[\'base_path\'] . \'assets/plugins/managermanager/mm.inc.php\';
-include($asset_path);
-';
-$p['ManagerManagerProps'] = '&config_chunk=Configuration Chunk;text;mm_demo_rules &remove_deprecated_tv_types_pref=Remove deprecated TV types;list;yes,no;yes &which_jquery=jQuery source;list;local (assets/js),remote (google code),manual url (specify below);manual url (specify below) &js_src_type=jQuery URL override;text;assets/js/jquery-1.7.2.min.js ';
 $p['Quick Manager+'] = '// In manager
 if (isset($_SESSION[\'mgrValidated\'])) {
 
@@ -4501,18 +4458,15 @@ switch ($e->name ) {
 $p['TransAliasProps'] = '&table_name=Trans table;list;common,russian,utf8,utf8lowercase;utf8lowercase &char_restrict=Restrict alias to;list;lowercase alphanumeric,alphanumeric,legal characters;legal characters &remove_periods=Remove Periods;list;Yes,No;No &word_separator=Word Separator;list;dash,underscore,none;dash &override_tv=Override TV name;string; ';
 $e = &$this->pluginEvent;
 $e['OnBeforeManagerLogin'] = array('Forgot Manager Login');
-$e['OnDocFormPrerender'] = array('ManagerManager','Quick Manager+');
-$e['OnDocFormRender'] = array('ManagerManager');
+$e['OnDocFormPrerender'] = array('Quick Manager+');
 $e['OnDocFormSave'] = array('Quick Manager+');
 $e['OnInterfaceSettingsRender'] = array('TinyMCE Rich Text Editor');
 $e['OnManagerAuthentication'] = array('Forgot Manager Login');
 $e['OnManagerLoginFormRender'] = array('Forgot Manager Login');
 $e['OnManagerLogout'] = array('Quick Manager+');
 $e['OnParseDocument'] = array('Quick Manager+');
-$e['OnPluginFormRender'] = array('ManagerManager');
 $e['OnRichTextEditorInit'] = array('TinyMCE Rich Text Editor');
 $e['OnRichTextEditorRegister'] = array('TinyMCE Rich Text Editor');
 $e['OnStripAlias'] = array('TransAlias');
-$e['OnTVFormRender'] = array('ManagerManager');
 $e['OnWebPagePrerender'] = array('Quick Manager+','Search Highlight');
 
