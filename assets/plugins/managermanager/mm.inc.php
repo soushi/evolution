@@ -34,7 +34,7 @@ switch ($which_jquery) {
  break;
 
  case 'manual url (specify below)':
-  $js_url  = $js_src_type;
+  $js_url  = $js_src_override;
  break;
 }
 
