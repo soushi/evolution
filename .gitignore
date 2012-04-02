@@ -2,10 +2,10 @@
 \.*
 
 # and any files in the cache directory
-/evo-dev/assets/cache/*
+assets/cache/*
 
 # and the config file
-/evo-dev/manager/includes/config.inc.php
+manager/includes/config.inc.php
 
 # except do not ignore .gitignore
 !.gitignore
