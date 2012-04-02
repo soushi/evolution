@@ -34,7 +34,7 @@ switch ($which_jquery) {
  break;
 
  case 'manual url (specify below)':
-  $js_url  = $js_src_override;
+  $js_url  = $js_src_type;
  break;
 }
 
@@ -271,7 +271,7 @@ case 'OnPluginFormRender':
 
 
 case 'OnDocFormPrerender':
-
+/*
 	// Are we clashing with the ShowImageTVs (or any other) plugins?
 	//$conflicted_plugins = array('ShowImageTVs');
 	//$conflicts = array();
@@ -290,7 +290,7 @@ case 'OnDocFormPrerender':
 	//	<script>	
 	//	';	
 	//}
-	
+*/	
 
 	// Load the jquery library
 	echo '<!-- Begin ManagerManager output -->';
