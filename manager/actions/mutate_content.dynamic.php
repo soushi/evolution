@@ -765,13 +765,8 @@ if ($_SESSION['mgrRole'] == 1 || $_REQUEST['a'] != '27' || $_SESSION['mgrInterna
         </table>
     </div><!-- end #tabSettings -->
     
-           <!-- Template Variables -->
-            
-            <div class="tab-page" id="tabTVs">
-        <h2 class="tab"><?php echo $_lang['settings_templvars']?></h2>
-        <script type="text/javascript">tpSettings.addTabPage( document.getElementById( "tabTVs" ) );</script>
-
-<?php
+            <!-- Template Variables -->
+ <?php
                 $template = $default_template;
                 if (isset ($_REQUEST['newtemplate'])) {
                     $template = $_REQUEST['newtemplate'];
@@ -791,6 +786,14 @@ if ($_SESSION['mgrRole'] == 1 || $_REQUEST['a'] != '27' || $_SESSION['mgrInterna
                 $rs = mysql_query($sql);
                 $limit = mysql_num_rows($rs);
                 if ($limit > 0) {
+?>
+ 
+            
+            <div class="tab-page" id="tabTVs">
+        <h2 class="tab"><?php echo $_lang['settings_templvars']?></h2>
+        <script type="text/javascript">tpSettings.addTabPage( document.getElementById( "tabTVs" ) );</script>
+<?php
+
                     echo "\t".'<table style="position:relative;" border="0" cellspacing="0" cellpadding="3" width="96%">'."\n";
                     require_once(MODX_MANAGER_PATH.'includes/tmplvars.inc.php');
                     require_once(MODX_MANAGER_PATH.'includes/tmplvars.commands.inc.php');
