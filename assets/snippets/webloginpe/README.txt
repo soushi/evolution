@@ -1,1 +1,0 @@
-See index.html in the 'docs' folder.

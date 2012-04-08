@@ -1,5 +1,0 @@
-[+wlpe.message+]
-<div class="wlpeUsersList">
-	<h3>[+view.title+]</h3>
-	[+view.list+]
-</div>
