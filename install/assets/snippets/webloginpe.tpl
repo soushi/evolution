@@ -1,32 +1,50 @@
-<?php
-	/**
-	 * WebLoginPE Snippet 1.3.1
-	 * v1.3.1 Bugfix by Soshite @ MODx CMS Forums & Various Other Forum Members
-	 *
-	 * v1.3.2 mods & bug fixes committed by allanb @ MODx CMS Forums from Various Other Forum Members
-     *        Added pagination based on code from Taff (http://xrl.us/oqafd)[r4][r69]
-     *        Fixed glitch with registration success redirect when pause value is set to 0[r9][r73]
-     *        Added approveuser manager function type for facilitating the activation of pending users;
-     *              Added ability to set a field to obtain group settings [groupsField];
-     *              Added ability to approve certain domains [approvedDomains];
-     *              Added ability to set what group is used for pending users [Pending Users];
-     *              See http://xrl.us/oqaq6 for more detail on changes;[r11][r75]
-     *       No log details for this revision [r36][r76]
-     *       config, stylesheet and lang array modifications by sottwell August 2009[r54][r77]
-     *       Multiple instances added vhollo [r25][r79]
-     *       fixed '&usersList' fixed placeholders vhollo [r40][r80]
-     *       no log message vhollo [r42][r81]
-     * 
-     *
-	 * @package WebLoginPE
-	 * @author Scotty Delicious and MODx community members
-	 * @version 1.3.2
-	 *
-	 * See the "docs" folder for detailed usage and parameter instructions.
-	 * New parameters for multiple instances:
-     * &id=`...` instancename that identifies this instance of WLPE call
-     * &hide=`0|1` if this instance must disappear when an other instance gets in action
-	 */
+//<?php
+/**
+ * WebLoginPE
+ *
+ * A progressively enhanced, complete Web User management snippet.
+ *
+ * @category    snippet
+ * @version     1.3.2
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
+ * @internal    @properties
+ * @internal    @modx_category Login
+ * @internal    @installset base, sample
+*/
+ 
+ /*
+::::::::::::::::::::::::::::::::::::::::
+Snippet name: WebLoginPE
+Short Desc: A progressively enhanced, complete Web User management snippet.
+Version: 1.3.2
+Authors: Scotty Delicious and MODx community members
+Date: 2007-2011
+::::::::::::::::::::::::::::::::::::::::
+Description:
+    WebLoginPE is a progressively enhanced (PE), advanced web user management snippet for MODx. 
+    WebLoginPE manages user registration, activation, login, logout, password recovery, 
+    extended profiling, profile editing, viewing and contacting other users, and user profile removal.
+::::::::::::::::::::::::::::::::::::::::
+
+v1.3.1 Bugfix by Soshite @ MODx CMS Forums & Various Other Forum Members
+
+v1.3.2 mods & bug fixes committed by allanb @ MODx CMS Forums from Various Other Forum Members
+        Added pagination based on code from Taff (http://xrl.us/oqafd)[r4][r69]
+        Fixed glitch with registration success redirect when pause value is set to 0[r9][r73]
+        Added approveuser manager function type for facilitating the activation of pending users;
+              Added ability to set a field to obtain group settings [groupsField];
+              Added ability to approve certain domains [approvedDomains];
+              Added ability to set what group is used for pending users [Pending Users];
+              See http://xrl.us/oqaq6 for more detail on changes;[r11][r75]
+       No log details for this revision [r36][r76]
+       config, stylesheet and lang array modifications by sottwell August 2009[r54][r77]
+       Multiple instances added vhollo [r25][r79]
+       fixed '&usersList' fixed placeholders vhollo [r40][r80]
+       no log message vhollo [r42][r81]
+
+See the included "docs/index.html" file for detailed usage and parameter instructions.
+::::::::::::::::::::::::::::::::::::::::
+*/
 	 
     // Allow use of a config file - sottwell
     $config = isset($config) ? $config : 'default';
@@ -518,4 +536,3 @@
 	{
 		return;
 	}
-?>
