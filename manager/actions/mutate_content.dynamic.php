@@ -835,10 +835,7 @@ if ($_SESSION['mgrRole'] == 1 || $_REQUEST['a'] != '27' || $_SESSION['mgrInterna
                              "\t\t</td></tr>\n";
                     }
                     echo "\t</table>\n";
-                } else {
-                    // There aren't any Template Variables
-                    echo "\t<p>".$_lang['tmplvars_novars']."</p>\n";
-                }
+                } 
             ?>
             </div>
             <!-- end .sectionBody .tmplvars -->
