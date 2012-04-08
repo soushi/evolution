@@ -2,6 +2,11 @@
 ===
 ##Changelog
 
+###08/04/2012
+
+* Began update of sample site
+* Replaced WebLogin snippets with WebLoginPE version 1.3.2b. This version is an improved version that offers the option of included external config files, and has the language array keys as informative text rather than numbers. For example, $wlpe_lang['username_used'] instead of $wlpe_lang[14].
+
 ###02/04/2012
 
 * Fixed bug in ManagerManager when using manual setting for jQuery location [View](https://github.com/sottwell/evolution/commit/a13ffa16a296e16ae320571c38c313f27f6e3871) 
