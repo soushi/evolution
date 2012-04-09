@@ -62,10 +62,18 @@ nav ul li.active a:hover{background: url(../img/menu-active.jpg) repeat-x center
 #mainLeft{width:275px;float:left;margin-top:1.1em;}
 #mainLeft div{margin:1em 2em 0 0;}
 /***************************************************
+			       DITTO OUTPUT
+***************************************************/
+#mainLeft .sideBlock .ditto_item{padding-bottom:5px;margin-bottom:5px;border-bottom:1px dotted #333;}
+#mainLeft .sideBlock .ditto_pageTitle{font-size:0.95em;margin:0;padding:0;}
+#mainLeft .sideBlock .ditto_introText{}
+#mainLeft .sideBlock .ditto_documentInfo{display:none;}
+/***************************************************
 				 RIGHT COLUMN
 ***************************************************/
 #mainRight{width:700px;float:left;}
 #mainRight ul{list-style:disc;margin-left:2em;}
+#mainRight ol{list-style:decimal;margin-left:2em;}
 #mainRight li{margin-bottom:10px;}
 /***************************************************
 			        FOOTER
