@@ -2,7 +2,7 @@
 /**
  * Jot
  * 
- * User comments with moderation and email subscription
+ * ページ単位でコメント機能を。承認機能・メール通知機能・ページングなど多機能
  *
  * @category 	snippet
  * @version 	1.1.4

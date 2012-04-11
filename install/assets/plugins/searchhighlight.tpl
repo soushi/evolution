@@ -1,7 +1,7 @@
 /**
  * Search Highlight
  * 
- * Used with AjaxSearch to show search terms highlighted on page linked from search results
+ * 検索結果ページ中のキーワードを分かりやすくハイライト表示 (AjaxSearchが必要)
  *
  * @category 	plugin
  * @version 	1.5

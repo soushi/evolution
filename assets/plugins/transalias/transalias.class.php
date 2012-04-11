@@ -141,6 +141,9 @@ class TransAlias {
      * @return string alias
      */
     function stripAlias($alias,$char_restrict,$word_separator) {
+        // Convert kana japanese
+        $alias = mb_convert_kana($alias, "aCKsV", "utf-8");
+        
         // Convert all named HTML entities to numeric entities
         $alias = preg_replace_callback('/&([a-zA-Z][a-zA-Z0-9]{1,7});/', array($this,'convert_entity'), $alias);
         
@@ -151,6 +154,7 @@ class TransAlias {
         if (!empty($this->_useTable)) {
             $alias = strtr($alias, $this->_tables[$this->_useTable]);
         }
+        $alias = preg_replace('/[^\x01-\x7E\._]{2,3}/', 'x', $alias);
 
         $alias = strip_tags($alias); // strip HTML
         if($char_restrict=='lowercase alphanumeric') {

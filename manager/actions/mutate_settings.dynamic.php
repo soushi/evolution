@@ -190,7 +190,9 @@ function confirmLangChange(el, lkey, elupd){
     <input type="hidden" name="site_id" value="<?php echo $site_id; ?>" />
     <input type="hidden" name="settings_version" value="<?php echo $modx_version; ?>" />
     <!-- this field is used to check site settings have been entered/ updated after install or upgrade -->
-    <?php if(!isset($settings_version) || $settings_version!=$modx_version) { ?>
+    <?php if(!isset($settings_version) || $settings_version!=$modx_version) {
+    include(MODX_MANAGER_PATH.'includes/locale/' . $manager_language . '/system_settings.php');
+    ?>
     <div class='sectionBody'><p><?php echo $_lang['settings_after_install']; ?></p></div>
     <?php } ?>
     <script type="text/javascript" src="media/script/tabpane.js"></script>
@@ -914,16 +916,16 @@ function confirmLangChange(el, lkey, elupd){
             </tr>
              <tr>
       		   <td nowrap class="warning"><b><?php echo $_lang["tree_page_click"] ?></b></td>
-      		   <td> <input onchange="documentDirty=true;" type="radio" name="tree_page_click" value="27" <?php echo $tree_page_click=='27' ? 'checked="checked"' : ""; ?> />
+      		   <td> <input onchange="documentDirty=true;" type="radio" name="tree_page_click" value="27" <?php echo ($tree_page_click=='27' || !isset($tree_page_click)) ? 'checked="checked"' : ""; ?> />
       			 <?php echo $_lang["edit_resource"]?><br />
-      			 <input onchange="documentDirty=true;" type="radio" name="tree_page_click" value="3" <?php echo ($tree_page_click=='3' || !isset($tree_page_click)) ? 'checked="checked"' : ""; ?> />
+      			 <input onchange="documentDirty=true;" type="radio" name="tree_page_click" value="3" <?php echo ($tree_page_click=='3') ? 'checked="checked"' : ""; ?> />
       			 <?php echo $_lang["doc_data_title"]?></td>
       		 </tr>
              <tr>
                <td width="200">&nbsp;</td>
                <td class='comment'><?php echo $_lang["tree_page_click_message"]?></td>
              </tr>
-             <tr>
+            <tr>
               <td colspan="2"><div class='split'></div></td>
             </tr>
              <tr>
@@ -1095,14 +1097,14 @@ function confirmLangChange(el, lkey, elupd){
           <tr id='rbRow4' class='row3' style="display: <?php echo $use_browser==1 ? $displayStyle : 'none' ; ?>">
             <td nowrap class="warning"><b><?php echo $_lang["rb_base_dir_title"]?></b></td>
             <td><?php
-			function getResourceBaseDir() {
-				global $base_path;
-				return $base_path."assets/";
-			}
+				function getResourceBaseDir() {
+					global $base_path;
+					return $base_path."assets/";
+				}
 		?>
                 <?php echo $_lang['default']; ?> <span id="default_rb_base_dir"><?php echo getResourceBaseDir()?></span><br />
                 <input onchange="documentDirty=true;" type='text' maxlength='255' style="width: 250px;" name="rb_base_dir" id="rb_base_dir" value="<?php echo isset($rb_base_dir) ? $rb_base_dir : getResourceBaseDir() ; ?>" /> <input type="button" onclick="reset_path('rb_base_dir');" value="<?php echo $_lang["reset"]; ?>" name="reset_rb_base_dir">
-            </td>
+              </td>
           </tr>
           <tr id='rbRow5' class='row3' style="display: <?php echo $use_browser==1 ? $displayStyle : 'none' ; ?>">
             <td width="200">&nbsp;</td>

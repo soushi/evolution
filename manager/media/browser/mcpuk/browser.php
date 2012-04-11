@@ -1,6 +1,11 @@
 <?php
 
-define('MODX_BASE_PATH', realpath('../../../../'));
+include_once('../../../includes/config.inc.php');
+
+// $modx_base_path = realpath('../../../../');
+// $modx_base_path = trim($modx_base_path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+// define('MODX_BASE_PATH', $modx_base_path);
+
 $rb = new FBROWSER();
 $ph = array();
 $ph['seturl_js'] = $rb->seturl_js();
@@ -45,5 +50,5 @@ class FBROWSER
 			$browser_html = str_replace($name, $value, $browser_html);
 		}
 		return $browser_html;
-	}
+			}
 }

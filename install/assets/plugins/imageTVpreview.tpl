@@ -2,12 +2,14 @@
 /**
  * Show Image TVs
  * 
- * Preview images in the Manager from image Template Variables
+ * イメージ入力用テンプレート変数に設定されたイメージをプレビュー
  *
  * @category 	plugin
  * @version 	1.0
  * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
+ * @internal    @properties &w=Max width;int;300 &h=Max height;int;100;
  * @internal	@events OnDocFormRender 
+ * @internal	@modx_category Manager and Admin
  */
 
 

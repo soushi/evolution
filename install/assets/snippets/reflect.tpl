@@ -2,7 +2,7 @@
 /**
  * Reflect
  * 
- * Generates date-based archives using Ditto
+ * 記事・ブログエントリー・イメージギャラリーなどのアーカイブを作成。Dittoと共に使用
  *
  * @category 	snippet
  * @version 	2.1.0

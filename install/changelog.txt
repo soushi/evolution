@@ -1,12 +1,12 @@
 This file shows the changes in recent releases of MODx. The most current release is usually the 
 development release, and is only shown to give an idea of what's currently in the pipeline.
 
-MODx Evolution 1.0.4 ($Rev$ - $Date$)
+MODx Evolution 1.0.4 ($Rev: 6978 $ - $Date: 2010-06-07 14:14:12 -0500 (Mon, 07 Jun 2010) $)
 ===================================
 --------------------------------------------
 Security:
 --------------------------------------------
-* [#MODX-1964] WebLogin does not prevent brute force attack 
+* [#MODX-1964] WebLogin does not prevent brute force attack
 
 --------------------------------------------
 Bugfixes:

@@ -2,7 +2,7 @@
 /**
  * Forgot Manager Login
  * 
- * Resets your manager login when you forget your password via email confirmation
+ * 管理画面のログインパスワードを再発行
  *
  * @category 	plugin
  * @version 	1.1.2
@@ -87,12 +87,15 @@ EOD;
         function sendEmail($to) {
             global $modx, $_lang;
 
+            $emailsender = $modx->config['emailsender'];
             $subject = $_lang['password_change_request'];
-            $headers  = "MIME-Version: 1.0\r\n".
-                "Content-type: text/html; charset=\"{$modx->config['modx_charset']}\"\r\n".
-		"From: MODx <{$modx->config['emailsender']}>\r\n".
-                "Reply-To: no-reply@{$_SERVER['HTTP_HOST']}\r\n".
-                "X-Mailer: PHP/".phpversion();
+            $headers  = "MIME-Version: 1.0\n".
+                "Content-type: text/html; charset=\"iso-2022-jp\"\n".
+                "Content-Transfer-Encoding: 7bit\n" .
+                "From: $emailsender\n".
+                "Reply-To: $emailsender\n".
+                "Date: " . date("r") . "\n" . 
+                "X-Mailer: MODx Admin";
 
             $user = $this->getUser(0, '', $to);
   
@@ -103,6 +106,12 @@ EOD;
 <p><small>{$_lang['forgot_password_email_fine_print']}</small></p>
 EOD;
 
+                /* For Japanese START -------------------- */	
+                mb_language("ja"); // add by MEGU
+                mb_internal_encoding($modx->config['modx_charset']); // add by MEGU
+                $subject = mb_encode_mimeheader($subject,"ISO-2022-JP","B");
+                $body = mb_convert_encoding($body,                                                 "ISO-2022-JP",$modx->config["modx_charset"]);
+                /* For Japanese END -------------------- */	
                 $mail = mail($to, $subject, $body, $headers);
                 if(!$mail) { $this->errors[] = $_lang['error_sending_email']; }
    

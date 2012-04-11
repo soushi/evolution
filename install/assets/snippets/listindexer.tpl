@@ -2,7 +2,7 @@
 /**
  * ListIndexer
  * 
- * A flexible way to show the most recent Resources and other Resource lists
+ * 最新のリソースのタイトル一覧を手軽に表示
  *
  * @category 	snippet
  * @version 	1.0.1

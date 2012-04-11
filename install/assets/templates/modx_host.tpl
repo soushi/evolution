@@ -1,7 +1,7 @@
 /**
  * MODxHost
  *
- * Legacy MODx Host template including dropdown menu
+ * 「MODx Host」ドロップダウンメニューが特徴的なテンプレート
  *
  * @category	template
  * @version 	1.0

@@ -1,17 +1,17 @@
-<?php
+//<?php
 /**
  * Inherit Parent Template
  * 
- * Newly created Resources use the same template as their Parent or Sibling Containers
+ * リソース新規作成時に親リソースのテンプレート選択を継承
  *
- * @category    plugin
+ * @category 	plugin
  * @version     1.1
- * @license     http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
+ * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @internal    @properties &inheritTemplate=Inherit Template;list;From Parent,From First Sibling;From Parent
- * @internal    @events OnDocFormPrerender 
- * @internal    @modx_category Manager and Admin
+ * @internal	@events OnDocFormPrerender 
+ * @internal	@modx_category Manager and Admin
  */
- 
+
 /*
  * Inherit Parent Permissions
  * Javier Arraiza // www.marker.es // 24/3/2008
@@ -32,7 +32,7 @@ global $content;
 $e = &$modx->Event;
 
 switch($e->name) {
-    case 'OnDocFormPrerender':        
+  case 'OnDocFormPrerender':
         if ($inheritTemplate == 'From First Sibling') {
             if ($_REQUEST['pid'] > 0 && $id == 0) {
                 if ($sibl = $modx->getDocumentChildren($_REQUEST['pid'], 1, 0, 'template', '', 'menuindex', 'ASC', 1)) {
@@ -45,10 +45,10 @@ switch($e->name) {
             }
         } else {
              if ($parent = $modx->getPageInfo($_REQUEST['pid'],0,'template')) {
-                 $content['template'] = $parent['template'];
-             }
-        }
-        break;
-    default:
-        break;
+        $content['template'] = $parent['template'];
+      }
+    }
+    break;
+  default:
+    break;
 }

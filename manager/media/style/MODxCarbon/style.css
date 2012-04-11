@@ -1,3 +1,4 @@
+@import url('ja.css');
 /* -------------------------[ Neutralize styles, fonts and viewport ]--- */
 html { /overflow-x: hidden; /overflow-y: auto;} /* for IE7, IE6 */
 html, body, form, fieldset {
@@ -136,7 +137,7 @@ hr {
 	border: 0;
 }
 .split {
-	background: #821517 url(images/misc/line.gif) repeat-x;
+	background: #556476 url(images/misc/line.gif) repeat-x;
 	height: 1px;
 	font-size: 0;
 	clear: both;
@@ -147,7 +148,7 @@ hr {
 	height: 400px;
 }
 .messageRead {
-	color: #000;
+	color: #333;
 }
 .messageUnread {
 	color: #3CB371;
@@ -155,7 +156,7 @@ hr {
 }
 .right {
 	font-weight: bold;
-	color: #000;
+	color: #333;
 	float: left;
 	padding: 0 20px 20px;
 }
@@ -166,7 +167,7 @@ hr {
 /* -------------------------[ Topbar ]--- */
 #topbar {
 	margin: 0;
-	color: #000;
+	color: #333;
 	padding: 0 5px;
 }
 #topbar * {
@@ -326,7 +327,7 @@ form input.hidden {
 		text-align: left;
 	}
 form textarea {
-	height: 75px;
+	height: 80px;
 	width: 300px;
 	margin-top: 0;
 }
@@ -403,7 +404,7 @@ input.submit {
 	margin: 0 10px;
 	padding: 5px 3px 5px;
 	font-weight: bold;
-	color: #000;
+	color: #333;
 	border: 1px solid #e3e3e3;
 	border-bottom:none;
 }
@@ -445,15 +446,15 @@ input.submit {
 	}
 .comment {
 	font-size: 10px;
-	color: #000;
+	color: #333;
 }
 thead, .fancyrow {
-	color: #000;
+	color: #333;
 	height: 18px !important;
 	background-color: #E4E4E4;
 }
 thead td {
-	color: #000;
+	color: #333;
 	border-top: 1px solid #fff;
 }
 .fancyrow2 {
@@ -507,10 +508,10 @@ a img {
 	}
 .row1, .row2, .row3 {
 	background-color: #fff;
-	color: #000;
+	color: #333;
 }
 .row2 {
-	background-color: #C8DAA2;
+	background-color: #ece7dd;
 }
 .row3 {
 	background-color: #F4F4F4;
@@ -550,7 +551,7 @@ a img {
 		right: 4px
 	}
 .rootNode, .treeNode, .treeNodeHover, .treeNodeSelected, .emptyNode {
-	color: #000;
+	color: #333;
 	padding: 2px;
 	cursor: pointer;
 	width: auto;
@@ -562,7 +563,7 @@ a img {
 }
 .treeNodeSelected {
 	background-color: #fff;
-	color: #000;
+	color: #333;
 	border: 1px solid #c8c8d4;
 	padding: 1px;
 }
@@ -575,7 +576,7 @@ a img {
 	text-decoration: line-through;
 }
 .publishedNode {
-	color: #000;
+	color: #333;
 }
 .emptyNode {
 	color: #aaa;
@@ -677,7 +678,7 @@ a img {
 /* -------------------------[ home page main links ]--- */
 a.hometblink, a.hometblink:active, a.hometblink:visited, a.hometblink:link, .hometblink {
 	text-decoration: underline;
-	color: #000;
+	color: #333;
 	font-weight: bold;
 }
 a.hometblink:hover {
@@ -719,7 +720,7 @@ a.hometblink:hover {
 .cntxMnuItem {
 	background-image: url(images/misc/_tx_.gif);
 	cursor: pointer;
-	color: #000;
+	color: #333;
 	padding: 3px 16px 3px 2px;
 }
 	.rtl .cntxMnuItem,
@@ -733,7 +734,7 @@ a.hometblink:hover {
 }
 .cntxMnuItemOver {
 	cursor: pointer;
-	color: #000;
+	color: #333;
 	background: #e3e3e3;
 	padding: 2px 15px 2px 1px;
 	border: 1px solid #c0c0c0;
@@ -917,7 +918,7 @@ a.hometblink:hover {
 	background: #DDE4EB;
 	border: 1px solid #fdfdfd;
 	border-bottom-color: #dcdcdc;
-	color: #000;
+	color: #333;
 }
 #mx_contextmenu .menuLink:hover,
 #mx_contextmenu .menuLinkDisabled {
@@ -945,7 +946,7 @@ a.hometblink:hover {
 
 #mx_contextmenu #nameHolder {
 	color: #fff;
-	text-align: right;
+	text-align: left;
 	cursor: default;
 	font-weight: bold;
 	padding: 2px;
@@ -1035,7 +1036,7 @@ a.hometblink:hover {
 	text-decoration: none;
 }
 .dynamic-tab-pane-control .tab-row .tab.selected {
-	color: #000;
+	color: #333;
 	z-index: 3;
 	top: 0;
 	background: #fff;
@@ -1079,7 +1080,7 @@ a.hometblink:hover {
 .treeButton {
 	display: block;
 	cursor: default;
-	color: #000;
+	color: #333;
 	border: 1px;
 	border-bottom-color: #809c47;
 	padding: 3px 5px;
@@ -1127,9 +1128,19 @@ a.hometblink, a.hometblink img {
 }
 /* -------------------------[ New sortable table class ]--- */
 .sortabletable {
-	border: 0 solid ThreeDShadow;
-	color: WindowText;
 }
+table.sortabletable {
+border-collapse:collapse;
+width:100%;
+}
+table.sortabletable td,table.sortabletable th {
+border:1px solid #ccc;
+padding:4px;
+}
+.sortabletable a {
+display:block;
+}
+
 .sortabletable thead tr {
 	background-color: #86919e;
 }
@@ -1146,14 +1157,14 @@ a.hometblink, a.hometblink img {
 .sortabletable th {
 	text-align: left;
 	cursor: pointer;
-	color: #000;
+	color: #f3f3f3;
 }
 	.rtl .sortabletable th {
 		text-align: right;
 	}
 .sortabletable th a {
 	text-decoration: none;
-	color: #000;
+	color: #f3f3f3;
 }
 .sortabletable th:active {
 	background: #ccc;
@@ -1183,7 +1194,7 @@ a.hometblink, a.hometblink img {
 	padding: 3px;
 	border: 1px solid #D9E7C2;
 	text-decoration: none;
-	color: #000;
+	color: #333;
 }
 #pagination li.currentPage a, #pagination li a:hover {
 	color: #060;
@@ -1424,7 +1435,7 @@ form#mutate select.tv_url_select {
 */
 
 .custom-tip {
-	color: #000;
+	color: #333;
 	width: 175px;
 	z-index: 13000;
 	border: 1px solid #cccccc;
@@ -1540,7 +1551,7 @@ input:focus.DatePicker, #mutate input:focus.DatePicker, #userPane input:focus.Da
 	background: #d9eefc;
 }
 .dp_cal td.dp_roll {
-	color: #000;
+	color: #333;
 	background: #fff6bf;
 }
 /* -------------------------[ must have this for the IE6 select box hiding ]--- */

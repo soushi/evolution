@@ -782,7 +782,7 @@ ALTER TABLE `{PREFIX}site_metatags`
 ALTER TABLE `{PREFIX}web_user_attributes`
   MODIFY COLUMN `state` varchar(25) NOT NULL default '',
   MODIFY COLUMN `zip` varchar(25) NOT NULL default '';
-  
+
 
 ALTER TABLE `{PREFIX}user_roles`
   ADD COLUMN `remove_locks` int(1) NOT NULL DEFAULT '0';
@@ -864,90 +864,6 @@ REPLACE INTO `{PREFIX}user_roles`
 
 # ]]non-upgrade-able
 
-
-# Default Site Settings
-
-
-INSERT IGNORE INTO `{PREFIX}system_settings` 
-(setting_name, setting_value) VALUES 
-('manager_theme','MODxCarbon'),
-('settings_version',''),
-('show_meta','0'),
-('server_offset_time','0'),
-('server_protocol','http'),
-('manager_language','{MANAGERLANGUAGE}'),
-('modx_charset','UTF-8'),
-('site_name','My MODx Site'),
-('site_start','1'),
-('error_page','1'),
-('unauthorized_page','1'),
-('site_status','1'),
-('site_unavailable_message','The site is currently unavailable'),
-('track_visitors','0'),
-('resolve_hostnames','0'),
-('top_howmany','10'),
-('default_template','3'),
-('old_template',''),
-('publish_default','0'),
-('cache_default','1'),
-('search_default','1'),
-('friendly_urls','0'),
-('friendly_url_prefix',''),
-('friendly_url_suffix','.html'),
-('friendly_alias_urls','1'),
-('use_alias_path','0'),
-('use_udperms','1'),
-('udperms_allowroot','0'),
-('failed_login_attempts','3'),
-('blocked_minutes','60'),
-('use_captcha','0'),
-('captcha_words','MODx,Access,Better,BitCode,Cache,Desc,Design,Excell,Enjoy,URLs,TechView,Gerald,Griff,Humphrey,Holiday,Intel,Integration,Joystick,Join(),Tattoo,Genetic,Light,Likeness,Marit,Maaike,Niche,Netherlands,Ordinance,Oscillo,Parser,Phusion,Query,Question,Regalia,Righteous,Snippet,Sentinel,Template,Thespian,Unity,Enterprise,Verily,Veri,Website,WideWeb,Yap,Yellow,Zebra,Zygote'),
-('emailsender','{ADMINEMAIL}'),
-('emailsubject','Your login details'),
-('number_of_logs','100'),
-('number_of_messages','30'),
-('number_of_results','20'),
-('use_editor','1'),
-('use_browser','1'),
-('rb_base_dir',''),
-('rb_base_url',''),
-('which_editor','TinyMCE'),
-('fe_editor_lang','{MANAGERLANGUAGE}'),
-('fck_editor_toolbar','standard'),
-('fck_editor_autolang','0'),
-('editor_css_path',''),
-('editor_css_selectors',''),
-('strip_image_paths','1'),
-('upload_images','bmp,ico,gif,jpeg,jpg,png,psd,tif,tiff'),
-('upload_media','au,avi,mp3,mp4,mpeg,mpg,wav,wmv'),
-('upload_flash','fla,flv,swf'),
-('upload_files','aac,au,avi,css,cache,doc,docx,gz,gzip,htaccess,htm,html,js,mp3,mp4,mpeg,mpg,ods,odp,odt,pdf,ppt,pptx,rar,tar,tgz,txt,wav,wmv,xls,xlsx,xml,z,zip'),
-('upload_maxsize','1048576'),
-('new_file_permissions','0644'),
-('new_folder_permissions','0755'),
-('filemanager_path',''),
-('theme_refresher',''),
-('manager_layout','4'),
-('custom_contenttype','application/rss+xml,application/pdf,application/vnd.ms-word,application/vnd.ms-excel,text/html,text/css,text/xml,text/javascript,text/plain'),
-('auto_menuindex','1'),
-('session.cookie.lifetime','604800'),
-('mail_check_timeperiod','60'),
-('manager_direction','ltr'),
-('tinymce_editor_theme','editor'),
-('tinymce_custom_plugins','style,advimage,advlink,searchreplace,print,contextmenu,paste,fullscreen,nonbreaking,xhtmlxtras,visualchars,media'),
-('tinymce_custom_buttons1','undo,redo,selectall,separator,pastetext,pasteword,separator,search,replace,separator,nonbreaking,hr,charmap,separator,image,link,unlink,anchor,media,separator,cleanup,removeformat,separator,fullscreen,print,code,help'),
-('tinymce_custom_buttons2','bold,italic,underline,strikethrough,sub,sup,separator,bullist,numlist,outdent,indent,separator,justifyleft,justifycenter,justifyright,justifyfull,separator,styleselect,formatselect,separator,styleprops'),
-('tree_show_protected', '0'),
-('rss_url_news', 'http://feeds.feedburner.com/modx-announce'),
-('rss_url_security', 'http://feeds.feedburner.com/modxsecurity'),
-('validate_referer', '1'),
-('datepicker_offset','-10'),
-('xhtml_urls','1'),
-('allow_duplicate_alias','0'),
-('automatic_alias','1'),
-('datetime_format','dd-mm-YYYY'),
-('warning_visibility', '1'),
-('remember_last_tab', '0');
 
 
 REPLACE INTO `{PREFIX}user_roles` 

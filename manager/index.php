@@ -122,7 +122,7 @@ define("IN_ETOMITE_SYSTEM", "true"); // for backward compatibility with 0.6
 $config_filename = "./includes/config.inc.php";
 if (!file_exists($config_filename)) {
     echo "<h3>Unable to load configuration settings</h3>";
-    echo "Please run the MODx <a href='../install'>install utility</a>";
+    echo "Please run the MODx <a href='../install/index.php?action=mode'>install utility</a>";
     exit;
 }
 
@@ -138,7 +138,7 @@ $etomite = &$modx; // for backward compatibility
 
 // connect to the database
 if(@!$modxDBConn = mysql_connect($database_server, $database_user, $database_password)) {
-    die("<h2>Failed to create the database connection!</h2>. Please run the MODx <a href='../install'>install utility</a>");
+    die("<h2>Failed to create the database connection!</h2>. Please run the MODx <a href='../install/index.php?action=mode'>install utility</a>");
 } else {
     mysql_select_db(str_replace('`', '', $dbase));
     @mysql_query("{$database_connection_method} {$database_connection_charset}");
@@ -154,7 +154,7 @@ include_once "settings.inc.php";
 include_once "user_settings.inc.php";
 
 // include_once the language file
-if(!isset($manager_language) || !file_exists(MODX_MANAGER_PATH."includes/lang/".$manager_language.".inc.php")) {
+if(!isset($manager_language)) {
     $manager_language = "english"; // if not set, get the english language file.
 }
 $_lang = array();
@@ -612,9 +612,9 @@ switch ($action) {
     case 200:
         // show phpInfo
         if($modx->hasPermission('logs')) {
-            include_once "header.inc.php";
-            include_once "actions/phpinfo.static.php";
-            include_once "footer.inc.php";
+        include_once "header.inc.php";
+        include_once "actions/phpinfo.static.php";
+        include_once "footer.inc.php";
         }
     break;
 /********************************************************************/

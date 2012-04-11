@@ -13,9 +13,9 @@
 $_lang = array ();
 
 #default fallback language file - english
-require_once("lang/english.inc.php");
+require_once("lang/japanese-utf8.inc.php");
 
-$install_language = "english";
+$install_language = "japanese-utf8";
 
 if (isset($_POST['language'])) {
 	$install_language = $_POST['language'];
@@ -24,7 +24,7 @@ if (isset($_POST['language'])) {
 		$install_language = $_GET['language'];
 }
 
-$manager_language = "english";
+$manager_language = "japanese-utf8";
 
 if (isset($_POST['managerlanguage'])) {
 	$manager_language = $_POST['managerlanguage'];
@@ -34,7 +34,7 @@ if (isset($_POST['managerlanguage'])) {
 }
 
 # load language file
-if($install_language!="english" && file_exists("lang/".$install_language.".inc.php")) {
+if($install_language!="japanese-utf8" && file_exists("lang/".$install_language.".inc.php")) {
     include_once "lang/".$install_language.".inc.php";
 }
 ?>

@@ -1,4 +1,4 @@
-#qmEditor, #qmEditorClosed
+#qmEditor, #qmEditorClosed 
 {
     height: 28px;
 	font-family: Helvetica, Arial, sans-serif !important;
@@ -18,8 +18,8 @@
 	-webkit-transition-duration: 0.7s;
 	-moz-transition-duration: 0.7s;
 	transition-duration: 0.7s;
-}   
- 
+}
+
 #qmEditor *:focus, #qmEditor *:active 
 {
     outline: none !important;
@@ -68,7 +68,7 @@
     border: 0 !important;
     background: transparent url(images/transparent.gif) repeat;
 }
-    
+
 #qmEditor:hover, #qmEditorClosed:hover 
 {
     opacity:1; 
@@ -125,7 +125,7 @@
 	border: 0;
 }
 
-#qmEditor .qmButton:hover
+#qmEditor .qmButton:hover 
 {
 	background-position: bottom left;
 	-webkit-box-shadow: 0 0 10px #b8c7d6;

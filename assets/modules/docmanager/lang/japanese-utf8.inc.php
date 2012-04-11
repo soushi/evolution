@@ -115,7 +115,7 @@ $_lang['DM_adjust_authors_noselection'] = '変更なし';
 
  //-- labels
 $_lang['DM_date_pubdate'] = '公開日時:';
-$_lang['DM_date_unpubdate'] = '非公開日時:';
+$_lang['DM_date_unpubdate'] = '公開終了日時:';
 $_lang['DM_date_createdon'] = '作成日時:';
 $_lang['DM_date_editedon'] = '編集日時:';
 //$_lang['DM_date_deletedon'] = 'Deleted On Date';
@@ -140,9 +140,9 @@ $_lang['DM_select_tree'] ='ツリー表示からリソースを選択します';
 $_lang['DM_process_noselection'] = '必要な指定がされていません。';
 $_lang['DM_process_novalues'] = '値が指定されていませんでした。';
 $_lang['DM_process_limits_error'] = '上限が下限よりも小さいです:';
-$_lang['DM_process_invalid_error'] = '値が変でした:';
+$_lang['DM_process_invalid_error'] = '値がイレギュラーです ';
 $_lang['DM_process_update_success'] = '変更は無事完了しました。';
-$_lang['DM_process_update_error'] = '変更は完了しましたがエラーがありました:';
+$_lang['DM_process_update_error'] = '変更は完了しましたが、エラーがありました:';
 $_lang['DM_process_back'] = '戻る';
 
 //-- manager access logging

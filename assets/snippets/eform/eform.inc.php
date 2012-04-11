@@ -37,6 +37,11 @@
 # bugfix: Validation css class isn't being added to labels.
 ##
 
+#----------------------------------------------------------
+# Modify ZeRo(http://www.petit-power.com) $Revision: 58 $
+# $Date: 2009-07-27 16:31:59 +0900 (??, 01 3 2009) $ 
+#----------------------------------------------------------
+
 $GLOBALS['optionsName'] = "eform"; //name of pseudo attribute used for format settings
 $GLOBALS['efPostBack'] = false;
 
@@ -345,9 +350,9 @@ $debugText .= 'Locale<pre>'.var_export($localeInfo,true).'</pre>';
 					foreach($fields as $key => $value)
 						$body .= "<tr><td>$key</td><td><pre>$value</pre></td></tr>";
 					$body .="</table>";
-					include_once "manager/includes/controls/class.phpmailer.php";
+					include_once "manager/includes/controls/modxmailer.inc.php";
 				# send abuse alert
-					$mail = new PHPMailer();
+					$mail = new MODxMailer();
 					$mail->IsMail();
 					$mail->IsHTML($isHtml);
 					$mail->From		= $modx->config['emailsender'];
@@ -431,7 +436,7 @@ $debugText .= 'Locale<pre>'.var_export($localeInfo,true).'</pre>';
 					$replyto = ( $fields[$replyto] && strstr($fields[$replyto],'@') )?$fields[$replyto]:$from;
 
 				# include PHP Mailer
-				include_once "manager/includes/controls/class.phpmailer.php";
+				include_once "manager/includes/controls/modxmailer.inc.php";
 
 				# send form
 				//defaults to html so only test sendasText
@@ -439,9 +444,8 @@ $debugText .= 'Locale<pre>'.var_export($localeInfo,true).'</pre>';
 
 				if(!$noemail) {
 					if($sendirect) $to = $fields['email'];
-					$mail = new PHPMailer();
+					$mail = new MODxMailer();
 					$mail->IsMail();
-					$mail->CharSet = $modx->config['modx_charset'];
 					$mail->IsHTML($isHtml);
 					$mail->From		= $from;
 					$mail->FromName	= $fromname;
@@ -457,9 +461,8 @@ $debugText .= 'Locale<pre>'.var_export($localeInfo,true).'</pre>';
 
 				# send user a copy of the report
 				if($ccsender && $fields['email']) {
-					$mail = new PHPMailer();
+					$mail = new MODxMailer();
 					$mail->IsMail();
-					$mail->CharSet = $modx->config['modx_charset'];
 					$mail->IsHTML($isHtml);
 					$mail->From		= $from;
 					$mail->FromName	= $fromname;
@@ -475,9 +478,8 @@ $debugText .= 'Locale<pre>'.var_export($localeInfo,true).'</pre>';
 				$isHtml = ($sendAsText==1 || strstr($sendAsText,'autotext'))?false:true;
 				if ($autotext && $fields['email']!='') {
 					$autotext = formMerge($autotext,$fields);
-					$mail = new PHPMailer();
+					$mail = new MODxMailer();
 					$mail->IsMail();
-					$mail->CharSet = $modx->config['modx_charset'];
 					$mail->IsHTML($isHtml);
 					$mail->From		= ($autosender)? $autosender:$from;
 					$mail->FromName	= ($autoSenderName)?$autoSenderName:$fromname;
@@ -492,9 +494,8 @@ $debugText .= 'Locale<pre>'.var_export($localeInfo,true).'</pre>';
 				# send mobile email
 				if ($mobile && $mobiletext) {
 					$mobiletext = formMerge($mobiletext,$fields);
-					$mail = new PHPMailer();
+					$mail = new MODxMailer();
 					$mail->IsMail();
-					$mail->CharSet = $modx->config['modx_charset'];
 					$mail->IsHTML($isHtml);
 					$mail->From		= $from;
 					$mail->FromName	= $fromname;

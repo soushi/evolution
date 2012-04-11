@@ -44,8 +44,8 @@ class AjaxSearchUtil {
             if ($isWriteable) {
                 $dbgFile = AS_DBGDIR . '/' . AS_DBGFILE;
                 $this->_dbgFd = fopen($dbgFile, 'w+');
-                $this->dbgRecord($header);
-                fclose($this->_dbgFd);
+            $this->dbgRecord($header);
+            fclose($this->_dbgFd);
                 $this->_dbgFd = fopen($dbgFile, 'a+');
             }
             else {

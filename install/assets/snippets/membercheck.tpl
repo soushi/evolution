@@ -2,7 +2,7 @@
 /**
  * MemberCheck
  * 
- * Show chunks based on a logged in Web User's group membership
+ * ウェブユーザーのログイン状態によってチャンクを呼び分ける
  *
  * @category 	snippet
  * @version 	1.1

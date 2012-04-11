@@ -66,6 +66,7 @@ $table_prefix = $modx->dbConfig['table_prefix'];
 
 # process password reminder
     if ($isPWDReminder==1) {
+    include_once dirname(__FILE__)."/../../../manager/includes/controls/modxmailer.inc.php";
         $email = $_POST['txtwebemail'];
         $webpwdreminder_message = $modx->config['webpwdreminder_message'];
         $emailsubject = $modx->config['emailsubject'];
@@ -104,9 +105,20 @@ $table_prefix = $modx->dbConfig['table_prefix'];
             $message = str_replace("[+sname+]",$site_name,$message);
             $message = str_replace("[+semail+]",$emailsender,$message);
             $message = str_replace("[+surl+]",$url,$message);
+/*
 
             if (!ini_get('safe_mode')) $sent = mail($email, "New Password Activation for $site_name", $message, "From: ".$emailsender."\r\n"."X-Mailer: MODx Content Manager - PHP/".phpversion(), "-f {$emailsender}");
             else $sent = mail($email, "New Password Activation for $site_name", $message, "From: ".$emailsender."\r\n"."X-Mailer: MODx Content Manager - PHP/".phpversion());
+*/
+			$mail = new MODxMailer();
+			$mail->IsHTML(false);
+			$mail->From		= $emailsender;
+			$mail->FromName	= $site_name;
+
+			$mail->Subject	=  "New Password Activation for $site_name";
+			$mail->Body		= $message;
+			$mail->AddAddress($email);
+			$sent = $mail->Send() ;         //ignore mail errors in this cas
             if(!$sent) {
                 // error
                 $output =  webLoginAlert("Error while sending mail to $email. Please contact the Site Administrator");
@@ -354,7 +366,7 @@ $table_prefix = $modx->dbConfig['table_prefix'];
     $ds = $modx->db->query($sql);
     while ($row = $modx->db->getRow($ds,'num')) $dg[$i++]=$row[0];
     $_SESSION['webDocgroups'] = $dg;
-    
+
     $tblwgn = $this->getFullTableName("webgroup_names");
     $tblwg = $this->getFullTableName("web_groups");
     $sql= "SELECT wgn.name

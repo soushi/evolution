@@ -2,7 +2,7 @@
 /**
  * WebSignup
  * 
- * Basic Web User account creation/signup system
+ * ウェブユーザーのサインアップスニペット
  *
  * @category 	snippet
  * @version 	1.1

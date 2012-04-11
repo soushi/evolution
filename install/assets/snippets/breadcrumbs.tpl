@@ -2,7 +2,7 @@
 /**
  * Breadcrumbs
  *
- * Configurable breadcrumb page-trail navigation
+ * カスタマイズの自由度が高いパン屑リスト
  * 
  * @category	snippet
  * @version 	1.0.2

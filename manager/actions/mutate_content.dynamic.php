@@ -507,6 +507,7 @@ $evtOut = $modx->invokeEvent('OnDocFormPrerender', array(
 ));
 if (is_array($evtOut))
 	echo implode('', $evtOut);
+$_SESSION['itemname'] = htmlspecialchars(stripslashes($content['pagetitle']));
 ?>
 <input type="hidden" name="a" value="5" />
 <input type="hidden" name="id" value="<?php echo $content['id']?>" />
@@ -627,7 +628,7 @@ if (is_array($evtOut))
 				&nbsp;&nbsp;<img src="<?php echo $_style["icons_tooltip_over"]?>" onmouseover="this.src='<?php echo $_style["icons_tooltip"]?>';" onmouseout="this.src='<?php echo $_style["icons_tooltip_over"]?>';" alt="<?php echo $_lang['resource_opt_menu_title_help']?>" onclick="alert(this.alt);" style="cursor:help;" /></td></tr>
 			<tr style="height: 24px;"><td align="left" style="width:100px;"><span class="warning"><?php echo $_lang['resource_opt_menu_index']?></span></td>
 				<td><table border="0" cellspacing="0" cellpadding="0" style="width:333px;"><tr>
-					<td><input name="menuindex" type="text" maxlength="3" value="<?php echo $content['menuindex']?>" class="inputBox" style="width:30px;" onchange="documentDirty=true;" /><input type="button" value="&lt;" onclick="var elm = document.mutate.menuindex;var v=parseInt(elm.value+'')-1;elm.value=v>0? v:0;elm.focus();documentDirty=true;" /><input type="button" value="&gt;" onclick="var elm = document.mutate.menuindex;var v=parseInt(elm.value+'')+1;elm.value=v>0? v:0;elm.focus();documentDirty=true;" />
+					<td><input name="menuindex" type="text" maxlength="3" value="<?php echo $content['menuindex']?>" class="inputBox number" style="width:30px;" onchange="documentDirty=true;" /><input type="button" value="&lt;" onclick="var elm = document.mutate.menuindex;var v=parseInt(elm.value+'')-1;elm.value=v>0? v:0;elm.focus();documentDirty=true;" /><input type="button" value="&gt;" onclick="var elm = document.mutate.menuindex;var v=parseInt(elm.value+'')+1;elm.value=v>0? v:0;elm.focus();documentDirty=true;" />
 					&nbsp;&nbsp;<img src="<?php echo $_style["icons_tooltip_over"]?>" onmouseover="this.src='<?php echo $_style["icons_tooltip"]?>';" onmouseout="this.src='<?php echo $_style["icons_tooltip_over"]?>';" alt="<?php echo $_lang['resource_opt_menu_index_help']?>" onclick="alert(this.alt);" style="cursor:help;" /></td>
 					<td align="right" style="text-align:right;"><span class="warning"><?php echo $_lang['resource_opt_show_menu']?></span>&nbsp;<input name="hidemenucheck" type="checkbox" class="checkbox" <?php echo $content['hidemenu']!=1 ? 'checked="checked"':''?> onclick="changestate(document.mutate.hidemenu);" /><input type="hidden" name="hidemenu" class="hidden" value="<?php echo ($content['hidemenu']==1) ? 1 : 0?>" />
 					&nbsp;<img src="<?php echo $_style["icons_tooltip_over"]?>" onmouseover="this.src='<?php echo $_style["icons_tooltip"]?>';" onmouseout="this.src='<?php echo $_style["icons_tooltip_over"]?>';" alt="<?php echo $_lang['resource_opt_show_menu_help']?>" onclick="alert(this.alt);" style="cursor:help;" /></td>
@@ -684,33 +685,9 @@ if (is_array($evtOut))
 			<div class="sectionBody" id="content_body">
 			<?php
 			if (($content['richtext'] == 1 || $_REQUEST['a'] == '4') && $use_editor == 1) {
-				// replace image path
-				$htmlContent = $content['content'];
-				if (!empty ($htmlContent)) {
-					if (substr($rb_base_url, -1) != '/')
-					        $im_base_url = $rb_base_url . '/';
-					else    $im_base_url = $rb_base_url;
-
-					$elements = parse_url($im_base_url);
-					$image_path = $elements['path'];
-
-					// make sure image path ends with a /
-					if (substr($image_path, -1) != '/')
-						$image_path .= '/';
-
-					$modx_root = dirname(dirname($_SERVER['PHP_SELF']));
-					$image_prefix = substr($image_path, strlen($modx_root));
-					if (substr($image_prefix, -1) != '/')
-						$image_prefix .= '/';
-
-					// escape / in path
-					$image_prefix = str_replace('/', '\/', $image_prefix);
-					$newcontent = preg_replace("/(<img[^>]+src=['\"])($image_prefix)([^'\"]+['\"][^>]*>)/", "\${1}$im_base_url\${3}", $content['content']);
-					$htmlContent = $newcontent;
-				}
 			?>
 				<div style="width:100%">
-					<textarea id="ta" name="ta" style="width:100%; height: 400px;" onchange="documentDirty=true;"><?php echo htmlspecialchars($htmlContent)?></textarea>
+					<textarea id="ta" name="ta" style="width:100%; height: 400px;" onchange="documentDirty=true;"><?php echo htmlspecialchars($content['content'])?></textarea>
 					<span class="warning"><?php echo $_lang['which_editor_title']?></span>
 
 					<select id="which_editor" name="which_editor" onchange="changeRTE();">
@@ -1018,7 +995,7 @@ if ($_SESSION['mgrRole'] == 1 || $_REQUEST['a'] != '27' || $_SESSION['mgrInterna
 				?>
 				</select>
 				<br />
-				<input type="button" value="<?php echo $_lang['deselect_metatags']?>" onclick="clearMetatagSelection();" />
+				<input type="button" class="button" value="<?php echo $_lang['deselect_metatags']?>" onclick="clearMetatagSelection();" />
 			</td>
 			</table>
 			</td>

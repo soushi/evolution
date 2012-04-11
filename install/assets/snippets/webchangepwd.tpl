@@ -2,7 +2,7 @@
 /**
  * WebChangePwd
  * 
- * Allows Web User to change their password from the front-end of the website
+ * ウェブユーザーのパスワード変更スニペット
  *
  * @category 	snippet
  * @version 	1.0

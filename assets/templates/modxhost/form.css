@@ -144,12 +144,12 @@ display: none;
     margin: 0;
 }
 .AS_resultLink {
-    text-decoration: underline;
-    padding: 0;
-    margin: 0;
+        text-decoration: underline;
+        padding: 0;
+        margin: 0;
 }
 .AS_ajax_resultDescription {
-    color: #888;
+        color: #888;
 }
 #ajaxSearch_output .AS_ajax_more a { color: #A3CB2C; text-decoration:none;}
 .AS_intro { display: none;}

@@ -160,10 +160,10 @@ class DataGrid {
 				
 		$this->_isDataset = is_resource($this->ds); // if not dataset then treat as array
 
-		if(!$cssStyle && !$cssClass) $cssStyle = "style='width:100%;border:1px solid silver;font-family:verdana,arial; font-size:11px;'";
-		if(!$columnHeaderStyle && !$columnHeaderClass) $columnHeaderStyle = "style='color:black;background-color:silver'";
-		if(!$this->_itemStyle && !$this->_itemClass) $this->_itemStyle = "style='color:black;'";
-		if(!$this->_altItemStyle && !$this->_altItemClass) $this->_altItemStyle = "style='color:black;background-color:#eeeeee'";
+		if(!$cssStyle && !$cssClass) $cssStyle = "style='width:100%;border:1px solid silver;font-family:verdana,arial; font-size:12px;'";
+		if(!$columnHeaderStyle && !$columnHeaderClass) $columnHeaderStyle = "style='color:#333333;background-color:#dddddd'";
+		if(!$this->_itemStyle && !$this->_itemClass) $this->_itemStyle = "style='color:#333333;'";
+		if(!$this->_altItemStyle && !$this->_altItemClass) $this->_altItemStyle = "style='color:#333333;background-color:#eeeeee'";
 
 		if($this->_isDataset && !$this->columns) {
 			$cols = mysql_num_fields($this->ds);
@@ -184,7 +184,7 @@ class DataGrid {
 		$this->_coltypes = explode((strstr($this->colTypes,"||")!==false ? "||":","),$this->colTypes);
 		$this->_colcount = count($this->_colnames);
 		if(!$this->_isDataset) {
-			$this->ds = explode((strstr($this->ds,"||")!==false ? "||":","),$this->ds);
+			$this->ds = preg_split((strstr($this->ds,"||")!==false ? "/\|\|/":"/[,\t\n]/"),$this->ds);
 			$this->ds = array_chunk($this->ds, $this->_colcount);
 		}
 		$tblColHdr ="<thead><tr>";

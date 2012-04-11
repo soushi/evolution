@@ -57,14 +57,14 @@ if (($modx->config['warning_visibility'] == 0 && $_SESSION['mgrRole'] == 1) || $
     $modx->setPlaceholder('settings_config',$_lang['settings_config']);
     $modx->setPlaceholder('configcheck_title',$_lang['configcheck_title']);
     if($config_check_results != $_lang['configcheck_ok']) {    
-        $modx->setPlaceholder('config_check_results',$config_check_results);
-        $modx->setPlaceholder('config_display','block');
+    $modx->setPlaceholder('config_check_results',$config_check_results);
+    $modx->setPlaceholder('config_display','block');
     }
     else {
         $modx->setPlaceholder('config_display','none');
     }
 } else {
-     $modx->setPlaceholder('config_display','none');
+    $modx->setPlaceholder('config_display','none');
 }
 
 // include rss feeds for important forum topics
@@ -192,7 +192,11 @@ if(is_array($evtOut)) {
 }
 
 // load template file
-$tplFile = $base_path.'assets/templates/manager/welcome.html';
+$tplFile = MODX_BASE_PATH . 'assets/templates/manager/welcome.html';
+if(file_exists($tplFile)==false)
+{
+	$tplFile = MODX_BASE_PATH . 'manager/media/style/' . $modx->config['manager_theme'] . '/manager/welcome.html';
+}
 $handle = fopen($tplFile, "r");
 $tpl = fread($handle, filesize($tplFile));
 fclose($handle);

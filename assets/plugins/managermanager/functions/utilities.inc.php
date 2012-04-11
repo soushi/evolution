@@ -80,7 +80,7 @@ function jsSafe($str) {
 	if (version_compare(PHP_VERSION, '5.2.3', '>=')) {
 	   return htmlentities($str, ENT_QUOTES, $modx->config['modx_charset'], false);
 	} else {
-	   return htmlentities($str, ENT_QUOTES, $modx->config['modx_charset']);
+	return htmlentities($str, ENT_QUOTES, $modx->config['modx_charset']); 
 	}
 }
 

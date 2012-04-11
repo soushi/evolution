@@ -2,7 +2,7 @@
 /**
  * WebLogin
  * 
- * Allows webusers to login to protected pages in the website, supporting multiple user groups
+ * ウェブユーザーのログインフォームスニペット
  *
  * @category 	snippet
  * @version 	1.1

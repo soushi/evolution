@@ -2,7 +2,7 @@
 /**
  * FirstChildRedirect
  * 
- * Automatically redirects to the first child of a Container Resource
+ * コンテナ内の最初のサブリソースへ自動的にリダイレクト
  *
  * @category 	snippet
  * @version 	1.0

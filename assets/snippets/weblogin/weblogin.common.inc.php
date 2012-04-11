@@ -43,6 +43,8 @@
 
     // Send new password to the user
     function webLoginSendNewPassword($email,$uid,$pwd,$ufn){
+    include_once dirname(__FILE__)."/../../../manager/includes/controls/modxmailer.inc.php";
+
         global $modx, $site_url;
         $mailto = $modx->config['mailto'];
         $websignupemail_message = $modx->config['websignupemail_message'];    
@@ -58,8 +60,19 @@
         $message = str_replace("[+sname+]",$site_name,$message);
         $message = str_replace("[+semail+]",$emailsender,$message);
         $message = str_replace("[+surl+]",$site_url,$message);
+/*
         if (!ini_get('safe_mode')) $sent = mail($email, $emailsubject, $message, "From: ".$emailsender."\r\n"."X-Mailer: Content Manager - PHP/".phpversion(), "-f {$emailsender}");
         else $sent = mail($email, $emailsubject, $message, "From: ".$emailsender."\r\n"."X-Mailer: Content Manager - PHP/".phpversion());
+*/
+		$mail = new MODxMailer();
+		$mail->IsHTML(false);
+		$mail->From		= $emailsender;
+		$mail->FromName	= $site_name;
+		$mail->Subject	= $emailsubject;
+		$mail->Body		= $message;
+		$mail->AddAddress($email);
+		$sent = $mail->Send() ;         //ignore mail errors in this cas
+
         if (!$sent) webLoginAlert("Error while sending mail to $mailto",1);
         return true;
     }

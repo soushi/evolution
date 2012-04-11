@@ -105,11 +105,11 @@ $header = '
 		}
 
 		ul.sortableList li {
-            font-weight: bold;
-            cursor: move;
+			font-weight: bold;
+			cursor: move;
             color: #444444;
             padding: 3px 5px;
-            margin: 4px 0px;
+			margin: 4px 0px;
             border: 1px solid #CCCCCC;
 			background-image: url("media/style/'.$useTheme.'images/misc/fade.gif");
 			background-repeat: repeat-x;
@@ -137,12 +137,12 @@ foreach ($sortables as $list) {
                         });
                     }
                     ,onComplete: function() {
-                       	var id = null;
-                       	var list = this.serialize(function(el) {
-                            id = el.getParent().id;
-                           	return el.id;
-                        });
-                       $(\'list_\' + id).value = list;
+           	var id = null;
+           	var list = this.serialize(function(el) {
+            id = el.getParent().id;
+           	return el.id;
+           });
+           $(\'list_\' + id).value = list;
                     }
                 });' ."\n";
 }

@@ -2,7 +2,7 @@
 /**
  * UltimateParent
  * 
- * Travels up the document tree from a specified document and returns its "ultimate" non-root parent
+ * 指定されたリソースが属するルート直下の親リソースのIDを返す
  *
  * @category 	snippet
  * @version 	2.0

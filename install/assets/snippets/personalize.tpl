@@ -2,7 +2,7 @@
 /**
  * Personalize
  * 
- * Basic personalization for web users
+ * ウェブユーザーのための基本的なパーソナライズ機能
  *
  * @category 	snippet
  * @version 	2.0

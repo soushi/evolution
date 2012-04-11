@@ -1,7 +1,7 @@
 /**
  * WebLoginSidebar
  * 
- * WebLogin Tpl
+ * サイドバーのウェブログインフォーム
  * 
  * @category	chunk
  * @version 	1.0

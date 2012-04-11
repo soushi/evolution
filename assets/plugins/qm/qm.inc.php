@@ -1,6 +1,6 @@
 <?php
 /**
- * Qm+ — QuickManager+
+ * Qm+ QuickManager+
  *  
  * @author      Mikko Lammi, www.maagit.fi (based on QuickManager by Urique Dertlian, urique@unix.am)
  * @license     GNU General Public License (GPL), http://www.gnu.org/copyleft/gpl.html
@@ -33,7 +33,7 @@ class Qm {
         $this->tplid = $tplid;
         $this->custombutton = $custombutton;
         $this->managerbutton = $managerbutton;
-        $this->logout = $logout;
+        $this->logout = $logout;          
         $this->autohide = $autohide;           
         
         // Includes
@@ -65,7 +65,7 @@ class Qm {
         }
         
         // Get event
-        $e = $this->modx->Event;
+        $e = & $this->modx->Event;
         
         // Run plugin based on event
         switch ($e->name) {
@@ -311,7 +311,7 @@ class Qm {
                         
                     $head .= '    
                         {                      
-                    		$("a.colorbox").colorbox({width:"'.$this->tbwidth.'", height:"'.$this->tbheight.'", iframe:true, overlayClose:false});
+                    		$("a.colorbox").colorbox({width:"'.$this->tbwidth.'", height:"'.$this->tbheight.'", iframe:true, overlayClose:false, opacity:0.5, transition:"fade", speed:150});
                     	
                         	// Bindings
                         	$().bind("cbox_open", function(){
@@ -326,7 +326,7 @@ class Qm {
                                 // Remove manager lock by going to home page
                                 $'.$jvar.'.ajax({ type: "GET", url: "'.$this->modx->config['site_url'].'manager/index.php?a=2" });
                             });                  
-                                                        						                            
+                            
                             // Hide QM+ if cookie found
                             if (getCookie("hideQM") == 1)
                             {

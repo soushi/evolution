@@ -2,7 +2,7 @@
 /**
  * TransAlias
  *
- * Human readible URL translation supporting multiple languages and overrides
+ * エイリアスとして入力された文字列をURLとして無難に扱える文字に正規化。日本語では、ひらがな・カタカナを半角ローマ字に変換します
  *
  * @category    plugin
  * @version     1.0.1

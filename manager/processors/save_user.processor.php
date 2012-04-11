@@ -238,7 +238,12 @@ switch ($_POST['mode']) {
 			<div class="sectionBody">
 			<div id="disp">
 			<p>
-			<?php echo sprintf($_lang["password_msg"], $newusername, $newpassword); ?>
+			<?php
+			if($_POST['passwordgenmethod'] !== 'spec')
+				echo sprintf($_lang["password_msg"], $newusername, $newpassword);
+			else
+				echo sprintf($_lang["password_msg"], $newusername, '**************');
+			?>
 			</p>
 			</div>
 			</div>
@@ -479,24 +484,31 @@ function sendMailMessage($email, $uid, $pwd, $ufn) {
 	$message = str_replace("[+semail+]", $emailsender, $message);
 	$message = str_replace("[+surl+]", $manager_url, $message);
 
-	$headers = "From: " . $emailsender . "\r\n";
-	$headers .= "X-Mailer: Content Manager - PHP/" . phpversion();
-	$headers .= "\r\n";
-	$headers .= "MIME-Version: 1.0\r\n";
-	$headers .= "Content-Type: text/plain; charset=utf-8\r\n";
-	$headers .= "Content-Transfer-Encoding: quoted-printable\r\n";
-	$subject = "=?UTF-8?Q?".$emailsubject."?=";
-	$message = save_user_quoted_printable($message);
-
-	if (ini_get('safe_mode') == FALSE) {
-		if (!mail($email, $subject, $message, $headers, "-f $emailsender")) {
-			webAlert("$email - {$_lang['error_sending_email']}");
-			exit;
-		}
-	} elseif (!mail($email, $subject, $message, $headers)) {
+	include_once dirname(__FILE__)."/../includes/controls/modxmailer.inc.php";
+	$mail = new MODxMailer();
+	$mail->IsMail();
+	$mail->IsHTML(0);
+	$mail->From		= $emailsender;
+	$mail->FromName	= $modx->config['site_name'];
+	$mail->Subject	=  $emailsubject;
+	$mail->Body		= $message;
+	$mail->AddAddress($email);
+	if ($mail->Send() === false) //ignore mail errors in this cas
+	{
 		webAlert("$email - {$_lang['error_sending_email']}");
 		exit;
 	}
+/*
+	if (ini_get('safe_mode') == FALSE) {
+		if (!mail($email, $emailsubject, $message, "From: " . $emailsender . "\r\n" . "X-Mailer: Content Manager - PHP", "-f $emailsender")) {
+			webAlert("$email - {$_lang['error_sending_email']}");
+			exit;
+		}
+	} elseif (!mail($email, $emailsubject, $message, "From: " . $emailsender . "\r\n" . "X-Mailer: Content Manager - PHP/" . phpversion())) {
+		webAlert("$email - {$_lang['error_sending_email']}");
+		exit;
+	}
+*/
 }
 
 // Save User Settings
