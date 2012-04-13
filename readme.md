@@ -2,6 +2,11 @@
 ===
 ##Changelog
 
+###12/04/2012
+
+* Re-factored manager/includes/header.inc.php to use a template. All data to be output is loaded into the $modx->placeholders array. 
+* A new template file was created in manager/media/style/<ThemeName>/templates/header.php containing only the HTML with placeholders.
+
 ###08/04/2012
 
 * Began update of sample site
