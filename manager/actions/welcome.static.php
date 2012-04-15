@@ -217,7 +217,11 @@ if(is_array($evtOut)) {
 }
 
 // load template file
-$tplFile = $base_path.'manager/media/style/'.$modx->config['manager_theme'] .'/templates/welcome.html';
+$tplFile = MODX_BASE_PATH . 'assets/templates/manager/welcome.html';
+if(file_exists($tplFile)==false)
+{
+	$tplFile = MODX_BASE_PATH . 'manager/media/style/' . $modx->config['manager_theme'] . '/manager/welcome.html';
+}
 $handle = fopen($tplFile, "r");
 $tpl = fread($handle, filesize($tplFile));
 fclose($handle);
