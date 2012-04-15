@@ -813,11 +813,13 @@ class DocumentParser {
         ob_start();
         $snip= eval ($snippet);
         $msg= ob_get_contents();
+        $request_uri = getenv('REQUEST_URI');
+        $request_uri = htmlspecialchars($request_uri, ENT_QUOTES);
         ob_end_clean();
         if ($msg && isset ($php_errormsg)) {
             if (!strpos($php_errormsg, 'Deprecated')) { // ignore php5 strict errors
                 // log error
-                $this->logEvent(1, 3, "<b>$php_errormsg</b><br /><br /> $msg", $this->currentSnippet . " - Snippet");
+                $this->logEvent(1, 3, "<b>$php_errormsg</b><br /><br /> $msg<br />REQUEST_URI = $request_uri<br />ID = $this->documentIdentifier", $this->currentSnippet . " - Snippet");
                 if ($this->isBackend())
                     $this->Event->alert("An error occurred while loading. Please see the event log for more information<p />$msg");
             }
