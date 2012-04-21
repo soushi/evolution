@@ -2725,14 +2725,14 @@ class DocumentParser {
 
             );
 
-            $parsedMessageString .= "<tr><td>&nbsp;</td></tr><tr><td colspan='3'><b>PHP error debug</b></td></tr>";
+            $parsedMessageString .= "<tr><td colspan='3'>&nbsp;</td></tr><tr><td colspan='3'><b>PHP error debug</b></td></tr>";
 
             $parsedMessageString .= "<tr><td valign='top'>&nbsp;&nbsp;Error: </td>";
             $parsedMessageString .= "<td colspan='2'>$text</td><td>&nbsp;</td>";
             $parsedMessageString .= "</tr>";
 
             $parsedMessageString .= "<tr><td valign='top'>&nbsp;&nbsp;Error type/ Nr.: </td>";
-            $parsedMessageString .= "<td colspan='2'>" . $errortype[$nr] . " - $nr</b></td><td>&nbsp;</td>";
+            $parsedMessageString .= "<td colspan='2'>" . $errortype[$nr] . " - $nr</td><td>&nbsp;</td>";
             $parsedMessageString .= "</tr>";
 
             $parsedMessageString .= "<tr><td>&nbsp;&nbsp;File: </td>";
