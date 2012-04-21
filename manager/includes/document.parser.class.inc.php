@@ -2688,13 +2688,6 @@ class DocumentParser {
               <html><head><title>MODx Content Manager $version &raquo; $release_date</title>
               <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
               <style>TD, BODY { font-size: 12px; font-family:Verdana; }</style>
-              function copyToClip()
-              {
-                holdtext.innerText = sqlHolder.innerText;
-                Copied = holdtext.createTextRange();
-                Copied.execCommand('Copy');
-              }
-            </script>
               </head><body>
               ";
         if ($is_error) {
@@ -2710,8 +2703,8 @@ class DocumentParser {
         }
 
         if (!empty ($query)) {
-            $parsedMessageString .= "<tr><td colspan='3'><b style='color:#999;font-size: 9px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SQL:&nbsp;<span id='sqlHolder'>$query</span></b>
-                    <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='javascript:copyToClip();' style='color:#821517;font-size: 9px; text-decoration: none'>[Copy SQL to ClipBoard]</a><textarea id='holdtext' style='display:none;'></textarea></td></tr>";
+            $parsedMessageString .= "<tr><td colspan='3'><b style='color:#999;font-size: 12px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SQL:&nbsp;<span id='sqlHolder'>$query</span></b>
+                    </td></tr>";
         }
 
         if ($text != '') {
