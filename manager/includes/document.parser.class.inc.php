@@ -1068,6 +1068,7 @@ class DocumentParser {
                 if ($st != $et)
                     $passes++; // if content change then increase passes because
             } // we have not yet reached maxParserPasses
+            $source = $this->rewriteUrls($source);//yama
         }
         return $source;
     }
