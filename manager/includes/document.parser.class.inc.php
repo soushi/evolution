@@ -2685,6 +2685,10 @@ class DocumentParser {
 
         $version= isset ($GLOBALS['version']) ? $GLOBALS['version'] : '';
 		$release_date= isset ($GLOBALS['release_date']) ? $GLOBALS['release_date'] : '';
+        $request_uri = getenv('REQUEST_URI');
+        $request_uri = htmlspecialchars($request_uri, ENT_QUOTES);
+        $ua          = htmlspecialchars($_SERVER['HTTP_USER_AGENT'], ENT_QUOTES);
+        $referer     = htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES);
         $parsedMessageString= "
               <html><head><title>MODx Content Manager $version &raquo; $release_date</title>
               <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
@@ -2749,7 +2753,39 @@ class DocumentParser {
             }
         }
 
-        $parsedMessageString .= "<tr><td>&nbsp;</td></tr><tr><td colspan='3'><b>Parser timing</b></td></tr>";
+        $parsedMessageString .= "<tr><td colspan='3'>&nbsp;</td></tr><tr><td colspan='3'><b>Basic info</b></td></tr>";
+
+        $parsedMessageString .= "<tr><td valign='top'>&nbsp;&nbsp;REQUEST_URI: </td>";
+        $parsedMessageString .= "<td colspan='3'>$request_uri</td>";
+        $parsedMessageString .= "</tr>";
+
+        $parsedMessageString .= "<tr><td valign='top'>&nbsp;&nbsp;ID: </td>";
+        $parsedMessageString .= "<td colspan='3'>" . $this->documentIdentifier . "</td>";
+        $parsedMessageString .= "</tr>";
+
+        if(!empty($this->currentSnippet))
+        {
+            $parsedMessageString .= "<tr><td>&nbsp;&nbsp;Current Snippet: </td>";
+            $parsedMessageString .= '<td colspan="3">' . $this->currentSnippet . '</td>';
+            $parsedMessageString .= "</tr>";
+        }
+
+        if(!empty($this->event->activePlugin))
+        {
+            $parsedMessageString .= "<tr><td>&nbsp;&nbsp;Current Plugin: </td>";
+            $parsedMessageString .= '<td colspan="3">' . $this->event->activePlugin . '(' . $this->event->name . ')' . '</td>';
+            $parsedMessageString .= "</tr>";
+        }
+
+        $parsedMessageString .= "<tr><td>&nbsp;&nbsp;Referer: </td>";
+        $parsedMessageString .= '<td colspan="3">' . $referer . '</td>';
+        $parsedMessageString .= "</tr>";
+
+        $parsedMessageString .= "<tr><td>&nbsp;&nbsp;User Agent: </td>";
+        $parsedMessageString .= '<td colspan="3">' . $ua . '</td>';
+        $parsedMessageString .= "</tr>";
+
+        $parsedMessageString .= '<tr><td colspan="3">&nbsp;</td></tr><tr><td colspan="3"><b>Parser timing</b></td></tr>';
 
         $parsedMessageString .= "<tr><td>&nbsp;&nbsp;MySQL: </td>";
         $parsedMessageString .= "<td><i>[^qt^]</i></td><td>(<i>[^q^] Requests</i>)</td>";
