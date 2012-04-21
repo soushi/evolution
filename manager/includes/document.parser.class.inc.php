@@ -2686,8 +2686,8 @@ class DocumentParser {
 		$release_date= isset ($GLOBALS['release_date']) ? $GLOBALS['release_date'] : '';
         $parsedMessageString= "
               <html><head><title>MODx Content Manager $version &raquo; $release_date</title>
-              <style>TD, BODY { font-size: 11px; font-family:verdana; }</style>
-              <script type='text/javascript'>
+              <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+              <style>TD, BODY { font-size: 12px; font-family:Verdana; }</style>
               function copyToClip()
               {
                 holdtext.innerText = sqlHolder.innerText;
