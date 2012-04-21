@@ -107,11 +107,13 @@
 				break;
 			case "option": // handles radio buttons
 				$index_list = ParseIntputOptions(ProcessTVCommand($field_elements, $field_id));
+				static $i=0;
 				while (list($item, $itemvalue) = each ($index_list))
 				{
 					list($item,$itemvalue) =  (is_array($itemvalue)) ? $itemvalue : explode("==",$itemvalue);
 					if (strlen($itemvalue)==0) $itemvalue = $item;
-					$field_html .=  '<input type="radio" value="'.htmlspecialchars($itemvalue).'" name="tv'.$field_id.'" '.($itemvalue==$field_value ?'checked="checked"':'').' onchange="documentDirty=true;" />'.$item.'<br />';
+					$field_html .=  '<label for="tv_'.$i.'"><input type="radio" value="'.htmlspecialchars($itemvalue).'" id="tv_'.$i.'" name="tv'.$field_id.'" '.($itemvalue==$field_value ?'checked="checked"':'').' onchange="documentDirty=true;" />'.$item.'</label>';
+					$i++;
 				}
 				break;
 			case "image":	// handles image fields using htmlarea image manager
