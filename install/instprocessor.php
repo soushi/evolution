@@ -30,7 +30,7 @@ $installData = $_POST['installdata'] == "1" ? 1 : 0;
 $database_server = $_POST['databasehost'];
 $database_user = $_SESSION['databaseloginname'];
 $database_password = $_SESSION['databaseloginpassword'];
-$database_collation = $_POST['database_collation'];
+$database_collation = ($_POST['database_collation']!=='') ? $_POST['database_collation'] : 'utf8_general_ci';
 $database_charset = substr($database_collation, 0, strpos($database_collation, '_'));
 $database_connection_charset = $_POST['database_connection_charset'];
 $database_connection_method = $_POST['database_connection_method'];
@@ -170,7 +170,7 @@ if ($installMode != 0) {
 $setupPath = realpath(dirname(__FILE__));
 include "{$setupPath}/setup.info.php";
 include "{$setupPath}/sqlParser.class.php";
-$sqlParser = new SqlParser($database_server, $database_user, $database_password, str_replace("`", "", $dbase), $table_prefix, $adminname, $adminemail, $adminpass, $database_connection_charset, $managerlanguage, $database_connection_method, $auto_template_logic);
+$sqlParser = new SqlParser($database_server, $database_user, $database_password, str_replace("`", "", $dbase), $table_prefix, $adminname, $adminemail, $adminpass, $database_connection_charset, $database_collation, $managerlanguage, $database_connection_method, $auto_template_logic);
 $sqlParser->mode = ($installMode < 1) ? "new" : "upd";
 /* image and file manager paths now handled via settings screen in Manager
 $sqlParser->imageUrl = 'http://' . $_SERVER['SERVER_NAME'] . $base_url . "assets/";
