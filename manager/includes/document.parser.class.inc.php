@@ -46,6 +46,7 @@ class DocumentParser {
     var $loadedjscripts;
     var $documentMap;
     var $forwards= 3;
+    var $referenceListing;
 
     // constructor
     function DocumentParser() {
@@ -923,24 +924,78 @@ class DocumentParser {
 
     function rewriteUrls($documentSource) {
         // rewrite the urls
-        if ($this->config['friendly_urls'] == 1) {
+			$pieces = preg_split('/(\[~|~\])/',$documentSource);
+			$maxidx = sizeof($pieces);
+			$documentSource = '';
+		if(empty($this->referenceListing))
+		{
+			$this->referenceListing = array();
+			$res = $this->db->select('id,content', $this->getFullTableName('site_content'), "type='reference'");
+			$rows = $this->db->makeArray($res);
+			foreach($rows as $row)
+			{
+				extract($row);
+				$this->referenceListing[$id] = $content;
+			}
+		}
+		
+		if ($this->config['friendly_urls'] == 1)
+		{
+			if(empty($this->aliases))
+			{
             $aliases= array ();
-            foreach ($this->aliasListing as $item) {
-                $aliases[$item['id']]= (strlen($item['path']) > 0 ? $item['path'] . '/' : '') . $item['alias'];
+			foreach ($this->aliasListing as $doc)
+			{
+				$aliases[$doc['id']]= (strlen($doc['path']) > 0 ? $doc['path'] . '/' : '') . $doc['alias'];
+			}
+				$this->aliases = $aliases;
+			}
+			$aliases = $this->aliases;
+			$use_alias = $this->config['friendly_alias_urls'];
+			$prefix    = $this->config['friendly_url_prefix'];
+			$suffix    = $this->config['friendly_url_suffix'];
+			
+			for ($idx = 0; $idx < $maxidx; $idx++)
+			{
+				$documentSource .= $pieces[$idx];
+				$idx++;
+				if ($idx < $maxidx)
+				{
+					$target = trim($pieces[$idx]);
+					if(preg_match("/^[0-9]+$/",$this->referenceListing[$target]))
+						$target = $this->referenceListing[$target];
+					else $target = $this->parseDocumentSource($target);
+					
+					if(preg_match('@^https?://@', $this->referenceListing[$target]))
+					                                        $path = $this->referenceListing[$target];
+					elseif($aliases[$target] && $use_alias) $path = $this->makeFriendlyURL($prefix, $suffix, $aliases[$target]);
+					else                                    $path = $this->makeFriendlyURL($prefix, $suffix, $target);
+					$documentSource .= $path;
+				}
+			}
+			unset($aliases);
+		}
+		else
+		{
+			for ($idx = 0; $idx < $maxidx; $idx++)
+			{
+				$documentSource .= $pieces[$idx];
+				$idx++;
+				if ($idx < $maxidx)
+				{
+					$target = trim($pieces[$idx]);
+					if(preg_match("/^[0-9]+$/",$this->referenceListing[$target]))
+						$target = $this->referenceListing[$target];
+					
+					if($target === $this->config['site_start'])
+						$path = 'index.php';
+					elseif(preg_match('@^https?://@', $this->referenceListing[$target]))
+						$path = $this->referenceListing[$target];
+					else
+						$path = 'index.php?id=' . $target;
+					$documentSource .= $path;
+				}
             }
-            $in= '!\[\~([0-9]+)\~\]!ise'; // Use preg_replace with /e to make it evaluate PHP
-            $isfriendly= ($this->config['friendly_alias_urls'] == 1 ? 1 : 0);
-            $pref= $this->config['friendly_url_prefix'];
-            $suff= $this->config['friendly_url_suffix'];
-            $thealias= '$aliases[\\1]';
-            $found_friendlyurl= "\$this->makeFriendlyURL('$pref','$suff',$thealias)";
-            $not_found_friendlyurl= "\$this->makeFriendlyURL('$pref','$suff','" . '\\1' . "')";
-            $out= "({$isfriendly} && isset({$thealias}) ? {$found_friendlyurl} : {$not_found_friendlyurl})";
-            $documentSource= preg_replace($in, $out, $documentSource);
-        } else {
-            $in= '!\[\~([0-9]+)\~\]!is';
-            $out= "index.php?id=" . '\1';
-            $documentSource= preg_replace($in, $out, $documentSource);
         }
         return $documentSource;
     }
