@@ -85,7 +85,7 @@ function deletedocument() {
 
 </script>
 
-<form name="mutate" method="post" action="index.php">
+<form name="mutate" method="post" action="index.php" enctype="multipart/form-data">
 <?php
     // invoke OnTempFormPrerender event
     $evtOut = $modx->invokeEvent("OnTempFormPrerender",array("id" => $id));
