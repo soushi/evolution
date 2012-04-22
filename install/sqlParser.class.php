@@ -55,14 +55,8 @@ class SqlParser {
 			return false;
 		}
 
-		$fh = fopen($filename, 'r');
-		$idata = '';
+		$idata = file_get_contents($filename);
 
-		while (!feof($fh)) {
-			$idata .= fread($fh, 1024);
-		}
-
-		fclose($fh);
 		$idata = str_replace("\r", '', $idata);
 
 		// check if in upgrade mode
