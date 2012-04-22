@@ -85,13 +85,11 @@ class SqlParser {
 		$idata = str_replace('ENGINE=MyISAM', 'ENGINE=MyISAM' . $char_collate, $idata);
 		/*$idata = str_replace('{VERSION}', $modx_version, $idata);*/
 
-		$sql_array = explode("\n\n", $idata);
+		$sql_array = preg_split('@;[ \t]*\n@', $idata);
 
 		$num = 0;
 		foreach($sql_array as $sql_entry) {
 			$sql_do = trim($sql_entry, "\r\n; ");
-
-			if (preg_match('/^\#/', $sql_do)) continue;
 
 			// strip out comments and \n for mysql 3.x
 			if ($this->dbVersion <4.0) {
