@@ -806,7 +806,7 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('automatic_alias','0'),
 ('datetime_format','dd-mm-YYYY'),
 ('warning_visibility', '1'),
-('remember_last_tab', '0');
+('remember_last_tab', '1'),
 ('tree_page_click', 'auto');
 
 
