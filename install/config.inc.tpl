@@ -16,9 +16,6 @@ $site_sessionname            = '[+site_sessionname+]';
 $https_port                  = '[+https_port+]';
 
 error_reporting(E_ALL & ~E_NOTICE);
-setlocale (LC_TIME, 'ja_JP.UTF-8');
-if(function_exists('date_default_timezone_set')) date_default_timezone_set('Asia/Tokyo');
-
 // automatically assign base_path and base_url
 if(empty($base_path)) $base_path = assign_base_path();
 if(empty($base_url))  $base_url  = assign_base_url();
