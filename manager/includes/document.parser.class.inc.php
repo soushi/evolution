@@ -711,17 +711,13 @@ class DocumentParser {
             $this->config= array_merge($this->config, $usrSettings);
         }
 
-    function getDocumentMethod() {
+	function getDocumentMethod()
+	{
         // function to test the query and find the retrieval method
-        if (isset ($_REQUEST['q'])) {
-            return "alias";
+		if(isset($_REQUEST['q']))        return 'alias';
+		elseif(isset ($_REQUEST['id']))  return 'id';
+		else                             return 'none';
         }
-        elseif (isset ($_REQUEST['id'])) {
-            return "id";
-        } else {
-            return "none";
-        }
-    }
 
     function getDocumentIdentifier($method) {
         // function to test the query and find the retrieval method
