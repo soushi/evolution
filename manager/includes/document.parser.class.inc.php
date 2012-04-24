@@ -1270,7 +1270,7 @@ class DocumentParser {
                     $this->sendErrorPage();
                 } else {
                     // Inculde the necessary files to check document permissions
-                    include_once ($this->config['base_path'] . '/manager/processors/user_documents_permissions.class.php');
+                    include_once ($this->config['base_path'] . 'manager/processors/user_documents_permissions.class.php');
                     $udperms= new udperms();
                     $udperms->user= $this->getLoginUserID();
                     $udperms->document= $this->documentIdentifier;
