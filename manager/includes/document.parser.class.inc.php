@@ -721,7 +721,7 @@ class DocumentParser {
 	    // Don't process when cached
 	    $this->documentObject['hasmetatags'] = '0';
         }
-	if ($metas) $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
+	if (isset($metas) && $metas) $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
         return $template;
     }
 
