@@ -2130,6 +2130,11 @@ class DocumentParser {
         return $src;
     }
 
+	function parsePlaceholder($src, $ph, $left= "[+", $right= "+]",$mode='ph')
+	{ // jp-edition only
+		return $this->parseChunk($src, $ph, $left, $right, $mode);
+	}
+	
     function getUserData() {
         include_once($this->config["base_path"] . "manager/includes/extenders/getUserData.extender.php");
         return $tmpArray;
