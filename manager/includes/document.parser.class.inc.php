@@ -1223,7 +1223,7 @@ class DocumentParser {
             // Check use_alias_path and check if $this->virtualDir is set to anything, then parse the path
             if ($this->config['use_alias_path'] == 1) {
                 $alias= (strlen($this->virtualDir) > 0 ? $this->virtualDir . '/' : '') . $this->documentIdentifier;
-                if (array_key_exists($alias, $this->documentListing)) {
+                if (isset($this->documentListing[$alias])) {
                     $this->documentIdentifier= $this->documentListing[$alias];
                 } else {
                     $this->sendErrorPage();
