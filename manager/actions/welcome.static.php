@@ -271,7 +271,7 @@ if(is_array($evtOut)) {
 }
 
 // merge placeholders
-$tpl = $modx->mergePlaceholderContent($tpl);
+$tpl = $modx->parseDocumentSource($tpl);
 if ($js= $modx->getRegisteredClientScripts()) {
 	$tpl .= $js;
 }
