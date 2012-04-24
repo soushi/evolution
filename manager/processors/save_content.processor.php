@@ -37,7 +37,7 @@ $donthit = intval($_POST['donthit']);
 $menutitle = $modx->db->escape($_POST['menutitle']);
 $hidemenu = intval($_POST['hidemenu']);
 
-if (trim($pagetitle == "")) {
+if (trim($pagetitle) == '') {
 	if ($type == "reference") {
 		$pagetitle = $_lang['untitled_weblink'];
 	} else {
