@@ -1,6 +1,6 @@
 <?php
 /**
- *	MODx Document Parser
+ *	MODX Document Parser
  *	Function: This class contains the main document parsing functions
  *
  */
@@ -62,14 +62,16 @@ class DocumentParser {
         $this->Event= & $this->event; //alias for backward compatibility
         $this->pluginEvent= array ();
         // set track_errors ini variable
-        @ ini_set("track_errors", "1"); // enable error tracking in $php_errormsg
+		@ ini_set('track_errors', '1'); // enable error tracking in $php_errormsg
     }
 
     // loads an extension from the extenders folder
-    function loadExtension($extname) {
+	function loadExtension($extname)
+	{
         global $database_type;
 
-        switch ($extname) {
+		switch ($extname)
+		{
             // Database API
             case 'DBAPI' :
                 if (!include_once MODX_BASE_PATH . 'manager/includes/extenders/dbapi.' . $database_type . '.class.inc.php')
@@ -971,10 +973,10 @@ class DocumentParser {
 	}
 	
 	function _split_snip_call($src)
-		{
+	{
 		list($call,$snip['except_snip_call']) = explode(']]', $src, 2);
 		if(strpos($call, '?') !== false && strpos($call, "\n")!==false && strpos($call, '?') < strpos($call, "\n"))
-			{
+		{
 			list($snip['name'],$snip['params']) = explode('?',$call,2);
 		}
 		elseif(strpos($call, '?') !== false && strpos($call, "\n")!==false && strpos($call, "\n") < strpos($call, '?'))
@@ -982,7 +984,7 @@ class DocumentParser {
 			list($snip['name'],$snip['params']) = explode("\n",$call,2);
 		}
 		elseif(strpos($call, '?') !== false)
-				{
+		{
 			list($snip['name'],$snip['params']) = explode('?',$call,2);
 		}
 		elseif((strpos($call, '&') !== false) && (strpos($call, '=') !== false) && (strpos($call, '?') === false))
@@ -998,7 +1000,7 @@ class DocumentParser {
 				{
 			$snip['name'] = $call;
 			$snip['params'] = '';
-				}
+		}
 		$snip['name'] = trim($snip['name']);
 		return $snip;
 				}
@@ -1012,7 +1014,7 @@ class DocumentParser {
 			$snippetObject['name']    = $snip_name;
 			$snippetObject['content'] = $this->snippetCache[$snip_name];
 			if(isset($this->snippetCache[$snip_name . 'Props']))
-					{
+			{
 				$snippetObject['properties'] = $this->snippetCache[$snip_name . 'Props'];
                 }
             }
@@ -1901,8 +1903,8 @@ class DocumentParser {
 				{
 					$args= '&' . $args;
             }
-            }
         }
+		}
 		elseif ($args != '')
 		{
             // add & to $args if missing
@@ -2580,7 +2582,7 @@ class DocumentParser {
 			if(isset($_SESSION['webDocgrpNames']))
 			{
 				$dgn = $_SESSION['webDocgrpNames']; //add so
-        }
+			}
         }
 		if(isset($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) && isset($_SESSION['mgrValidated']))
 		{
@@ -3169,7 +3171,7 @@ class DocumentParser {
 
         // Display error
         if (isset($_SESSION['mgrValidated'])) echo $parsedMessageString;
-        else  echo 'Error. Check event log.';
+        else  echo 'Error';
         ob_end_flush();
 
         // Make sure and die!
@@ -3218,7 +3220,7 @@ class SystemEvent {
     var $activated;
     var $activePlugin;
 
-    function SystemEvent($name= "") {
+    function SystemEvent($name= '') {
         $this->_resetEventObject();
         $this->name= $name;
     }
@@ -3226,7 +3228,7 @@ class SystemEvent {
     // used for displaying a message to the user
     function alert($msg) {
         global $SystemAlertMsgQueque;
-        if ($msg == "")
+        if ($msg == '')
             return;
         if (is_array($SystemAlertMsgQueque)) {
             if ($this->name && $this->activePlugin)
@@ -3246,10 +3248,9 @@ class SystemEvent {
 
     function _resetEventObject() {
         unset ($this->returnedValues);
-        $this->name= "";
-        $this->_output= "";
+        $this->name= '';
+        $this->_output= '';
         $this->_propagate= true;
         $this->activated= false;
     }
 }
-?>
