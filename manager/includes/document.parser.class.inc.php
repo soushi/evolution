@@ -739,7 +739,7 @@ class DocumentParser {
         if (preg_match_all('~\[\(([a-z\_]*?)\)\]~', $template, $matches)) {
             $settingsCount= count($matches[1]);
             for ($i= 0; $i < $settingsCount; $i++) {
-                if (array_key_exists($matches[1][$i], $this->config))
+                if (isset($this->config[$matches[1][$i]]))
                     $replace[$i]= $this->config[$matches[1][$i]];
             }
 
