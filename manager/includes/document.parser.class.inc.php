@@ -2732,7 +2732,7 @@ class DocumentParser {
             $tend= $this->getMicroTime();
             $totaltime= $tend - $tstart;
             if ($this->dumpSQL) {
-                $this->queryCode .= "<fieldset style='text-align:left'><legend>Database connection</legend>" . sprintf("Database connection to %s was created in %2.4f s", $dbase, $totaltime) . "</fieldset><br />";
+                $this->queryCode .= "<fieldset style='text-align:left'><legend>Database connection</legend>" . sprintf("Database connection to %s was created in %2.4f s", $dbase, $totaltime) . "</fieldset>";
             }
             $this->queryTime= $this->queryTime + $totaltime;
         }
