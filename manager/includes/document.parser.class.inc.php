@@ -424,51 +424,70 @@ class DocumentParser {
         }
     }
 
-    function checkCache($id) {
-        $cacheFile= "assets/cache/docid_" . $id . ".pageCache.php";
-        if (file_exists($cacheFile)) {
+	function checkCache($id)
+	{
+		if($this->config['cache_enabled'] == 0) return ''; // jp-edition only
+		$cacheFile = "{$this->config['base_path']}assets/cache/docid_{$id}.pageCache.php";
+		if(!file_exists($cacheFile))
+		{
+			$this->documentGenerated = 1;
+			return '';
+		}
             $this->documentGenerated= 0;
             $flContent = file_get_contents($cacheFile, false);
             $flContent= substr($flContent, 37); // remove php header
-            $a= explode("<!--__MODxCacheSpliter__-->", $flContent, 2);
+		$a = explode('<!--__MODxCacheSpliter__-->', $flContent, 2);
             if (count($a) == 1)
+		{
                 return $a[0]; // return only document content
-            else {
-                $docObj= unserialize($a[0]); // rebuild document object
+		}
+		
+		$docObj = unserialize(trim($a[0])); // rebuild document object
                 // add so - check page security(admin(mgrRole=1) is pass)
                 if (!(isset($_SESSION['mgrRole']) && $_SESSION['mgrRole']== 1) 
-                    && $docObj['privateweb'] && isset ($docObj['__MODxDocGroups__'])) {
+		    && $docObj['privateweb'] && isset ($docObj['__MODxDocGroups__']))
+		{
                     $pass= false;
                     $usrGrps= $this->getUserDocGroups();
-                    $docGrps= explode(",", $docObj['__MODxDocGroups__']);
+			$docGrps = explode(',', $docObj['__MODxDocGroups__']);
                     // check is user has access to doc groups
-                    if (is_array($usrGrps)) {
+			if(is_array($usrGrps))
+			{
                         foreach ($usrGrps as $k => $v)
-                            if (in_array($v, $docGrps)) {
+				{
+					if(in_array($v, $docGrps))
+					{
                                 $pass= true;
                                 break;
                             }
                     }
+			}
                     // diplay error pages if user has no access to cached doc
-                    if (!$pass) {
-                        if ($this->config['unauthorized_page']) {
+			if(!$pass)
+			{
+				if($this->config['unauthorized_page'])
+				{
                             // check if file is not public
-                            $tbldg= $this->getFullTableName("document_groups");
-                            $secrs= $this->db->query("SELECT id FROM $tbldg WHERE document = '" . $id . "' LIMIT 1;");
+					$tbldg = $this->getFullTableName('document_groups');
+					$secrs = $this->db->query("SELECT id FROM {$tbldg} WHERE document = '{$id}' LIMIT 1;");
                             if ($secrs)
-                                $seclimit= mysql_num_rows($secrs);
+					{
+						$seclimit = $this->db->getRecordCount($secrs);
                         }
-                        if ($seclimit > 0) {
+				}
+				if($seclimit > 0)
+				{
                             // match found but not publicly accessible, send the visitor to the unauthorized_page
                             $this->sendUnauthorizedPage();
                             exit; // stop here
-                        } else {
+				}
+				else
+				{
                             // no match found, send the visitor to the error_page
                             $this->sendErrorPage();
                             exit; // stop here
                         }
                     }
-                }
 				// Grab the Scripts
 				if (isset($docObj['__MODxSJScripts__'])) $this->sjscripts = $docObj['__MODxSJScripts__'];
 				if (isset($docObj['__MODxJScripts__']))  $this->jscripts = $docObj['__MODxJScripts__'];
@@ -479,10 +498,6 @@ class DocumentParser {
                 $this->documentObject= $docObj;
                 return $a[1]; // return document content
             }
-        } else {
-            $this->documentGenerated= 1;
-            return "";
-        }
     }
 
     function outputContent($noEvent= false) {
