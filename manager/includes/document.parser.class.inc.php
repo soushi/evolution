@@ -2102,8 +2102,11 @@ class DocumentParser {
     }
 
     function getChunk($chunkName) {
+        if(isset($this->chunkCache[$chunkName]))
+        {
         $t= $this->chunkCache[$chunkName];
         return $t;
+    }
     }
 
     // deprecated
