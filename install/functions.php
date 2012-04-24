@@ -57,9 +57,10 @@ function compare_check($params)
 	if($params['category']=='plugin') $sql .= " AND `disabled`='0'";
 	$rs = mysql_query($sql);
 	if(!$rs) echo "An error occurred while executing a query: ".mysql_error();
-	else     $row = mysql_fetch_assoc($rs);
+	else     
+	{
+		$row = mysql_fetch_assoc($rs);
 	$count = mysql_num_rows($rs);
-	
 	if($count===1)
 	{
 		$new_version_str = ($new_version) ? '<strong>' . $new_version . '</strong> ':'';
@@ -83,8 +84,7 @@ echo 'old-' . $old_version . '<br />';
 		else                            $result = 'diff';
 	}
 	elseif($count < 1)                  $result = 'no exists';
-	
-	
+	}
 if($params['category']=='chunk')
 {
 //echo '$old_version=' . $old_version . '<br />';
@@ -193,14 +193,15 @@ function clean_up($sqlParser) {
 		}	
 		
 		// secure web documents - privateweb 
-		mysql_query("UPDATE `".$sqlParser->prefix."site_content` SET privateweb = 0 WHERE privateweb = 1",$sqlParser->conn);
+		mysql_query("UPDATE `".$sqlParser->prefix."site_content` SET privateweb = 0 WHERE privateweb = 1");
 		$sql =  "SELECT DISTINCT sc.id 
 				 FROM `".$sqlParser->prefix."site_content` sc
 				 LEFT JOIN `".$sqlParser->prefix."document_groups` dg ON dg.document = sc.id
 				 LEFT JOIN `".$sqlParser->prefix."webgroup_access` wga ON wga.documentgroup = dg.document_group
 				 WHERE wga.id>0";
-		$ds = mysql_query($sql,$sqlParser->conn);
-		if(!$ds) {
+		$ds = mysql_query($sql);
+		if(!$ds)
+		{
 			echo "An error occurred while executing a query: ".mysql_error();
 		}
 		else {
@@ -219,7 +220,8 @@ function clean_up($sqlParser) {
 				 LEFT JOIN `".$sqlParser->prefix."membergroup_access` mga ON mga.documentgroup = dg.document_group
 				 WHERE mga.id>0";
 		$ds = mysql_query($sql);
-		if(!$ds) {
+		if(!$ds)
+		{
 			echo "An error occurred while executing a query: ".mysql_error();
 		}
 		else {
@@ -229,35 +231,6 @@ function clean_up($sqlParser) {
 				unset($ids);
 			}		
 		}
-
-		/**** Add Quick Plugin to Module 
-		// get quick edit module id
-		$ds = mysql_query("SELECT id FROM `".$sqlParser->prefix."site_modules` WHERE name='QuickEdit'");
-		if(!$ds) {
-			echo "An error occurred while executing a query: ".mysql_error();
-		}
-		else {
-			$row = mysql_fetch_assoc($ds);
-			$moduleid=$row["id"];
-		}		
-		// get plugin id
-		$ds = mysql_query("SELECT id FROM `".$sqlParser->prefix."site_plugins` WHERE name='QuickEdit'");
-		if(!$ds) {
-			echo "An error occurred while executing a query: ".mysql_error();
-		}
-		else {
-			$row = mysql_fetch_assoc($ds);
-			$pluginid=$row["id"];
-		}		
-		// setup plugin as module dependency
-		$ds = mysql_query("SELECT module FROM `".$sqlParser->prefix."site_module_depobj` WHERE module='$moduleid' AND resource='$pluginid' AND type='30' LIMIT 1"); 
-		if(!$ds) {
-			echo "An error occurred while executing a query: ".mysql_error();
-		}
-		elseif (mysql_num_rows($ds)==0){
-			mysql_query("INSERT INTO `".$sqlParser->prefix."site_module_depobj` (module, resource, type) VALUES('$moduleid','$pluginid',30)");
-		}
-		***/
 }
 
 // Property Update function
@@ -303,13 +276,14 @@ function getCreateDbCategory($category, $sqlParser) {
     if(!empty($category)) {
         $category = modx_escape($category);
         $rs = mysql_query("SELECT id FROM $dbase.`".$table_prefix."categories` WHERE category = '".$category."'");
-        if(mysql_num_rows($rs) && ($row = mysql_fetch_assoc($rs))) {
+        if(mysql_num_rows($rs) && ($row = mysql_fetch_assoc($rs)))
+        {
             $category_id = $row['id'];
         } else {
             $q = "INSERT INTO $dbase.`".$table_prefix."categories` (`category`) VALUES ('{$category}');";
-            $rs = mysql_query($q, $sqlParser->conn);
+            $rs = mysql_query($q);
             if($rs) {
-                $category_id = mysql_insert_id($sqlParser->conn);
+                $category_id = mysql_insert_id();
             }
         }
     }
