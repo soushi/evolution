@@ -4,6 +4,7 @@
  *	Function: This class contains the main document parsing functions
  *
  */
+
 class DocumentParser {
     var $db; // db object
     var $event, $Event; // event object
@@ -369,9 +370,9 @@ class DocumentParser {
         /* FS#476 and FS#308: only return virtualDir if friendly paths are enabled */
         if ($this->config['use_alias_path'] == 1)
         {
-            $this->virtualDir= dirname($q);
+            $this->virtualDir = dirname($q);
             $this->virtualDir = ($this->virtualDir == '.') ? '' : $this->virtualDir;
-            $q= end(explode('/', $q));
+            $q = end(explode('/', $q));
         }
         else
         {
@@ -399,18 +400,18 @@ class DocumentParser {
                       )
                     )
                     {
-                    $this->documentMethod= 'id';
+                        $this->documentMethod = 'id';
                     return $q;
                     }
                     else
                     { /* not a valid id in terms of virtualDir, treat as alias */
-                    $this->documentMethod= 'alias';
+                        $this->documentMethod = 'alias';
                     return $q;
                 }
             }
             else
             {
-                $this->documentMethod= 'id';
+                $this->documentMethod = 'id';
                 return $q;
             }
         }
@@ -434,22 +435,22 @@ class DocumentParser {
 			$this->documentGenerated = 1;
 			return '';
 		}
-            $this->documentGenerated= 0;
+		$this->documentGenerated = 0;
             $flContent = file_get_contents($cacheFile, false);
-            $flContent= substr($flContent, 37); // remove php header
+		$flContent = substr($flContent, 37); // remove php header
 		$a = explode('<!--__MODxCacheSpliter__-->', $flContent, 2);
-            if (count($a) == 1)
+		if(count($a) == 1)
 		{
                 return $a[0]; // return only document content
 		}
 		
 		$docObj = unserialize(trim($a[0])); // rebuild document object
                 // add so - check page security(admin(mgrRole=1) is pass)
-                if (!(isset($_SESSION['mgrRole']) && $_SESSION['mgrRole']== 1) 
+		if(!(isset($_SESSION['mgrRole']) && $_SESSION['mgrRole'] == 1) 
 		    && $docObj['privateweb'] && isset ($docObj['__MODxDocGroups__']))
 		{
-                    $pass= false;
-                    $usrGrps= $this->getUserDocGroups();
+			$pass = false;
+			$usrGrps = $this->getUserDocGroups();
 			$docGrps = explode(',', $docObj['__MODxDocGroups__']);
                     // check is user has access to doc groups
 			if(is_array($usrGrps))
@@ -458,7 +459,7 @@ class DocumentParser {
 				{
 					if(in_array($v, $docGrps))
 					{
-                                $pass= true;
+						$pass = true;
                                 break;
                             }
                     }
@@ -471,7 +472,7 @@ class DocumentParser {
                             // check if file is not public
 					$tbldg = $this->getFullTableName('document_groups');
 					$secrs = $this->db->query("SELECT id FROM {$tbldg} WHERE document = '{$id}' LIMIT 1;");
-                            if ($secrs)
+					if($secrs)
 					{
 						$seclimit = $this->db->getRecordCount($secrs);
                         }
@@ -490,13 +491,13 @@ class DocumentParser {
                         }
                     }
 				// Grab the Scripts
-				if (isset($docObj['__MODxSJScripts__'])) $this->sjscripts = $docObj['__MODxSJScripts__'];
-				if (isset($docObj['__MODxJScripts__']))  $this->jscripts = $docObj['__MODxJScripts__'];
+			if(isset($docObj['__MODxSJScripts__'])) $this->sjscripts = $docObj['__MODxSJScripts__'];
+			if(isset($docObj['__MODxJScripts__']))  $this->jscripts  = $docObj['__MODxJScripts__'];
 
 				// Remove intermediate variables
                 unset($docObj['__MODxDocGroups__'], $docObj['__MODxSJScripts__'], $docObj['__MODxJScripts__']);
 
-                $this->documentObject= $docObj;
+			$this->documentObject = $docObj;
                 return $a[1]; // return document content
             }
     }
@@ -523,7 +524,7 @@ class DocumentParser {
 				if($i == ($passes -1)) $st= md5($this->documentOutput);
 				
 				$this->documentOutput = str_replace(array('[!','!]'), array('[[',']]'), $this->documentOutput);
-            $this->documentOutput= $this->parseDocumentSource($this->documentOutput);
+				$this->documentOutput = $this->parseDocumentSource($this->documentOutput);
 				
 				if($i == ($passes -1) && $i < ($this->maxParserPasses - 1))
 				{
@@ -615,7 +616,7 @@ class DocumentParser {
 	function checkPublishStatus()
 	{
 		$tbl_site_content = $this->getFullTableName('site_content');
-        $cacheRefreshTime= 0;
+		$cacheRefreshTime = 0;
 		include_once("{$this->config['base_path']}assets/cache/sitePublishing.idx.php");
         $timeNow= time() + $this->config['server_offset_time'];
 		
@@ -1025,7 +1026,7 @@ class DocumentParser {
                     $added = false;
 					if($this->db->getRecordCount($result) == 1)
 					{
-                        $row= $this->db->getRow($result);
+				$row = $this->db->getRow($result);
 				if($row['name'] == $snip_name)
 						{
 					$snippetObject['name']       = $row['name'];
@@ -1927,7 +1928,7 @@ class DocumentParser {
         }
 		elseif ($this->config['friendly_urls'] == 1 && $alias == '')
 		{
-            $alias= $id;
+			$alias = $id;
 			if ($this->config['friendly_alias_urls'] == 1)
 			{
                 $al= $this->aliasListing[$id];
@@ -1937,8 +1938,8 @@ class DocumentParser {
                     $alias= $al['alias'];
             }
 			}
-            $alias= $alPath . $f_url_prefix . $alias . $f_url_suffix;
-            $url= $alias . $args;
+			$alias = $alPath . $f_url_prefix . $alias . $f_url_suffix;
+			$url = $alias . $args;
 		}
 		else
 		{
@@ -2220,7 +2221,7 @@ class DocumentParser {
           elseif($v == '%A')              $str .= $A[$w];
           elseif($v == '%p')              $str .= $p[$ampm];
           elseif($v == '%P')              $str .= $P[$ampm];
-          elseif(strpos($v, '%')!==false) $str .= strftime($v, $timestamp);
+			elseif(strpos($v,'%')!==false) $str .= strftime($v, $timestamp);
           else                            $str .= $v;
         }
         return $str;
@@ -2323,7 +2324,7 @@ class DocumentParser {
             // get document record
 			if ($docid == '')
 			{
-                $docid= $this->documentIdentifier;
+				$docid = $this->documentIdentifier;
 				$resource= $this->documentObject;
             }
 			else
@@ -2331,7 +2332,6 @@ class DocumentParser {
 				$resource= $this->getDocument($docid, '*', $published);
 				if (!$resource) return false;
 			}
-
             // get user defined template variables
 			$fields= ($fields == '') ? 'tv.*' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $fields)));
 			$sort= ($sort == '') ? '' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $sort)));
@@ -2375,7 +2375,6 @@ class DocumentParser {
 					$result[] = array ('name'=>$key,'value'=>$value);
 				}
             }
-
             return $result;
         }
     }
@@ -2573,11 +2572,11 @@ class DocumentParser {
     # Set $resolveIds to true to return the document group names
 	function getUserDocGroups($resolveIds= false)
 	{
-        $dg= array();// add so
-        $dgn= array();
+		$dg  = array(); // add so
+		$dgn = array();
 		if($this->isFrontend() && isset($_SESSION['webDocgroups']) && !empty($_SESSION['webDocgroups']) && isset($_SESSION['webValidated']))
 		{
-            $dg= $_SESSION['webDocgroups'];
+			$dg = $_SESSION['webDocgroups'];
 			if(isset($_SESSION['webDocgrpNames']))
 			{
 				$dgn = $_SESSION['webDocgrpNames']; //add so
@@ -2585,13 +2584,13 @@ class DocumentParser {
         }
 		if(isset($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) && isset($_SESSION['mgrValidated']))
 		{
-            $dg= array_merge($dg, $_SESSION['mgrDocgroups']);
+			$dg = array_merge($dg, $_SESSION['mgrDocgroups']);
 			if(isset($_SESSION['mgrDocgrpNames']))
 			{
-                $dgn= array_merge($dgn, $_SESSION['mgrDocgrpNames']);
+				$dgn = array_merge($dgn, $_SESSION['mgrDocgrpNames']);
             }
             }
-        if (!$resolveIds)
+		if(!$resolveIds)
 		{
             return $dg;
 		}
@@ -2602,13 +2601,13 @@ class DocumentParser {
 		elseif(is_array($dg))
 		{
                     // resolve ids to names
-                    $dgn= array ();
+			$dgn = array ();
 			$tbl_dgn = $this->getFullTableName('documentgroup_names');
 			$imploded_dg = implode(',', $dg);
 			$ds = $this->db->query("SELECT `name` FROM {$tbl_dgn} WHERE id IN ({$imploded_dg})");
-                    while ($row= $this->db->getRow($ds))
+			while ($row = $this->db->getRow($ds))
 			{
-                        $dgn[count($dgn)]= $row['name'];
+				$dgn[count($dgn)] = $row['name'];
 			}
                     // cache docgroup names to session
 			if($this->isFrontend()) $_SESSION['webDocgrpNames'] = $dgn;
@@ -2707,16 +2706,16 @@ class DocumentParser {
 		if (!is_array($options))
 		{
             if (is_bool($options))  // backward compatibility with old plaintext parameter
-                $options=array('plaintext'=>$options);
+				$options = array('plaintext'=>$options);
             elseif (is_string($options)) // Also allow script name as 2nd param
-                $options=array('name'=>$options);
+				$options = array('name'=>$options);
             else
-                $options=array();
+				$options = array();
         }
-        $name= isset($options['name']) ? strtolower($options['name']) : '';
-        $version= isset($options['version']) ? $options['version'] : '0';
-        $plaintext= isset($options['plaintext']) ? $options['plaintext'] : false;
-        $key= !empty($name) ? $name : $src;
+		$name      = isset($options['name'])      ? strtolower($options['name']) : '';
+		$version   = isset($options['version'])   ? $options['version'] : '0';
+		$plaintext = isset($options['plaintext']) ? $options['plaintext'] : false;
+		$key       = !empty($name)                ? $name : $src;
 
         $useThisVer= true;
 		if (isset($this->loadedjscripts[$key]))
@@ -2886,7 +2885,7 @@ class DocumentParser {
 
                 // load default params/properties
                 $parameter= $this->parseProperties($pluginProperties);
-                if (!empty ($extParams))
+				if (!empty($extParams))
                     $parameter= array_merge($parameter, $extParams);
 
                 // eval plugin
@@ -2944,11 +2943,9 @@ class DocumentParser {
 		$orderby= ($sort != '') ? "{$sort} {$dir}" : '';
 		return $this->db->select($fields, $from, $where, $orderby, $limit);
     }
-
     function putIntTableRow($fields= "", $into= "") {
 		return $this->db->insert($fields,$into);
     }
-
     function updIntTableRow($fields= "", $into= "", $where= "", $sort= "", $dir= "ASC", $limit= "") {
 		return $this->db->update($fields, $into, $where);
         }
@@ -2979,7 +2976,6 @@ class DocumentParser {
     function dbExtConnect($host, $user, $pass, $dbase) {
 		$this->db->connect($host, $dbase, $user, $pass);
         }
-
     function getFormVars($method= "", $prefix= "", $trim= "", $REQUEST_METHOD) {
         //  function to retrieve form results into an associative array
         $results= array ();
@@ -3212,7 +3208,6 @@ class DocumentParser {
         }
     }
     // End of class.
-
 }
 
 // SystemEvent Class
