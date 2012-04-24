@@ -8,7 +8,7 @@
 class DocumentParser {
     var $db; // db object
     var $event, $Event; // event object
-    var $pluginEvent;
+    var $pluginEvent = array();
     var $config= null;
     var $rs;
     var $result;
@@ -42,13 +42,14 @@ class DocumentParser {
     var $queryCode;
     var $virtualDir;
     var $placeholders;
-    var $sjscripts;
-    var $jscripts;
-    var $loadedjscripts;
+    var $sjscripts = array();
+    var $jscripts = array();
+    var $loadedjscripts = array();
     var $documentMap;
     var $forwards= 3;
     var $referenceListing;
     var $documentMap_cache;
+    var $safeMode;
 
     // constructor
 	function DocumentParser()
@@ -61,16 +62,19 @@ class DocumentParser {
 		if($_REQUEST['q']=='index.php') $_REQUEST['q'] = '';
 		
         $this->loadExtension('DBAPI') or die('Could not load DBAPI class.'); // load DBAPI class
-        $this->dbConfig= & $this->db->config; // alias for backward compatibility
-        $this->jscripts= array ();
-        $this->sjscripts= array ();
-        $this->loadedjscripts= array ();
         // events
         $this->event= new SystemEvent();
         $this->Event= & $this->event; //alias for backward compatibility
-        $this->pluginEvent= array ();
+		$this->minParserPasses = 1; // min number of parser recursive loops or passes
+		$this->maxParserPasses = 10; // max number of parser recursive loops or passes
+		$this->dumpSQL = false;
+		$this->dumpSnippets = false; // feed the parser the execution start time
+		$this->stopOnNotice = false;
+		$this->safeMode     = false;
         // set track_errors ini variable
 		@ ini_set('track_errors', '1'); // enable error tracking in $php_errormsg
+		// Don't show PHP errors to the public
+		if($this->checkSession()===false) @ini_set('display_errors','0');
     }
 
     // loads an extension from the extenders folder
