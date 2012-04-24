@@ -877,4 +877,3 @@ if($action!=1 && $action!=7 && $action!=2) {
 }
 
 unset($_SESSION['itemname']); // clear this, because it's only set for logging purposes
-include_once "debug.inc.php";
