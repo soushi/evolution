@@ -588,7 +588,7 @@ class DocumentParser {
 
     function checkPublishStatus() {
         $cacheRefreshTime= 0;
-        @include $this->config["base_path"] . "assets/cache/sitePublishing.idx.php";
+        include_once($this->config["base_path"] . "assets/cache/sitePublishing.idx.php");
         $timeNow= time() + $this->config['server_offset_time'];
         if ($cacheRefreshTime <= $timeNow && $cacheRefreshTime != 0) {
             // now, check for documents that need publishing
