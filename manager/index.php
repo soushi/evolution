@@ -70,10 +70,10 @@ header("X-UA-Compatible: IE=edge;FF=3;OtherUA=4");
 error_reporting(E_ALL & ~E_NOTICE);
 
 // check PHP version. MODX Evolution is compatible with php 4 (4.3.3+)
-$php_ver_comp =  version_compare(phpversion(), "4.3.3");
+$php_ver_comp =  version_compare(phpversion(), "4.4.2");
         // -1 if left is less, 0 if equal, +1 if left is higher
 if($php_ver_comp < 0) {
-    echo "Wrong php version! You're using PHP version '".phpversion()."', and MODx only works on 4.3.3 or higher."; // $_lang['php_version_check'];
+    echo "Wrong php version! You're using PHP version '".phpversion()."', and MODx only works on 4.4.2 or higher."; // $_lang['php_version_check'];
     exit;
 }
 
