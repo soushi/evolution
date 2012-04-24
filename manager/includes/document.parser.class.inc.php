@@ -1605,13 +1605,42 @@ class DocumentParser {
         elseif ($type > 3) {
             $type= 3; // Types: 1 = information, 2 = warning, 3 = error
         }
-        $sql= "INSERT INTO " . $this->getFullTableName("event_log") . " (eventid,type,createdon,source,description,user) " .
-	"VALUES($evtid,$type," . time() . ",'$source','$msg','" . $LoginUserID . "')";
-        $ds= @$this->db->query($sql);
-        if (!$ds) {
+        $fields['eventid']     = $evtid;
+        $fields['type']        = $type;
+        $fields['createdon']   = time();
+        $fields['source']      = $source;
+        $fields['description'] = $msg;
+        $fields['user']        = $LoginUserID;
+        $insert_id = @$this->db->insert($fields,$this->getFullTableName("event_log"));
+        if (!$insert_id) {
             echo "Error while inserting event log into database.";
             exit();
         }
+        else {
+            $trim  = (isset($this->config['event_log_trim']))  ? intval($this->config['event_log_trim']) : 100;
+            if(($insert_id % $trim) == 0)
+            {
+                $limit = (isset($this->config['event_log_limit'])) ? intval($this->config['event_log_limit']) : 2000;
+                $this->purge_event_log($limit,$trim);
+            }
+        }
+    }
+
+	function purge_event_log($limit=2000, $trim=100)
+	{
+		if($limit < $trim) $trim = $limit;
+		
+		$tbl_event_log = $this->getFullTableName("event_log");
+		$count = $this->db->getValue($this->db->select('COUNT(id)',$tbl_event_log));
+		$over = $count - $limit;
+		if(0 < $over)
+		{
+			$trim = ($over + $trim);
+			$sql = "DELETE FROM {$tbl_event_log} LIMIT {$trim}";
+			$this->db->query($sql);
+			$sql = "OPTIMIZE TABLE {$tbl_event_log}";
+			$this->db->query($sql);
+		}
 	}
 	
 	function remove_locks($action=27,$limit_time=86400)
