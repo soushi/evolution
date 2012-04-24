@@ -23,7 +23,8 @@ $role = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
 
 
 // check to see the role editor isn't locked
-$sql = "SELECT internalKey, username FROM $dbase.`".$table_prefix."active_users` WHERE $dbase.`".$table_prefix."active_users`.action=35 and $dbase.`".$table_prefix."active_users`.id=$role";
+$tbl_active_users = $modx->getFullTableName('active_users');
+$sql = "SELECT internalKey, username FROM {$tbl_active_users} WHERE action=35 and id={$role}";
 $rs = mysql_query($sql);
 $limit = mysql_num_rows($rs);
 if($limit>1) {
@@ -40,8 +41,10 @@ if($limit>1) {
 
 
 
-if($_REQUEST['a']=='35') {
-	$sql = "SELECT * FROM $dbase.`".$table_prefix."user_roles` WHERE $dbase.`".$table_prefix."user_roles`.id=".$role.";";
+if($_REQUEST['a']=='35')
+{
+	$tbl_user_roles = $modx->getFullTableName('user_roles');
+	$sql = "SELECT * FROM {$tbl_user_roles} WHERE id={$role}";
 	$rs = mysql_query($sql);
 	$limit = mysql_num_rows($rs);
 	if($limit>1) {

@@ -19,7 +19,8 @@ if(isset($_REQUEST['id'])) {
 
 
 // check to see the variable editor isn't locked
-$sql = "SELECT internalKey, username FROM $dbase.`".$table_prefix."active_users` WHERE action=301 AND id=$id";
+$tbl_active_users = $modx->getFullTableName('active_users');
+$sql = "SELECT internalKey, username FROM {$tbl_active_users} WHERE action=301 AND id=$id";
 $rs = mysql_query($sql);
 $limit = mysql_num_rows($rs);
 if($limit>1) {
@@ -42,7 +43,8 @@ if(!is_numeric($id)) {
 }
 
 if(isset($_GET['id'])) {
-    $sql = "SELECT * FROM $dbase.`".$table_prefix."site_tmplvars` WHERE id = $id;";
+    $tbl_site_tmplvars = $modx->getFullTableName('site_tmplvars');
+    $sql = "SELECT * FROM {$tbl_site_tmplvars} WHERE id = $id;";
     $rs = mysql_query($sql);
     $limit = mysql_num_rows($rs);
     if($limit>1) {

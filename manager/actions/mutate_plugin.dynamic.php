@@ -23,14 +23,16 @@ $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
 
 
 // check to see the plugin editor isn't locked
-$sql = "SELECT internalKey, username FROM $dbase.`".$table_prefix."active_users` WHERE $dbase.`".$table_prefix."active_users`.action=102 AND $dbase.`".$table_prefix."active_users`.id=$id";
-$rs = mysql_query($sql);
+$tbl_active_users = $modx->getFullTableName('active_users');
+$rs = $modx->db->select('internalKey, username',$tbl_active_users,"action='102' AND id='{$id}'");
 $limit = mysql_num_rows($rs);
-if($limit>1) {
-    for ($i=0;$i<$limit;$i++) {
-        $lock = mysql_fetch_assoc($rs);
-        if($lock['internalKey']!=$modx->getLoginUserID()) {
-            $msg = sprintf($_lang["lock_msg"],$lock['username'],"plugin");
+if($limit>1)
+{
+	while($lock = $modx->db->getRow)
+	{
+		if($lock['internalKey']!=$modx->getLoginUserID())
+		{
+			$msg = sprintf($_lang["lock_msg"],$lock['username'],'plugin');
             $e->setError(5, $msg);
             $e->dumpError();
         }
@@ -38,26 +40,31 @@ if($limit>1) {
 }
 // end check for lock
 
-
-if(isset($_GET['id'])) {
-    $sql = "SELECT * FROM $dbase.`".$table_prefix."site_plugins` WHERE $dbase.`".$table_prefix."site_plugins`.id = $id;";
-    $rs = mysql_query($sql);
-    $limit = mysql_num_rows($rs);
-    if($limit>1) {
+$tbl_site_plugins = $modx->getFullTableName('site_plugins');
+if(isset($_GET['id']))
+{
+	$rs = $modx->db->select('*',$tbl_site_plugins,"id={$id}");
+	$limit = $modx->db->getRecordCount($rs);
+	if($limit>1)
+	{
         echo "Multiple plugins sharing same unique id. Not good.<p>";
         exit;
     }
-    if($limit<1) {
-        header("Location: /index.php?id=".$site_start);
+	if($limit<1)
+	{
+		header("Location: {$modx->config['site_url']}");
     }
-    $content = mysql_fetch_assoc($rs);
+	$content = $modx->db->getRow($rs);
     $_SESSION['itemname']=$content['name'];
-    if($content['locked']==1 && $_SESSION['mgrRole']!=1) {
+	if($content['locked']==1 && $_SESSION['mgrRole']!=1)
+	{
         $e->setError(3);
         $e->dumpError();
     }
-} else {
-    $_SESSION['itemname']="New Plugin";
+}
+else
+{
+	$_SESSION['itemname']='New Plugin';
 }
 ?>
 <script language="JavaScript">
@@ -145,7 +152,6 @@ function showParameters(ctrl) {
                     value = typeof ar[3] !== 'undefined' ? (ar[3]+'').replace(/^\s|\s$/,"") : '';
                     arrValue = value.split(",");
                     ls = (ar[2]+'').split(",");
-
                     if(currentParams[key]==ar[2]) currentParams[key] = ls[0]; // use first list item as default
 					c = '<select name="prop_'+key+'" id="prop_'+key+'" size="'+ls.length+'" multiple="multiple" style="width:168px" onchange="setParameter(\''+key+'\',\''+dt+'\',this)">';
                     for(i=0;i<ls.length;i++){
@@ -554,23 +560,24 @@ if(is_array($evtOut)) echo implode("",$evtOut);
 <?php
 
     // get selected events
-    if(is_numeric($id) && $id > 0) {
-        $sql = "
-            SELECT evtid, pluginid
-            FROM $dbase.`".$table_prefix."site_plugin_events`
-            WHERE pluginid='$id'
-        ";
+	if(is_numeric($id) && $id > 0)
+	{
         $evts = array();
-        $rs = mysql_query($sql);
-        $limit = mysql_num_rows($rs);
-        for ($i=0; $i<$limit; $i++) {
-           $row = mysql_fetch_assoc($rs);
+		$tbl_site_plugin_events = $modx->getFullTableName('site_plugin_events');
+		$rs = $modx->db->select('evtid, pluginid',$tbl_site_plugin_events,"pluginid='{$id}'");
+		while($row = mysql_fetch_assoc($rs))
+		{
            $evts[] = $row['evtid'];
         }
-    } else {
-        if(isset($content['sysevents']) && is_array($content['sysevents'])) {
+	}
+	else
+	{
+		if(isset($content['sysevents']) && is_array($content['sysevents']))
+		{
             $evts = $content['sysevents'];
-        } else {
+		}
+		else
+		{
             $evts = array();
         }
     }
@@ -585,12 +592,12 @@ if(is_array($evtOut)) echo implode("",$evtOut);
         "Template Service Events",
         "User Defined Events"
     );
-            $sql = "SELECT * FROM $dbase.`".$table_prefix."system_eventnames` ORDER BY service DESC, groupname, name";
-    $rs = mysql_query($sql);
-    $limit = mysql_num_rows($rs);
-    if($limit==0) echo "<tr><td>&nbsp;</td></tr>";
-    else for ($i=0; $i<$limit; $i++) {
-        $row = mysql_fetch_assoc($rs);
+	$tbl_system_eventnames = $modx->getFullTableName('system_eventnames');
+	$rs = $modx->db->select('*',$tbl_system_eventnames,'','service DESC, groupname, name');
+	if($modx->db->getRecordCount($rs)==0) echo '<tr><td>&nbsp;</td></tr>';
+	else
+	while($row = mysql_fetch_assoc($rs))
+	{
         // display records
         if($srv!=$row['service']){
             $srv=$row['service'];
