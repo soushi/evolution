@@ -4,9 +4,6 @@ if(!$modx->hasPermission('save_template')) {
 	$e->setError(3);
 	$e->dumpError();	
 }
-?>
-<?php
-
 $id = intval($_POST['id']);
 $template = $modx->db->escape($_POST['post']);
 $templatename = $modx->db->escape(trim($_POST['templatename']));
@@ -153,13 +150,9 @@ switch ($_POST['mode']) {
 				header($header);
 			}
 		}		
-
-		
-		
         break;
     default:
 	?>
 	Erm... You supposed to be here now?
 	<?php
 }
-?>

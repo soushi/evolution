@@ -69,6 +69,4 @@ if (isset($_POST) && count($_POST) > 0) {
 	$sync->setReport(false);
 	$sync->emptyCache(); // first empty the cache
 }
-$header="Location: index.php?a=7&r=10";
-header($header);
-?>
+header("Location: index.php?a=7&r=10");

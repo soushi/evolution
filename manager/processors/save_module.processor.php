@@ -4,9 +4,6 @@ if(!$modx->hasPermission('save_module')) {
 	$e->setError(3);
 	$e->dumpError();	
 }
-?>
-<?php
-
 $id = intval($_POST['id']);
 $name = $modx->db->escape(trim($_POST['name']));
 $description = $modx->db->escape($_POST['description']);
@@ -201,4 +198,3 @@ function saveUserGroupAccessPermissons(){
 		}
 	}
 }
-?>
