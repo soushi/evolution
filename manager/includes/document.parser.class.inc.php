@@ -466,10 +466,10 @@ class DocumentParser {
 			$docid = $this->documentIdentifier;
 			
             // invoke OnBeforeSaveWebPageCache event
-            $this->invokeEvent("OnBeforeSaveWebPageCache");
+			$this->invokeEvent('OnBeforeSaveWebPageCache');
                 // get and store document groups inside document object. Document groups will be used to check security on cache pages
 			$dsq = $this->db->select('document_group', $tbl_document_groups, "document='{$docid}'");
-			$docGroups= $this->db->getColumn("document_group", $dsq);
+			$docGroups= $this->db->getColumn('document_group', $dsq);
 
 				// Attach Document Groups and Scripts
 			if (is_array($docGroups))
@@ -480,7 +480,7 @@ class DocumentParser {
 			$cacheContent  = "<?php die('Unauthorized access.'); ?>\n";
 			$cacheContent .= serialize($this->documentObject);
 			$cacheContent .= "<!--__MODxCacheSpliter__-->{$this->documentContent}";
-			$base_path = $this->config["base_path"];
+			$base_path = $this->config['base_path'];
 			$page_cache_path = "{$base_path}assets/cache/docid_{$docid}.pageCache.php";
             file_put_contents($page_cache_path, $cacheContent);
         }
@@ -491,7 +491,8 @@ class DocumentParser {
         // end post processing
     }
 
-    function getMicroTime() {
+	function getMicroTime()
+	{
         list ($usec, $sec)= explode(' ', microtime());
         return ((float) $usec + (float) $sec);
     }
@@ -515,13 +516,13 @@ class DocumentParser {
 				else
 				{
                     $currentNumberOfRedirects += 1;
-					if (strpos($url, "?") > 0)
+					if (strpos($url, '?') > 0)
 					{
-                        $url .= "&err=$currentNumberOfRedirects";
+						$url .= "&err={$currentNumberOfRedirects}";
 					}
 					else
 					{
-                        $url .= "?err=$currentNumberOfRedirects";
+						$url .= "?err={$currentNumberOfRedirects}";
                     }
                 }
             }
@@ -582,7 +583,6 @@ class DocumentParser {
     function sendErrorPage() {
         // invoke OnPageNotFound event
         $this->invokeEvent('OnPageNotFound');
-//        $this->sendRedirect($this->makeUrl($this->config['error_page'], '', '&refurl=' . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'])), 1);
         $this->sendForward($this->config['error_page'] ? $this->config['error_page'] : $this->config['site_start'], 'HTTP/1.0 404 Not Found');
         exit();
     }
