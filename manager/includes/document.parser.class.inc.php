@@ -226,14 +226,14 @@ class DocumentParser {
                 $included= include_once (MODX_BASE_PATH . 'assets/cache/siteCache.idx.php');
             }
             if (!$included || !is_array($this->config) || empty ($this->config)) {
-                include_once MODX_BASE_PATH . "/manager/processors/cache_sync.class.processor.php";
+                include_once MODX_MANAGER_PATH . "processors/cache_sync.class.processor.php";
                 $cache = new synccache();
-                $cache->setCachepath(MODX_BASE_PATH . "/assets/cache/");
+                $cache->setCachepath(MODX_BASE_PATH . "assets/cache/");
                 $cache->setReport(false);
                 $rebuilt = $cache->buildCache($this);
                 $included = false;
                 if($rebuilt && $included= file_exists(MODX_BASE_PATH . 'assets/cache/siteCache.idx.php')) {
-                    $included= include MODX_BASE_PATH . 'assets/cache/siteCache.idx.php';
+                    $included= include_once(MODX_BASE_PATH . 'assets/cache/siteCache.idx.php');
                 }
                 if(!$included) {
                     $result= $this->db->query('SELECT setting_name, setting_value FROM ' . $this->getFullTableName('system_settings'));
@@ -2907,7 +2907,7 @@ class DocumentParser {
         ob_end_flush();
 
         // Log error
-        $this->logEvent(0, 3, $parsedMessageString, $source= 'Parser');
+        $this->logEvent(0, 3, $parsedMessageString);
 
         // Make sure and die!
         exit();
