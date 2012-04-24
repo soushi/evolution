@@ -1041,61 +1041,7 @@ class DocumentParser {
                     }
                 }
 		return $snippetObject;
-            }
-
-			for ($i= 0; $i < $matchCount; $i++)
-			{
-                $parameter= array ();
-                $snippetName= $this->currentSnippet= $snippets[$i]['name'];
-                // FIXME Undefined index: properties
-				if(isset($snippets[$i]['properties']))
-				{
-                    $snippetProperties= $snippets[$i]['properties'];
-				}
-				else
-				{
-                    $snippetProperties= '';
-                }
-                // load default params/properties - Raymond
-                // FIXME Undefined variable: snippetProperties
-                $parameter= $this->parseProperties($snippetProperties);
-                // current params
-				$currentSnippetParams = $snip_param[$i];
-				if(!empty($currentSnippetParams))
-				{
-					$tempSnippetParams = preg_replace('@^\?@', '', $currentSnippetParams);
-					if(strpos($tempSnippetParams, '&amp;') !== false)
-					{
-					
-						$tempSnippetParams = str_replace('&amp;', '&', $tempSnippetParams);
-                    //$tempSnippetParams = html_entity_decode($tempSnippetParams, ENT_NOQUOTES, $this->config['etomite_charset']); //FS#334 and FS#456
-					}
-					$tempSnippetParams_array = explode('&', $tempSnippetParams);
-					$snippetParamCount = count($tempSnippetParams_array);
-					for ($x= 0; $x < $snippetParamCount; $x++)
-					{
-						if(strpos($tempSnippetParams_array[$x], '=', 0))
-						{
-							if($parameterTemp= explode('=', $tempSnippetParams_array[$x],2))
-							{
-                                $parameterTemp[0] = trim($parameterTemp[0]);
-                                $parameterTemp[1] = trim($parameterTemp[1]);
-								$parameterTemp[1] = trim($parameterTemp[1],'`');
-                                $parameter[$parameterTemp[0]]= $parameterTemp[1];
-                            }
-                        }
-                    }
-                }
-                $executedSnippets[$i]= $this->evalSnippet($snippets[$i]['snippet'], $parameter);
-				if($this->dumpSnippets == 1)
-				{
-					echo "<fieldset><legend><b>{$snippetName}</b></legend><textarea style='width:60%; height:200px'>" . htmlentities($executedSnippets[$i]) . "</textarea></fieldset>";
-                }
-				$documentSource = str_replace('[[' . $snippetName . $currentSnippetParams . ']]', $executedSnippets[$i], $documentSource);
-            }
-        }
-        return $documentSource;
-    }
+	}
 
     function makeFriendlyURL($pre, $suff, $path) {
         $elements = explode('/',$path);
