@@ -240,6 +240,15 @@ $modx->setPlaceholder('onlineusers_title',$_lang['onlineusers_title']);
     }
 $modx->setPlaceholder('OnlineInfo',$html);
 
+// load template file
+if(file_exists($tplFile)) {
+	$tplFile = MODX_BASE_PATH . 'assets/templates/manager/welcome.html';
+}
+else {
+	$tplFile = MODX_BASE_PATH . 'manager/media/style/' . $modx->config['manager_theme'] . '/manager/welcome.html';
+}
+$tpl = file_get_contents($tplFile);
+
 // invoke event OnManagerWelcomePrerender
 $evtOut = $modx->invokeEvent('OnManagerWelcomePrerender');
 if(is_array($evtOut)) {
@@ -260,16 +269,6 @@ if(is_array($evtOut)) {
     $output = implode('',$evtOut);
     $modx->setPlaceholder('OnManagerWelcomeRender', $output);
 }
-
-// load template file
-$tplFile = MODX_BASE_PATH . 'assets/templates/manager/welcome.html';
-if(file_exists($tplFile)==false)
-{
-	$tplFile = MODX_BASE_PATH . 'manager/media/style/' . $modx->config['manager_theme'] . '/manager/welcome.html';
-}
-$handle = fopen($tplFile, "r");
-$tpl = fread($handle, filesize($tplFile));
-fclose($handle);
 
 // merge placeholders
 $tpl = $modx->mergePlaceholderContent($tpl);
