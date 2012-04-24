@@ -1093,16 +1093,11 @@ class DocumentParser {
 		
 		if ($this->config['friendly_urls'] == 1)
 		{
-			if(empty($this->aliases))
-			{
-            $aliases= array ();
-			foreach ($this->aliasListing as $doc)
-			{
-				$aliases[$doc['id']]= (strlen($doc['path']) > 0 ? $doc['path'] . '/' : '') . $doc['alias'];
-			}
-				$this->aliases = $aliases;
-			}
+			if(!isset($this->aliases) || empty($this->aliases))
+				$aliases = $this->set_aliases();
+			else
 			$aliases = $this->aliases;
+			
 			$use_alias = $this->config['friendly_alias_urls'];
 			$prefix    = $this->config['friendly_url_prefix'];
 			$suffix    = $this->config['friendly_url_suffix'];
@@ -1116,6 +1111,8 @@ class DocumentParser {
 					$target = trim($pieces[$idx]);
 					if(preg_match("/^[0-9]+$/",$this->referenceListing[$target]))
 						$target = $this->referenceListing[$target];
+					elseif(preg_match("/^[0-9]+$/",$target))
+						$target = $aliases[$target];
 					else $target = $this->parseDocumentSource($target);
 					
 					if(preg_match('@^https?://@', $this->referenceListing[$target]))
@@ -1136,12 +1133,12 @@ class DocumentParser {
 				if ($idx < $maxidx)
 				{
 					$target = trim($pieces[$idx]);
-					if(preg_match("/^[0-9]+$/",$this->referenceListing[$target]))
+					if(isset($this->referenceListing[$target]) && preg_match("/^[0-9]+$/",$this->referenceListing[$target]))
 						$target = $this->referenceListing[$target];
 					
 					if($target === $this->config['site_start'])
 						$path = 'index.php';
-					elseif(preg_match('@^https?://@', $this->referenceListing[$target]))
+					elseif(isset($this->referenceListing[$target]) && preg_match('@^https?://@', $this->referenceListing[$target]))
 						$path = $this->referenceListing[$target];
 					else
 						$path = 'index.php?id=' . $target;
