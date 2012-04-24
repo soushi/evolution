@@ -659,23 +659,34 @@ class DocumentParser {
             file_put_contents($cache_path, $content);
         }
 
-    function postProcess() {
+	function postProcess()
+	{
         // if the current document was generated, cache it!
-        if ($this->documentGenerated == 1 && $this->documentObject['cacheable'] == 1 && $this->documentObject['type'] == 'document' && $this->documentObject['published'] == 1) {
-            $basepath= $this->config["base_path"] . "assets/cache";
+		if ($this->documentGenerated           == 1
+		 && $this->documentObject['cacheable'] == 1
+		 && $this->documentObject['type']      == 'document'
+		 && $this->documentObject['published'] == 1)
+		{
+			$tbl_document_groups = $this->getFullTableName('document_groups');
+			$docid = $this->documentIdentifier;
+			
             // invoke OnBeforeSaveWebPageCache event
             $this->invokeEvent("OnBeforeSaveWebPageCache");
                 // get and store document groups inside document object. Document groups will be used to check security on cache pages
-                $sql= "SELECT document_group FROM " . $this->getFullTableName("document_groups") . " WHERE document='" . $this->documentIdentifier . "'";
-                $docGroups= $this->db->getColumn("document_group", $sql);
+			$dsq = $this->db->select('document_group', $tbl_document_groups, "document='{$docid}'");
+			$docGroups= $this->db->getColumn("document_group", $dsq);
 
 				// Attach Document Groups and Scripts
-            if (is_array($docGroups)) $this->documentObject['__MODxDocGroups__'] = implode(',', $docGroups);
+			if (is_array($docGroups))
+			{
+				$this->documentObject['__MODxDocGroups__'] = implode(',', $docGroups);
+			}
 
-                $docObjSerial= serialize($this->documentObject);
-                $cacheContent= $docObjSerial . "<!--__MODxCacheSpliter__-->" . $this->documentContent;
-            $cacheContent = "<?php die('Unauthorized access.'); ?>" . $cacheContent;
-            $page_cache_path = $basepath . '/docid_' . $this->documentIdentifier . '.pageCache.php';
+			$cacheContent  = "<?php die('Unauthorized access.'); ?>\n";
+			$cacheContent .= serialize($this->documentObject);
+			$cacheContent .= "<!--__MODxCacheSpliter__-->{$this->documentContent}";
+			$base_path = $this->config["base_path"];
+			$page_cache_path = "{$base_path}assets/cache/docid_{$docid}.pageCache.php";
             file_put_contents($page_cache_path, $cacheContent);
         }
 
