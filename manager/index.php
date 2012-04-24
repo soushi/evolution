@@ -69,7 +69,7 @@ header("X-UA-Compatible: IE=edge;FF=3;OtherUA=4");
 // set error reporting
 error_reporting(E_ALL & ~E_NOTICE);
 
-// check PHP version. MODX Evolution is compatible with php 4 (4.3.3+)
+// check PHP version. MODX Evolution is compatible with php 4 (4.4.2+)
 $php_ver_comp =  version_compare(phpversion(), "4.4.2");
         // -1 if left is less, 0 if equal, +1 if left is higher
 if($php_ver_comp < 0) {
@@ -108,7 +108,7 @@ if (!file_exists($config_filename)) {
 }
 
 // include the database configuration file
-include_once "config.inc.php";
+include_once $config_filename;
 
 // initiate the content manager class
 include_once "document.parser.class.inc.php";
@@ -139,10 +139,10 @@ if(!isset($manager_language) || !file_exists(MODX_MANAGER_PATH."includes/lang/".
     $manager_language = "english"; // if not set, get the english language file.
 }
 $_lang = array();
-include_once "lang/english.inc.php";
+include_once(MODX_MANAGER_PATH."includes/lang/english.inc.php");
 $length_eng_lang = count($_lang);
 
-if($manager_language!="english" && file_exists(MODX_MANAGER_PATH."includes/lang/".$manager_language.".inc.php")) {
+if($manager_language!="english" && file_exists(MODX_MANAGER_PATH."includes/lang/{$manager_language}.inc.php")) {
     include_once "lang/".$manager_language.".inc.php";
 }
 
