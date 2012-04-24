@@ -1474,15 +1474,31 @@ class DocumentParser {
     /* API functions																/
     /***************************************************************************************/
 
-    function getParentIds($id, $height= 10) {
+	function getParentIds($id, $height= 10)
+	{
         $parents= array ();
-        while ( $id && $height-- ) {
-            $thisid = $id;
+		while( $id && 0<$height)
+		{
+			$current_id = $id;
             $id = $this->aliasListing[$id]['parent'];
-            if (!$id) break;
-            $pkey = strlen($this->aliasListing[$thisid]['path']) ? $this->aliasListing[$thisid]['path'] : $this->aliasListing[$id]['alias'];
-            if (!strlen($pkey)) $pkey = "{$id}";
+			if(!$id)
+			{
+				break;
+			}
+			if(strlen($this->aliasListing[$current_id]['path']))
+			{
+				$pkey = $this->aliasListing[$current_id]['path'];
+			}
+			else
+			{
+				$pkey = $this->aliasListing[$id]['alias'];
+			}
+			if(!strlen($pkey))
+			{
+				$pkey = $id;
+			}
             $parents[$pkey] = $id;
+			$height--;
         }
         return $parents;
     }
