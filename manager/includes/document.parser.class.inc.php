@@ -789,7 +789,8 @@ class DocumentParser {
         }
     }
 
-    function cleanDocumentIdentifier($qOrig) {
+	function cleanDocumentIdentifier($qOrig)
+	{
         if(empty($qOrig)) $qOrig = $this->config['site_start'];
         $q = trim($qOrig,'/');
         /* Save path if any */
@@ -823,8 +824,7 @@ class DocumentParser {
                          ($this->virtualDir != '' && in_array($q, $this->getChildIds($this->documentListing[$this->virtualDir], 1)))
                          ||
                          ($this->virtualDir == '' && in_array($q, $this->getChildIds(0, 1)))
-                      )
-                    )
+					))
                     {
                         $this->documentMethod = 'id';
                     return $q;
