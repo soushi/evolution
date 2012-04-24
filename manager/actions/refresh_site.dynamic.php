@@ -20,11 +20,12 @@ doRefresh(1);
 <h1><?php echo $_lang['refresh_title']; ?></h1>
 <div class="sectionBody">
 <?php
-include_once "./processors/cache_sync.class.processor.php";
-$sync = new synccache();
-$sync->setCachepath("../assets/cache/");
-$sync->setReport(true);
-$sync->emptyCache();
+
+if(0<$num_rows_pub)   printf('<p>'.$_lang["refresh_published"].'</p>', $num_rows_pub);
+if(0<$num_rows_unpub) printf('<p>'.$_lang["refresh_unpublished"].'</p>', $num_rows_unpub);
+
+$params['showReport'] = true;
+$modx->clearCache($params);
 
 // invoke OnSiteRefresh event
 $modx->invokeEvent("OnSiteRefresh");
