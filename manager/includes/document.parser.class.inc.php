@@ -2201,19 +2201,20 @@ class DocumentParser {
         return $timeStamp;
     }
 
-    function mb_strftime($format='%Y/%m/%d', $timestamp='') {
+	function mb_strftime($format='%Y/%m/%d', $timestamp='')
+	{
         $a = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
         $A = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
         $w         = strftime('%w', $timestamp);
         $p = array('am'=>'AM', 'pm'=>'PM');
         $P = array('am'=>'am', 'pm'=>'pm');
         $ampm = (strftime('%H', $timestamp) < 12) ? 'am' : 'pm';
-        if(empty($timestamp)) $timestamp = time() + $this->config['server_offset_time'];
+		if($timestamp==='') return '';
         if(substr(PHP_OS,0,3) == 'WIN') $format = str_replace('%-', '%#', $format);
-        $peaces    = preg_split('@(%[\-#]?[a-zA-Z%])@',$format,null,PREG_SPLIT_DELIM_CAPTURE);
+		$pieces    = preg_split('@(%[\-#]?[a-zA-Z%])@',$format,null,PREG_SPLIT_DELIM_CAPTURE);
         
         $str = '';
-        foreach($peaces as $v)
+		foreach($pieces as $v)
         {
           if    ($v == '%a')              $str .= $a[$w];
           elseif($v == '%A')              $str .= $A[$w];
