@@ -47,6 +47,7 @@ class DocumentParser {
     var $documentMap;
     var $forwards= 3;
     var $referenceListing;
+    var $documentMap_cache;
 
     // constructor
     function DocumentParser() {
@@ -1503,28 +1504,56 @@ class DocumentParser {
         return $parents;
     }
 
-    function getChildIds($id, $depth= 10, $children= array ()) {
-
-        // Initialise a static array to index parents->children
-        static $documentMap_cache = array();
-        if (!count($documentMap_cache)) {
-            foreach ($this->documentMap as $document) {
-                foreach ($document as $p => $c) {
+	function set_documentMap_cache()
+	{
+		$path_documentmapcache = MODX_BASE_PATH . 'assets/cache/documentmap.pageCache.php';
+		if(file_exists($path_documentmapcache))
+		{
+			$src = file_get_contents($path_documentmapcache);
+			$this->documentMap_cache = unserialize($src);
+		}
+		else
+		{
+			$documentMap_cache= array ();
+			foreach ($this->documentMap as $document)
+			{
+				foreach ($document as $p => $c)
+				{
                     $documentMap_cache[$p][] = $c;
                 }
             }
+			file_put_contents($path_documentmapcache,serialize($documentMap_cache));
+			$this->documentMap_cache = $documentMap_cache;
+		}
+		return $this->documentMap_cache;
         }
 
+	function getChildIds($id, $depth= 10, $children= array ())
+	{
+		// Initialise a static array to index parents->children
+		if(!count($this->documentMap_cache))
+			$documentMap_cache = $this->set_documentMap_cache();
+		else
+			$documentMap_cache = $this->documentMap_cache;
+		
         // Get all the children for this parent node
-        if (isset($documentMap_cache[$id])) {
+		if (isset($documentMap_cache[$id]))
+		{
             $depth--;
 
-            foreach ($documentMap_cache[$id] as $childId) {
-                $pkey = (strlen($this->aliasListing[$childId]['path']) ? "{$this->aliasListing[$childId]['path']}/" : '') . $this->aliasListing[$childId]['alias'];
-                if (!strlen($pkey)) $pkey = "{$childId}";
+			foreach ($documentMap_cache[$id] as $childId)
+			{
+				$pkey = $this->aliasListing[$childId]['alias'];
+				if(strlen($this->aliasListing[$childId]['path']))
+				{
+					$pkey = "{$this->aliasListing[$childId]['path']}/{$pkey}";
+				}
+				
+				if (!strlen($pkey)) $pkey = $childId;
                     $children[$pkey] = $childId;
 
-                if ($depth) {
+				if ($depth)
+				{
                     $children += $this->getChildIds($childId, $depth);
                 }
             }
