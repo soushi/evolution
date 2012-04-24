@@ -1035,7 +1035,7 @@ class DocumentParser {
             $identifier = $this->cleanDocumentIdentifier($identifier);
             $method = $this->documentMethod;
         }
-        if($method == 'alias' && $this->config['use_alias_path'] && array_key_exists($identifier, $this->documentListing)) {
+        if($method == 'alias' && $this->config['use_alias_path'] && isset($this->documentListing[$identifier])) {
             $method = 'id';
             $identifier = $this->documentListing[$identifier];
         }
