@@ -4,9 +4,6 @@ if(!$modx->hasPermission('save_chunk')) {
 	$e->setError(3);
 	$e->dumpError();	
 }
-?>
-<?php
-
 $id = intval($_POST['id']);
 $snippet = $modx->db->escape($_POST['post']);
 $name = $modx->db->escape(trim($_POST['name']));
@@ -147,4 +144,3 @@ switch ($_POST['mode']) {
 	Erm... You supposed to be here now?
 	<?php
 }
-?>

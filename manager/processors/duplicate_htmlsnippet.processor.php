@@ -4,9 +4,6 @@ if(!$modx->hasPermission('new_chunk')) {
 	$e->setError(3);
 	$e->dumpError();
 }
-?>
-<?php
-
 $id=$_GET['id'];
 
 // duplicate htmlsnippet
@@ -22,6 +19,4 @@ else {
 }
 
 // finish duplicating - redirect to new chunk
-$header="Location: index.php?r=2&a=78&id=$newid";
-header($header);
-?>
+header("Location: index.php?a=78&id={$newid}");

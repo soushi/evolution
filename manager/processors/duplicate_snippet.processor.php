@@ -4,9 +4,6 @@ if(!$modx->hasPermission('new_snippet')) {
 	$e->setError(3);
 	$e->dumpError();
 }
-?>
-<?php
-
 $id=$_GET['id'];
 
 // duplicate Snippet
@@ -21,8 +18,5 @@ else {
 	exit;
 }
 
-
 // finish duplicating - redirect to new snippet
-$header="Location: index.php?r=2&a=22&id=$newid";
-header($header);
-?>
+header("Location: index.php?a=22&id={$newid}");

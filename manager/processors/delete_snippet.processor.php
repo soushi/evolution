@@ -4,8 +4,6 @@ if(!$modx->hasPermission('delete_snippet')) {
 	$e->setError(3);
 	$e->dumpError();
 }
-?>
-<?php
 $id=intval($_GET['id']);
 
 // invoke OnBeforeSnipFormDelete event
@@ -35,8 +33,5 @@ if(!$rs) {
 		$sync->emptyCache(); // first empty the cache
 		// finished emptying cache - redirect
 
-	$header="Location: index.php?a=76&r=2";
-	header($header);
+	header("Location: index.php?a=76");
 }
-
-?>

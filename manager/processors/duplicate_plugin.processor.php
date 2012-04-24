@@ -5,7 +5,6 @@ if(!$modx->hasPermission('new_plugin')) {
 	$e->setError(3);
 	$e->dumpError();	
 }
-
 $id=$_GET['id'];
 
 // duplicate Plugin
@@ -32,6 +31,4 @@ if (!$rs) {
 }
 
 // finish duplicating - redirect to new plugin
-$header="Location: index.php?r=2&a=102&id=$newid";
-header($header);
-?>
+header("Location: index.php?a=102&id={$newid}");

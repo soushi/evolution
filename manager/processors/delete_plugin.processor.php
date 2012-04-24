@@ -41,9 +41,6 @@ if(!$rs) {
 		$sync->setReport(false);
 		$sync->emptyCache(); // first empty the cache		
 		// finished emptying cache - redirect
-		$header="Location: index.php?a=76&r=2";
-		header($header);
+		header("Location: index.php?a=76");
 	}
 }
-
-?>

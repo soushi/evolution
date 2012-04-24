@@ -4,9 +4,6 @@ if(!$modx->hasPermission('new_module')) {
 	$e->setError(3);
 	$e->dumpError();	
 }
-?>
-<?php
-
 $id=$_GET['id'];
 
 // create globally unique identifiers (guid)
@@ -54,6 +51,6 @@ if(!$rs){
 }
 
 // finish duplicating - redirect to new module
-$header="Location: index.php?r=2&a=108&id=$newid";
-header($header);
+header("Location: index.php?r=2&a=108&id={$newid}");
+
 ?>
