@@ -50,14 +50,18 @@
  */
 
 // get start time
-$mtime = microtime(); $mtime = explode(" ",$mtime); $mtime = $mtime[1] + $mtime[0]; $tstart = $mtime;
-if(@file_exists('../autoload.php')) include_once('../autoload.php');
-
+$mtime = explode(' ',microtime());
+$tstart = $mtime[1] + $mtime[0];
+$mstart = memory_get_usage();
 define("IN_MANAGER_MODE", "true");  // we use this to make sure files are accessed through
                                     // the manager instead of seperately.
+$base_path = str_replace('\\','/',realpath('../')) . '/';
+$core_path = "{$base_path}manager/includes/";
 
+if(@file_exists("{$base_path}autoload.php")) include_once("{$base_path}autoload.php");
 // harden it
-require_once('./includes/protect.inc.php');
+require_once("{$core_path}protect.inc.php");
+require_once("{$core_path}initialize.inc.php");
 
 // send anti caching headers
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
@@ -67,26 +71,12 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("X-UA-Compatible: IE=edge;FF=3;OtherUA=4");
 
-// set error reporting
-error_reporting(E_ALL & ~E_NOTICE);
-
-// check PHP version. MODX Evolution is compatible with php 4 (4.4.2+)
-$php_ver_comp =  version_compare(phpversion(), "4.4.2");
-        // -1 if left is less, 0 if equal, +1 if left is higher
-if($php_ver_comp < 0) {
-    echo "Wrong php version! You're using PHP version '".phpversion()."', and MODx only works on 4.4.2 or higher."; // $_lang['php_version_check'];
-    exit;
-}
-
-// set some runtime options
-$incPath = str_replace("\\","/",dirname(__FILE__)."/includes/"); // Mod by Raymond
-set_include_path(get_include_path() . PATH_SEPARATOR . $incPath);
-
-if (version_compare(phpversion(), "5.3") < 0) {
+if (version_compare(phpversion(), '5.3') < 0)
+{
     @set_magic_quotes_runtime(0);
 }
 // include_once the magic_quotes_gpc workaround
-if(get_magic_quotes_gpc()) include_once "quotes_stripper.inc.php";
+if(get_magic_quotes_gpc()) include_once "{$core_path}quotes_stripper.inc.php";
 
 if (!defined("ENT_COMPAT")) define("ENT_COMPAT", 2);
 if (!defined("ENT_NOQUOTES")) define("ENT_NOQUOTES", 0);
@@ -100,60 +90,47 @@ if(!isset($_SERVER["DOCUMENT_ROOT"]) || empty($_SERVER["DOCUMENT_ROOT"])) {
 define("IN_ETOMITE_SYSTEM", "true"); // for backward compatibility with 0.6
 
 // include_once config file
-$config_filename = "./includes/config.inc.php";
-if (!file_exists($config_filename)) {
+$config_path = "{$core_path}config.inc.php";
+if (!file_exists($config_path)) {
     echo "<h3>Unable to load configuration settings</h3>";
     echo "Please run the MODx <a href='../install'>install utility</a>";
     exit;
 }
 
 // include the database configuration file
-include_once $config_filename;
-
-// initiate the content manager class
-include_once "document.parser.class.inc.php";
-$modx = new DocumentParser;
-$modx->loadExtension("ManagerAPI");
-$modx->getSettings();
-$etomite = &$modx; // for backward compatibility
-
-// connect to the database
-if(@!$modxDBConn = mysql_connect($database_server, $database_user, $database_password)) {
-    die("<h2>Failed to create the database connection!</h2>. Please run the MODx <a href='../install'>install utility</a>");
-} else {
-    mysql_select_db(str_replace('`', '', $dbase));
-    @mysql_query("{$database_connection_method} {$database_connection_charset}");
-}
+include_once $config_path;
 
 // start session
 startCMSSession();
 
-// get the settings from the database
-include_once "settings.inc.php";
+// set some runtime options
+set_include_path(get_include_path() . PATH_SEPARATOR . rtrim($core_path,'/'));
 
-// get the user settings from the database
-include_once "user_settings.inc.php";
+// initiate the content manager class
+include_once "{$core_path}document.parser.class.inc.php";
+$modx = new DocumentParser;
+// $modx->safeMode = true;
+$etomite = &$modx; // for backward compatibility
+$modx->tstart = $tstart;
+$modx->mstart = $mstart;
+$modx->loadExtension("ManagerAPI");
+$modx->db->connect();
+$modx->getSettings();
+extract($modx->config);
 
 // include_once the language file
-if(!isset($manager_language) || !file_exists(MODX_MANAGER_PATH."includes/lang/".$manager_language.".inc.php")) {
-    $manager_language = "english"; // if not set, get the english language file.
-}
+if(!isset($manager_language)) $manager_language = 'english';
 $_lang = array();
-include_once(MODX_MANAGER_PATH."includes/lang/english.inc.php");
-$length_eng_lang = count($_lang);
-
-if($manager_language!="english" && file_exists(MODX_MANAGER_PATH."includes/lang/{$manager_language}.inc.php")) {
-    include_once "lang/".$manager_language.".inc.php";
-}
+include_once("{$core_path}lang/{$manager_language}.inc.php");
 
 // send the charset header
-header('Content-Type: text/html; charset='.$modx_manager_charset);
+header("Content-Type: text/html; charset={$modx_manager_charset}");
 
 // include version info
-include_once "version.inc.php";
+include_once "{$core_path}version.inc.php";
 
 // accesscontrol.php checks to see if the user is logged in. If not, a log in form is shown
-include_once "accesscontrol.inc.php";
+include_once "{$core_path}accesscontrol.inc.php";
 
 // double check the session
 if(!isset($_SESSION['mgrValidated'])){
@@ -162,21 +139,16 @@ if(!isset($_SESSION['mgrValidated'])){
 }
 
 // include_once the style variables file
-if(isset($manager_theme) && !isset($_style)) {
-    $_style = array();
-    include_once "media/style/".$manager_theme."/style.php";
-}
+$theme_dir = "media/style/{$manager_theme}/";
+include_once "{$theme_dir}style.php";
 
-// allow quickmanager access
-if(empty($_SERVER['HTTP_REFERER']) || !($_SESSION['in_qm'])) {  
-    // check if user is allowed to access manager interface
-    if(isset($allow_manager_access) && $allow_manager_access==0) {
-        include_once "manager.lockout.inc.php";
-    }
+// check if user is allowed to access manager interface
+if(isset($allow_manager_access) && $allow_manager_access==0) {
+	include_once "{$core_path}manager.lockout.inc.php";
 }
 
 // include_once the error handler
-include_once "error.class.inc.php";
+include_once "{$core_path}error.class.inc.php";
 $e = new errorHandler;
 
 // Initialize System Alert Message Queque
@@ -186,51 +158,65 @@ $SystemAlertMsgQueque = &$_SESSION['SystemAlertMsgQueque'];
 // first we check to see if this is a frameset request
 if(!isset($_POST['a']) && !isset($_GET['a']) && ($e->getError()==0) && !isset($_POST['updateMsgCount'])) {
     // this looks to be a top-level frameset request, so let's serve up a frameset
-    include_once "frames/1.php";
+	include_once "{$base_path}manager/frames/1.php";
     exit;
 }
 
 // OK, let's retrieve the action directive from the request
-if(isset($_GET['a']) && isset($_POST['a'])) {
+if(isset($_GET['a']) && isset($_POST['a']))
+{
     $e->setError(100);
     $e->dumpError();
     // set $e to a corresponding errorcode
     // we know that if an error occurs here, something's wrong,
     // so we dump the error, thereby stopping the script.
 
-} else {
+}
+else
+{
     $action= (int) $_REQUEST['a'];
 }
 
-if (isset($_POST['updateMsgCount']) && $modx->hasPermission('messages')) {
-    include_once 'messageCount.inc.php';
+if (isset($_POST['updateMsgCount']) && $modx->hasPermission('messages'))
+{
+	include_once "{$core_path}messageCount.inc.php";
 }
 
 // save page to manager object
 $modx->manager->action = $action;
 
 // attempt to foil some simple types of CSRF attacks
-if (isset($modx->config['validate_referer']) && intval($modx->config['validate_referer'])) {
-    if (isset($_SERVER['HTTP_REFERER'])) {
+if (isset($modx->config['validate_referer']) && intval($modx->config['validate_referer']))
+{
+	if (isset($_SERVER['HTTP_REFERER']))
+	{
         $referer = $_SERVER['HTTP_REFERER'];
 
-        if (!empty($referer)) {
-            if (!preg_match('/^'.preg_quote(MODX_SITE_URL, '/').'/i', $referer)) {
+		if (!empty($referer))
+		{
+			if (!preg_match('/^'.preg_quote(MODX_SITE_URL, '/').'/i', $referer))
+			{
                 echo "A possible CSRF attempt was detected from referer: {$referer}.";
                 exit();
             }
-        } else {
+		}
+		else
+		{
             echo "A possible CSRF attempt was detected. No referer was provided by the client.";
             exit();
         }
-    } else {
+	}
+	else
+	{
         echo "A possible CSRF attempt was detected. No referer was provided by the server.";
         exit();
     }
 }
 
 // invoke OnManagerPageInit event
-$modx->invokeEvent("OnManagerPageInit", array("action" => $action));
+// If you would like to output $evtOutOnMPI , set $action to 999 or 998 in Plugin. 
+//   ex)$modx->event->setGlobalVariable('action',999);
+$evtOutOnMPI = $modx->invokeEvent("OnManagerPageInit", array("action" => $action));
 
 // Now we decide what to do according to the action request. This is a BIG list :)
 switch ($action)
@@ -868,9 +854,9 @@ switch ($action)
         include_once "footer.inc.php";
 }
 
-
 // log action, unless it's a frame request
-if($action!=1 && $action!=7 && $action!=2) {
+if($action!=1 && $action!=7 && $action!=2)
+{
     include_once "log.class.inc.php";
     $log = new logHandler;
     $log->initAndWriteLog();
