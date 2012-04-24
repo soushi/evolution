@@ -2836,37 +2836,50 @@ class DocumentParser {
     }
 
     # invoke an event. $extParams - hash array: name=>value
-    function invokeEvent($evtName, $extParams= array ()) {
-        if (!$evtName)
-            return false;
-        if (!isset ($this->pluginEvent[$evtName]))
-            return false;
+	function invokeEvent($evtName, $extParams= array ())
+	{
+		if (!$evtName)                             return false;
+		if (!isset ($this->pluginEvent[$evtName])) return false;
+		
         $el= $this->pluginEvent[$evtName];
         $results= array ();
         $numEvents= count($el);
         if ($numEvents > 0)
-            for ($i= 0; $i < $numEvents; $i++) { // start for loop
+		{
+			for ($i= 0; $i < $numEvents; $i++)
+			{ // start for loop
                 $pluginName= $el[$i];
                 $pluginName = stripslashes($pluginName);
                 // reset event object
-                $e= & $this->Event;
+				$e= & $this->event;
                 $e->_resetEventObject();
                 $e->name= $evtName;
                 $e->activePlugin= $pluginName;
 
                 // get plugin code
-                if (isset ($this->pluginCache[$pluginName])) {
+				if (isset ($this->pluginCache[$pluginName]))
+				{
                     $pluginCode= $this->pluginCache[$pluginName];
-                    $pluginProperties= $this->pluginCache[$pluginName . "Props"];
-                } else {
-                    $sql= "SELECT `name`, `plugincode`, `properties` FROM " . $this->getFullTableName("site_plugins") . " WHERE `name`='" . $pluginName . "' AND `disabled`=0;";
-                    $result= $this->db->query($sql);
-                    if ($this->db->getRecordCount($result) == 1) {
+					$pluginProperties= isset($this->pluginCache["{$pluginName}Props"]) ? $this->pluginCache["{$pluginName}Props"] : '';
+				}
+				else
+				{
+					$fields = '`name`, plugincode, properties';
+					$tbl_site_plugins = $this->getFullTableName('site_plugins');
+					$where = "`name`='{$pluginName}' AND disabled=0";
+					$result= $this->db->select($fields,$tbl_site_plugins,$where);
+					if ($this->db->getRecordCount($result) == 1)
+					{
                         $row= $this->db->getRow($result);
-                        $pluginCode= $this->pluginCache[$row['name']]= $row['plugincode'];
-                        $pluginProperties= $this->pluginCache[$row['name'] . "Props"]= $row['properties'];
-                    } else {
-                        $pluginCode= $this->pluginCache[$pluginName]= "return false;";
+						
+						$pluginCode                      = $row['plugincode'];
+						$this->pluginCache[$row['name']] = $row['plugincode']; 
+						$pluginProperties= $this->pluginCache["{$row['name']}Props"]= $row['properties'];
+					}
+					else
+					{
+						$pluginCode                      = 'return false;';
+						$this->pluginCache[$pluginName]  = 'return false;';
                         $pluginProperties= '';
                     }
                 }
@@ -2878,12 +2891,13 @@ class DocumentParser {
 
                 // eval plugin
                 $this->evalPlugin($pluginCode, $parameter);
-                if ($e->_output != "")
+				if ($e->_output != '')
                     $results[]= $e->_output;
                 if ($e->_propagate != true)
                     break;
             }
-        $e->activePlugin= "";
+		}
+		$e->activePlugin= '';
         return $results;
     }
 
