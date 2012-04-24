@@ -511,11 +511,25 @@ class DocumentParser {
 
         // check for non-cached snippet output
         if (strpos($this->documentOutput, '[!') !== false) {
-            $this->documentOutput= str_replace('[!', '[[', $this->documentOutput);
-            $this->documentOutput= str_replace('!]', ']]', $this->documentOutput);
 
             // Parse document source
+			if(empty($this->minParserPasses)) $this->minParserPasses = 2;
+			if(empty($this->maxParserPasses)) $this->maxParserPasses = 10;
+			$passes = $this->minParserPasses;
+			
+			for ($i= 0; $i < $passes; $i++)
+			{
+				if($i == ($passes -1)) $st= md5($this->documentOutput);
+				
+				$this->documentOutput = str_replace(array('[!','!]'), array('[[',']]'), $this->documentOutput);
             $this->documentOutput= $this->parseDocumentSource($this->documentOutput);
+				
+				if($i == ($passes -1) && $i < ($this->maxParserPasses - 1))
+				{
+					$et = md5($this->documentOutput);
+					if($st != $et) $passes++;
+				}
+			}
     	}
 
     	// Moved from prepareResponse() by sirlancelot
@@ -540,7 +554,7 @@ class DocumentParser {
                 $this->documentOutput= str_replace($matches[0], '', $this->documentOutput);
         }
 
-        $this->documentOutput= $this->rewriteUrls($this->documentOutput);
+        if(strpos($this->documentOutput,'[~')!==false) $this->documentOutput = $this->rewriteUrls($this->documentOutput);
 
         // send out content-type and content-disposition headers
         if (IN_PARSER_MODE == "true") {
