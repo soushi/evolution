@@ -51,7 +51,15 @@ class DocumentParser {
     var $documentMap_cache;
 
     // constructor
-    function DocumentParser() {
+	function DocumentParser()
+	{
+		if(!isset($_REQUEST['id']))
+		{
+			$_REQUEST['q'] = substr($_SERVER['REQUEST_URI'],strlen(MODX_BASE_URL));
+			if(strpos($_REQUEST['q'],'?')) $_REQUEST['q'] = substr($_REQUEST['q'],0,strpos($_REQUEST['q'],'?'));
+		}
+		if($_REQUEST['q']=='index.php') $_REQUEST['q'] = '';
+		
         $this->loadExtension('DBAPI') or die('Could not load DBAPI class.'); // load DBAPI class
         $this->dbConfig= & $this->db->config; // alias for backward compatibility
         $this->jscripts= array ();
