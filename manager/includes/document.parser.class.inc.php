@@ -3072,7 +3072,10 @@ class DocumentParser {
                 E_USER_ERROR => "User Error",
                 E_USER_WARNING => "User Warning",
                 E_USER_NOTICE => "User Notice",
-
+                E_STRICT => "E_STRICT",
+                E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR",
+                E_DEPRECATED => "E_DEPRECATED",
+                E_USER_DEPRECATED => "E_USER_DEPRECATED"
             );
 
             $parsedMessageString .= "<tr><td colspan='3'>&nbsp;</td></tr><tr><td colspan='3'><b>PHP error debug</b></td></tr>";
@@ -3161,6 +3164,10 @@ class DocumentParser {
         $parsedMessageString= str_replace("[^p^]", $phpTime, $parsedMessageString);
         $parsedMessageString= str_replace("[^t^]", $totalTime, $parsedMessageString);
 
+        // Log error
+        $this->logEvent(0, 3, $parsedMessageString);
+        if($nr == E_DEPRECATED) return true;
+
         // Set 500 response header
         header('HTTP/1.1 500 Internal Server Error');
 
@@ -3168,9 +3175,6 @@ class DocumentParser {
         if (isset($_SESSION['mgrValidated'])) echo $parsedMessageString;
         else  echo 'Error. Check event log.';
         ob_end_flush();
-
-        // Log error
-        $this->logEvent(0, 3, $parsedMessageString);
 
         // Make sure and die!
         exit();
