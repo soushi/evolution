@@ -20,6 +20,7 @@ class DocumentParser {
     var $documentGenerated;
     var $documentContent;
     var $tstart;
+    var $mstart;
     var $minParserPasses;
     var $maxParserPasses;
     var $documentObject;
@@ -29,12 +30,11 @@ class DocumentParser {
     var $executedQueries;
     var $queryTime;
     var $currentSnippet;
-    var $documentName;
     var $aliases;
-    var $visitor;
     var $entrypage;
     var $documentListing;
     var $dumpSnippets;
+    var $snipCode;
     var $chunkCache;
     var $snippetCache;
     var $contentTypes;
@@ -318,21 +318,24 @@ class DocumentParser {
         $this->outputContent();
     }
 
-    function outputContent($noEvent= false) {
+	function outputContent($noEvent= false)
+	{
 
         $this->documentOutput= $this->documentContent;
 
-        if ($this->documentGenerated == 1 && $this->documentObject['cacheable'] == 1 && $this->documentObject['type'] == 'document' && $this->documentObject['published'] == 1) {
+		if ($this->documentGenerated           == 1
+		 && $this->documentObject['cacheable'] == 1
+		 && $this->documentObject['type']      == 'document'
+		 && $this->documentObject['published'] == 1)
+		{
     		if (!empty($this->sjscripts)) $this->documentObject['__MODxSJScripts__'] = $this->sjscripts;
     		if (!empty($this->jscripts)) $this->documentObject['__MODxJScripts__'] = $this->jscripts;
         }
 
         // check for non-cached snippet output
-        if (strpos($this->documentOutput, '[!') !== false) {
-
+		if (strpos($this->documentOutput, '[!') !== false)
+		{
             // Parse document source
-			if(empty($this->minParserPasses)) $this->minParserPasses = 2;
-			if(empty($this->maxParserPasses)) $this->maxParserPasses = 10;
 			$passes = $this->minParserPasses;
 			
 			for ($i= 0; $i < $passes; $i++)
@@ -352,20 +355,23 @@ class DocumentParser {
 
     	// Moved from prepareResponse() by sirlancelot
     	// Insert Startup jscripts & CSS scripts into template - template must have a <head> tag
-    	if ($js= $this->getRegisteredClientStartupScripts()) {
+		if ($js= $this->getRegisteredClientStartupScripts())
+		{
     		// change to just before closing </head>
     		// $this->documentContent = preg_replace("/(<head[^>]*>)/i", "\\1\n".$js, $this->documentContent);
     		$this->documentOutput= preg_replace("/(<\/head>)/i", $js . "\n\\1", $this->documentOutput);
     	}
 
     	// Insert jscripts & html block into template - template must have a </body> tag
-    	if ($js= $this->getRegisteredClientScripts()) {
+		if ($js= $this->getRegisteredClientScripts())
+		{
     		$this->documentOutput= preg_replace("/(<\/body>)/i", $js . "\n\\1", $this->documentOutput);
     	}
     	// End fix by sirlancelot
 
         // remove all unused placeholders
-        if (strpos($this->documentOutput, '[+') > -1) {
+		if (strpos($this->documentOutput, '[+') > -1)
+		{
             $matches= array ();
             preg_match_all('~\[\+(.*?)\+\]~', $this->documentOutput, $matches);
             if ($matches[0])
@@ -375,21 +381,26 @@ class DocumentParser {
         if(strpos($this->documentOutput,'[~')!==false) $this->documentOutput = $this->rewriteUrls($this->documentOutput);
 
         // send out content-type and content-disposition headers
-        if (IN_PARSER_MODE == "true") {
-            $type= !empty ($this->contentTypes[$this->documentIdentifier]) ? $this->contentTypes[$this->documentIdentifier] : "text/html";
-            header('Content-Type: ' . $type . '; charset=' . $this->config['modx_charset']);
-//            if (($this->documentIdentifier == $this->config['error_page']) || $redirect_error)
-//                header('HTTP/1.0 404 Not Found');
-            if (!$this->checkPreview() && $this->documentObject['content_dispo'] == 1) {
+		if (IN_PARSER_MODE == 'true')
+		{
+			$type = $this->documentObject['contentType'];
+			if(empty($type)) $type = 'text/html';
+			
+			header("Content-Type: {$type}; charset={$this->config['modx_charset']}");
+			//            if (($this->documentIdentifier == $this->config['error_page']) || $redirect_error)
+			//                header('HTTP/1.0 404 Not Found');
+			if ($this->documentObject['content_dispo'] == 1)
+			{
                 if ($this->documentObject['alias'])
-                    $name= $this->documentObject['alias'];
-                else {
+				{
+					$name= urldecode($this->documentObject['alias']);
+				}
+				else
+				{
                     // strip title of special characters
                     $name= $this->documentObject['pagetitle'];
                     $name= strip_tags($name);
-                    $name= strtolower($name);
                     $name= preg_replace('/&.+?;/', '', $name); // kill entities
-                    $name= preg_replace('/[^\.%a-z0-9 _-]/', '', $name);
                     $name= preg_replace('/\s+/', '-', $name);
                     $name= preg_replace('|-+|', '-', $name);
                     $name= trim($name, '-');
@@ -406,25 +417,39 @@ class DocumentParser {
         $queryTime= sprintf("%2.4f s", $queryTime);
         $totalTime= sprintf("%2.4f s", $totalTime);
         $phpTime= sprintf("%2.4f s", $phpTime);
-        $source= $this->documentGenerated == 1 ? "database" : "cache";
+		$source= $this->documentGenerated == 1 ? 'database' : 'cache';
         $queries= isset ($this->executedQueries) ? $this->executedQueries : 0;
+		if(function_exists('memory_get_peak_usage'))
+		{
+			$total_mem = $this->nicesize(memory_get_peak_usage() - $this->mstart);
+		}
+		else
+		{
+			$total_mem = $this->nicesize(memory_get_usage() - $this->mstart);
+		}
 
         $out =& $this->documentOutput;
-        if ($this->dumpSQL) {
+		if ($this->dumpSQL)
+		{
             $out .= $this->queryCode;
         }
-        $out= str_replace("[^q^]", $queries, $out);
-        $out= str_replace("[^qt^]", $queryTime, $out);
-        $out= str_replace("[^p^]", $phpTime, $out);
-        $out= str_replace("[^t^]", $totalTime, $out);
-        $out= str_replace("[^s^]", $source, $out);
+		if ($this->dumpSnippets)
+		{
+			$out .= $this->snipCode;
+		}
+		$out= str_replace('[^q^]', $queries, $out);
+		$out= str_replace('[^qt^]', $queryTime, $out);
+		$out= str_replace('[^p^]', $phpTime, $out);
+		$out= str_replace('[^t^]', $totalTime, $out);
+		$out= str_replace('[^s^]', $source, $out);
+		$out= str_replace('[^m^]', $total_mem, $out);
         //$this->documentOutput= $out;
 
         // invoke OnWebPagePrerender event
-        if (!$noEvent) {
-            $this->invokeEvent("OnWebPagePrerender");
+		if (!$noEvent)
+		{
+			$this->invokeEvent('OnWebPagePrerender');
         }
-
         echo $this->documentOutput;
         ob_end_flush();
     }
