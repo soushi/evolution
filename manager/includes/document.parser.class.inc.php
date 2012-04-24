@@ -86,20 +86,23 @@ class DocumentParser {
 		{
             // Database API
             case 'DBAPI' :
-                if (!include_once MODX_BASE_PATH . 'manager/includes/extenders/dbapi.' . $database_type . '.class.inc.php')
-                    return false;
+				if(include_once(MODX_BASE_PATH . "manager/includes/extenders/dbapi.{$database_type}.class.inc.php"))
+				{
                 $this->db= new DBAPI;
+					$this->dbConfig= & $this->db->config; // alias for backward compatibility
                 return true;
+				}
+				else return false;
                 break;
-
                 // Manager API
             case 'ManagerAPI' :
-                if (!include_once MODX_BASE_PATH . 'manager/includes/extenders/manager.api.class.inc.php')
-                    return false;
+				if(include_once(MODX_BASE_PATH . 'manager/includes/extenders/manager.api.class.inc.php'))
+				{
                 $this->manager= new ManagerAPI;
                 return true;
+				}
+				else return false;
                 break;
-
             default :
                 return false;
         }
