@@ -11,7 +11,7 @@
 		$field_html ='';
 		$field_value = ($field_value!="" ? $field_value : $default_text);
 
-		switch ($field_type) {
+		switch (strtolower($field_type)) {
 
 			case "text": // handler for regular text boxes
 			case "rawtext"; // non-htmlentity converted text boxes
@@ -293,7 +293,6 @@ EOT;
             
 			default: // the default handler -- for errors, mostly
 				$field_html .=  '<input type="text" id="tv'.$field_id.'" name="tv'.$field_id.'" value="'.htmlspecialchars($field_value).'" '.$field_style.' onchange="documentDirty=true;" />';
-
 		} // end switch statement
 		return $field_html;
 	} // end renderFormElement function
