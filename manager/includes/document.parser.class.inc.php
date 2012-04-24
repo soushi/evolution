@@ -752,14 +752,21 @@ class DocumentParser {
 		else return false;
     }
 
-    function checkPreview() {
-        if ($this->checkSession() == true) {
-            if (isset ($_REQUEST['z']) && $_REQUEST['z'] == 'manprev') {
+	function checkPreview()
+	{
+		if ($this->checkSession() == true)
+		{
+			if (isset ($_REQUEST['z']) && $_REQUEST['z'] == 'manprev')
+			{
                 return true;
-            } else {
+			}
+			else
+			{
                 return false;
             }
-        } else {
+		}
+		else
+		{
             return false;
         }
     }
