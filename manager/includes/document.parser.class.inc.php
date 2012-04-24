@@ -2310,51 +2310,70 @@ class DocumentParser {
     }
 
     # returns an array of TV records. $idnames - can be an id or name that belongs the template that the current document is using
-    function getTemplateVars($idnames= array (), $fields= "*", $docid= "", $published= 1, $sort= "rank", $dir= "ASC") {
-        if (($idnames != '*' && !is_array($idnames)) || count($idnames) == 0) {
+	function getTemplateVars($idnames=array(),$fields='*',$docid= '',$published= 1,$sort='rank',$dir='ASC')
+	{
+		if (($idnames!='*' && !is_array($idnames)) || count($idnames) == 0)
+		{
             return false;
-        } else {
+		}
+		else
+		{
             $result= array ();
 
             // get document record
-            if ($docid == "") {
+			if ($docid == '')
+			{
                 $docid= $this->documentIdentifier;
-                $docRow= $this->documentObject;
-            } else {
-                $docRow= $this->getDocument($docid, '*', $published);
-                if (!$docRow)
-                    return false;
+				$resource= $this->documentObject;
             }
+			else
+			{
+				$resource= $this->getDocument($docid, '*', $published);
+				if (!$resource) return false;
+			}
 
             // get user defined template variables
-            $fields= ($fields == "") ? "tv.*" : 'tv.' . implode(',tv.', preg_replace("/^\s/i", "", explode(',', $fields)));
-            $sort= ($sort == "") ? "" : 'tv.' . implode(',tv.', preg_replace("/^\s/i", "", explode(',', $sort)));
-            if ($idnames == "*")
-                $query= "tv.id<>0";
+			$fields= ($fields == '') ? 'tv.*' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $fields)));
+			$sort= ($sort == '') ? '' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $sort)));
+			if ($idnames == '*')
+			{
+				$where= 'tv.id<>0';
+			}
             else
-                $query= (is_numeric($idnames[0]) ? "tv.id" : "tv.name") . " IN ('" . implode("','", $idnames) . "')";
+			{
+				$where= (is_numeric($idnames[0]) ? 'tv.id' : 'tv.name') . " IN ('" . implode("','", $idnames) . "')";
+			}
             if ($docgrp= $this->getUserDocGroups())
-                $docgrp= implode(",", $docgrp);
-            $sql= "SELECT $fields, IF(tvc.value!='',tvc.value,tv.default_text) as value ";
-            $sql .= "FROM " . $this->getFullTableName('site_tmplvars')." tv ";
-            $sql .= "INNER JOIN " . $this->getFullTableName('site_tmplvar_templates')." tvtpl ON tvtpl.tmplvarid = tv.id ";
-            $sql .= "LEFT JOIN " . $this->getFullTableName('site_tmplvar_contentvalues')." tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '" . $docid . "' ";
-            $sql .= "WHERE " . $query . " AND tvtpl.templateid = " . $docRow['template'];
+			{
+				$docgrp= implode(',', $docgrp);
+			}
+			$tbl_site_tmplvars              = $this->getFullTableName('site_tmplvars');
+			$tbl_site_tmplvar_templates     = $this->getFullTableName('site_tmplvar_templates');
+			$tbl_site_tmplvar_contentvalues = $this->getFullTableName('site_tmplvar_contentvalues');
+			$fields= "{$fields}, IF(tvc.value!='',tvc.value,tv.default_text) as value";
+			$from  = "{$tbl_site_tmplvars} tv";
+			$from .= " INNER JOIN {$tbl_site_tmplvar_templates} tvtpl  ON tvtpl.tmplvarid = tv.id";
+			$from .= " LEFT JOIN {$tbl_site_tmplvar_contentvalues} tvc ON tvc.tmplvarid=tv.id AND tvc.contentid='{$docid}'";
+			$where = "{$where} AND tvtpl.templateid={$resource['template']}";
             if ($sort)
-                $sql .= " ORDER BY $sort $dir ";
-            $rs= $this->db->query($sql);
-            for ($i= 0; $i < @ $this->db->getRecordCount($rs); $i++) {
-                $result[] = @ $this->db->getRow($rs);
+			{
+				 $orderby = "{$sort} {$dir}";
+			}
+			else $orderby = '';
+			$rs= $this->db->select($fields,$from,$where,$orderby);
+			while($row = $this->db->getRow($rs))
+			{
+				$result[] = $row;
             }
 
             // get default/built-in template variables
-            ksort($docRow);
-            foreach ($docRow as $key => $value) {
-                if ($idnames == "*" || in_array($key, $idnames))
-                    $result[] = array (
-                        "name" => $key,
-                        "value" => $value
-                    );
+			ksort($resource);
+			foreach ($resource as $key => $value)
+			{
+				if ($idnames == '*' || in_array($key, $idnames))
+				{
+					$result[] = array ('name'=>$key,'value'=>$value);
+				}
             }
 
             return $result;
