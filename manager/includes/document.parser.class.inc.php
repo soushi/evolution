@@ -719,17 +719,22 @@ class DocumentParser {
 		else                             return 'none';
         }
 
-    function getDocumentIdentifier($method) {
+	function getDocumentIdentifier($method)
+	{
         // function to test the query and find the retrieval method
         $docIdentifier= $this->config['site_start'];
-        switch ($method) {
+		switch ($method)
+		{
             case 'alias' :
                 $docIdentifier= $this->db->escape($_REQUEST['q']);
                 break;
             case 'id' :
-                if (!is_numeric($_REQUEST['id'])) {
+				if (!is_numeric($_REQUEST['id']))
+				{
                     $this->sendErrorPage();
-                } else {
+				}
+				else
+				{
                     $docIdentifier= intval($_REQUEST['id']);
                 }
                 break;
