@@ -1,5 +1,5 @@
-# MODx Database Script for New/Upgrade Installations
-# MODx was created By Raymond Irving - Nov 2004 
+# MODX Database Script for New/Upgrade Installations
+# MODX was created By Raymond Irving - Nov 2004 
 
 CREATE TABLE IF NOT EXISTS `{PREFIX}active_users` (
   `internalKey` int(9) NOT NULL default '0',
@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}keyword_xref` (
   KEY `content_id` (`content_id`),
   KEY `keyword_id` (`keyword_id`)
 ) ENGINE=MyISAM COMMENT='Cross reference bewteen keywords and content';
+
 CREATE TABLE IF NOT EXISTS `{PREFIX}manager_log` (
   `id` int(10) NOT NULL auto_increment,
   `timestamp` int(20) NOT NULL default '0',
@@ -671,9 +672,9 @@ ALTER TABLE `{PREFIX}member_groups` ADD UNIQUE INDEX `ix_group_member` (`user_gr
 ALTER TABLE `{PREFIX}web_groups` ADD UNIQUE INDEX `ix_group_user` (`webgroup`,`webuser`);
 
 # Set the private manager group flag
-UPDATE {PREFIX}documentgroup_names AS dgn
-  LEFT JOIN {PREFIX}membergroup_access AS mga ON mga.documentgroup = dgn.id
-  LEFT JOIN {PREFIX}webgroup_access AS wga ON wga.documentgroup = dgn.id
+UPDATE `{PREFIX}documentgroup_names` AS dgn
+  LEFT JOIN `{PREFIX}membergroup_access` AS mga ON mga.documentgroup = dgn.id
+  LEFT JOIN `{PREFIX}webgroup_access` AS wga ON wga.documentgroup = dgn.id
   SET dgn.private_memgroup = (mga.membergroup IS NOT NULL),
       dgn.private_webgroup = (wga.webgroup IS NOT NULL);
 
@@ -710,12 +711,12 @@ REPLACE INTO `{PREFIX}site_content` VALUES (1,'document','text/html','MODx CMS I
 
 REPLACE INTO `{PREFIX}manager_users` 
 (id, username, password)VALUES 
-(1, '{ADMIN}', MD5('{ADMINPASS}'));
+(1, '{ADMINNAME}', MD5('{ADMINPASS}'));
 
 
 REPLACE INTO `{PREFIX}user_attributes` 
 (id, internalKey, fullname, role, email, phone, mobilephone, blocked, blockeduntil, blockedafter, logincount, lastlogin, thislogin, failedlogincount, sessionid, dob, gender, country, state, zip, fax, photo, comment) VALUES 
-(1, 1, 'Default admin account', 1, '{ADMINEMAIL}', '', '', 0, 0, 0, 0, 0, 0, 0, '', 0, 0, '', '', '', '', '', '');
+(1, 1, '{ADMINFULLNAME}', 1, '{ADMINEMAIL}', '', '', 0, 0, 0, 0, 0, 0, 0, '', 0, 0, '', '', '', '', '', '');
 
 REPLACE INTO `{PREFIX}user_roles` 
 (id,name,description,frames,home,view_document,new_document,save_document,publish_document,delete_document,empty_trash,action_ok,logout,help,messages,new_user,edit_user,logs,edit_parser,save_parser,edit_template,settings,credits,new_template,save_template,delete_template,edit_snippet,new_snippet,save_snippet,delete_snippet,edit_chunk,new_chunk,save_chunk,delete_chunk,empty_cache,edit_document,change_password,error_dialog,about,file_manager,save_user,delete_user,save_password,edit_role,save_role,delete_role,new_role,access_permissions,bk_manager,new_plugin,edit_plugin,save_plugin,delete_plugin,new_module,edit_module,save_module,exec_module,delete_module,view_eventlog,delete_eventlog,manage_metatags,edit_doc_metatags,new_web_user,edit_web_user,save_web_user,delete_web_user,web_access_permissions,view_unpublished,import_static,export_static,remove_locks) VALUES 
@@ -775,16 +776,17 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('editor_css_path',''),
 ('editor_css_selectors',''),
 ('strip_image_paths','1'),
+('rb_webuser','0'),
 ('upload_images','bmp,ico,gif,jpeg,jpg,png,psd,tif,tiff'),
 ('upload_media','au,avi,mp3,mp4,mpeg,mpg,wav,wmv'),
 ('upload_flash','fla,flv,swf'),
+('clean_uploaded_filename','0'),
 ('upload_files','aac,au,avi,css,cache,doc,docx,gz,gzip,htaccess,htm,html,js,mp3,mp4,mpeg,mpg,ods,odp,odt,pdf,ppt,pptx,rar,tar,tgz,txt,wav,wmv,xls,xlsx,xml,z,zip'),
-('upload_maxsize','1048576'),
+('upload_maxsize','3145728'),
 ('new_file_permissions','0644'),
 ('new_folder_permissions','0755'),
 ('filemanager_path',''),
 ('theme_refresher',''),
-('manager_layout','4'),
 ('custom_contenttype','application/rss+xml,application/pdf,application/vnd.ms-word,application/vnd.ms-excel,text/html,text/css,text/xml,text/javascript,text/plain'),
 ('auto_menuindex','1'),
 ('session.cookie.lifetime','604800'),
@@ -805,6 +807,7 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('datetime_format','dd-mm-YYYY'),
 ('warning_visibility', '1'),
 ('remember_last_tab', '0');
+('tree_page_click', 'auto');
 
 
 REPLACE INTO `{PREFIX}user_roles` 
