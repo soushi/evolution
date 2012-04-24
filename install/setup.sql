@@ -721,9 +721,7 @@ ALTER TABLE `{PREFIX}user_attributes` ADD COLUMN `dob` integer(10) NOT NULL DEFA
  ADD COLUMN `photo` varchar(255) NOT NULL DEFAULT '' COMMENT 'link to photo' AFTER `fax`,
  ADD COLUMN `comment` varchar(255) NOT NULL DEFAULT '' COMMENT 'short comment' AFTER `photo`;
 
-
-ALTER TABLE `{PREFIX}web_users` 
- MODIFY COLUMN `username` varchar(100) NOT NULL DEFAULT '';
+ALTER TABLE `{PREFIX}web_users` MODIFY COLUMN `username` varchar(100) NOT NULL DEFAULT '';
 
 
 ALTER TABLE `{PREFIX}web_user_attributes` ADD COLUMN `dob` integer(10) NOT NULL DEFAULT 0 AFTER `sessionid`,
@@ -740,8 +738,8 @@ ALTER TABLE `{PREFIX}web_user_attributes` ADD COLUMN `dob` integer(10) NOT NULL 
 
 
 ALTER TABLE `{PREFIX}user_roles` ADD COLUMN `view_unpublished` int(1) NOT NULL DEFAULT '0' AFTER `web_access_permissions`;
-
-ALTER TABLE `{PREFIX}site_tmplvar_templates` DROP INDEX `idx_tmplvarid`,
+ALTER TABLE `{PREFIX}site_tmplvar_templates`
+ DROP INDEX `idx_tmplvarid`,
  DROP INDEX `idx_templateid`,
  ADD PRIMARY KEY ( `tmplvarid` , `templateid` );
 
@@ -787,17 +785,9 @@ ALTER TABLE `{PREFIX}web_user_attributes`
   MODIFY COLUMN `zip` varchar(25) NOT NULL default '',
   MODIFY COLUMN `comment` text;
   
-
-ALTER TABLE `{PREFIX}user_roles`
-  ADD COLUMN `remove_locks` int(1) NOT NULL DEFAULT '0';
-
-
-ALTER TABLE `{PREFIX}member_groups`
-  ADD UNIQUE INDEX `ix_group_member` (`user_group`,`member`);
-
-
-ALTER TABLE `{PREFIX}web_groups`
-  ADD UNIQUE INDEX `ix_group_user` (`webgroup`,`webuser`);
+ALTER TABLE `{PREFIX}user_roles` ADD COLUMN `remove_locks` int(1) NOT NULL DEFAULT '0';
+ALTER TABLE `{PREFIX}member_groups` ADD UNIQUE INDEX `ix_group_member` (`user_group`,`member`);
+ALTER TABLE `{PREFIX}web_groups` ADD UNIQUE INDEX `ix_group_user` (`webgroup`,`webuser`);
 
 
 # Set the private manager group flag
@@ -895,7 +885,7 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('server_protocol','http'),
 ('manager_language','{MANAGERLANGUAGE}'),
 ('modx_charset','UTF-8'),
-('site_name','My MODx Site'),
+('site_name','My MODX Site'),
 ('site_start','1'),
 ('error_page','1'),
 ('unauthorized_page','1'),
@@ -1131,10 +1121,5 @@ UPDATE `{PREFIX}user_roles` SET
 
 # Update any invalid Manager Themes in User Settings and reset the default theme
 
-
-UPDATE `{PREFIX}user_settings` SET
-  `setting_value`='MODxCarbon'
-  WHERE `setting_name`='manager_theme';
-
-
+UPDATE `{PREFIX}user_settings` SET `setting_value`='MODxCarbon' WHERE `setting_name`='manager_theme';
 REPLACE INTO `{PREFIX}system_settings` (setting_name, setting_value) VALUES ('manager_theme','MODxCarbon');
