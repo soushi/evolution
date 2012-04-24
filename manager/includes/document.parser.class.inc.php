@@ -772,18 +772,20 @@ class DocumentParser {
     }
 
     // check if site is offline
-    function checkSiteStatus() {
+	function checkSiteStatus()
+	{
         $siteStatus= $this->config['site_status'];
-        if ($siteStatus == 1) {
-            // site online
-            return true;
+		if($siteStatus == 1)
+		{
+			return true; // site online
+		}
+		elseif($siteStatus == 0 && $this->checkSession())
+		{
+			return true; // site offline but launched via the manager
         }
-        elseif ($siteStatus == 0 && $this->checkSession()) {
-            // site offline but launched via the manager
-            return true;
-        } else {
-            // site is offline
-            return false;
+		else
+		{
+			return false; // site is offline
         }
     }
 
