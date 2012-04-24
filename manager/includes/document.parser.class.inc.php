@@ -1726,7 +1726,7 @@ class DocumentParser {
     }
 
     function getVersionData() {
-        include $this->config["base_path"] . "manager/includes/version.inc.php";
+        include_once($this->config["base_path"] . "manager/includes/version.inc.php");
         $v= array ();
         $v['version']= $modx_version;
         $v['branch']= $modx_branch;
@@ -1871,7 +1871,7 @@ class DocumentParser {
     }
 
     function getUserData() {
-        include $this->config["base_path"] . "manager/includes/extenders/getUserData.extender.php";
+        include_once($this->config["base_path"] . "manager/includes/extenders/getUserData.extender.php");
         return $tmpArray;
     }
 
