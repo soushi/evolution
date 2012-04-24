@@ -418,8 +418,9 @@ class DocumentParser {
                 return $a[0]; // return only document content
             else {
                 $docObj= unserialize($a[0]); // rebuild document object
-                // check page security
-                if ($docObj['privateweb'] && isset ($docObj['__MODxDocGroups__'])) {
+                // add so - check page security(admin(mgrRole=1) is pass)
+                if (!(isset($_SESSION['mgrRole']) && $_SESSION['mgrRole']== 1) 
+                    && $docObj['privateweb'] && isset ($docObj['__MODxDocGroups__'])) {
                     $pass= false;
                     $usrGrps= $this->getUserDocGroups();
                     $docGrps= explode(",", $docObj['__MODxDocGroups__']);
@@ -1020,9 +1021,9 @@ class DocumentParser {
         // get document groups for current user
         if ($docgrp= $this->getUserDocGroups())
             $docgrp= implode(",", $docgrp);
-        // get document
-        $access= ($this->isFrontend() ? "sc.privateweb=0" : "1='" . $_SESSION['mgrRole'] . "' OR sc.privatemgr=0") .
-         (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)");
+        // get document (add so)
+        $access= ($this->isFrontend() ? "sc.privateweb=0" : "sc.privatemgr=0") .
+         (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)") . " OR 1='" . $_SESSION['mgrRole'] . "'";
         $sql= "SELECT sc.*
               FROM $tblsc sc
               LEFT JOIN $tbldg dg ON dg.document = sc.id
@@ -1434,8 +1435,8 @@ class DocumentParser {
         if ($docgrp= $this->getUserDocGroups())
             $docgrp= implode(",", $docgrp);
         // build query
-        $access= ($this->isFrontend() ? "sc.privateweb=0" : "1='" . $_SESSION['mgrRole'] . "' OR sc.privatemgr=0") .
-         (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)");
+        $access= ($this->isFrontend() ? "sc.privateweb=0" : "sc.privatemgr=0") .
+         (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)") . " OR 1='" . $_SESSION['mgrRole'] . "'";
         $sql= "SELECT DISTINCT $fields FROM $tblsc sc
               LEFT JOIN $tbldg dg on dg.document = sc.id
               WHERE sc.parent = '$id'
@@ -1522,8 +1523,8 @@ class DocumentParser {
             // get document groups for current user
             if ($docgrp= $this->getUserDocGroups())
                 $docgrp= implode(",", $docgrp);
-            $access= ($this->isFrontend() ? "sc.privateweb=0" : "1='" . $_SESSION['mgrRole'] . "' OR sc.privatemgr=0") .
-             (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)");
+            $access= ($this->isFrontend() ? "sc.privateweb=0" : "sc.privatemgr=0") .
+             (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)") . " OR 1='" . $_SESSION['mgrRole'] . "'";
             $sql= "SELECT DISTINCT $fields FROM $tblsc sc
                     LEFT JOIN $tbldg dg on dg.document = sc.id
                     WHERE (sc.id IN (" . implode(",",$ids) . ") AND sc.published=$published AND sc.deleted=$deleted $where)
@@ -2267,20 +2268,23 @@ class DocumentParser {
     # This function will first return the web user doc groups when running from frontend otherwise it will return manager user's docgroup
     # Set $resolveIds to true to return the document group names
     function getUserDocGroups($resolveIds= false) {
-        if ($this->isFrontend() && isset ($_SESSION['webDocgroups']) && isset ($_SESSION['webValidated'])) {
+        $dg= array();// add so
+        $dgn= array();
+        if ($this->isFrontend() && isset ($_SESSION['webDocgroups']) && !empty($_SESSION['webDocgroups']) && isset ($_SESSION['webValidated'])) {
             $dg= $_SESSION['webDocgroups'];
-            $dgn= isset ($_SESSION['webDocgrpNames']) ? $_SESSION['webDocgrpNames'] : false;
-        } else
-            if ($this->isBackend() && isset ($_SESSION['mgrDocgroups']) && isset ($_SESSION['mgrValidated'])) {
-                $dg= $_SESSION['mgrDocgroups'];
-                $dgn= $_SESSION['mgrDocgrpNames'];
-            } else {
-                $dg= '';
+            $dgn= isset ($_SESSION['webDocgrpNames']) ? $_SESSION['webDocgrpNames'] : array();//add so
+        }
+        if (isset ($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) && isset ($_SESSION['mgrValidated'])) {
+            $dg= array_merge($dg, $_SESSION['mgrDocgroups']);
+            if (isset($_SESSION['mgrDocgrpNames']) ){
+                $dgn= array_merge($dgn, $_SESSION['mgrDocgrpNames']);
+            }
             }
         if (!$resolveIds)
             return $dg;
         else
-            if (is_array($dgn))
+// add so
+            if (!empty($dgn) || empty($dg))
                 return $dgn;
             else
                 if (is_array($dg)) {
