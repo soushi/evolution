@@ -67,28 +67,34 @@ class SqlParser {
 			if($s && $e) $idata = str_replace(substr($idata,$s,$e-$s)," Removed non upgradeable items",$idata);
 		}
 
-		$char_collate = '';
 		if(version_compare($this->dbVersion,'4.1.0', '>='))
-			$char_collate = ' DEFAULT CHARSET=' . $this->connection_charset . ' COLLATE ' . $this->connection_collation . ' ';
+		{
+			$char_collate = "DEFAULT CHARSET={$this->connection_charset} COLLATE {$this->connection_collation}";
+			$idata = str_replace('ENGINE=MyISAM', "ENGINE=MyISAM {$char_collate}", $idata);
+		}
 		
 		// replace {} tags
-		$idata = str_replace('{PREFIX}', $this->prefix, $idata);
-		$idata = str_replace('{ADMIN}', $this->adminname, $idata);
-		$idata = str_replace('{ADMINEMAIL}', $this->adminemail, $idata);
-		$idata = str_replace('{ADMINPASS}', $this->adminpass, $idata);
-		$idata = str_replace('{IMAGEPATH}', $this->imagePath, $idata);
-		$idata = str_replace('{IMAGEURL}', $this->imageUrl, $idata);
-		$idata = str_replace('{FILEMANAGERPATH}', $this->fileManagerPath, $idata);
-		$idata = str_replace('{MANAGERLANGUAGE}', $this->managerlanguage, $idata);
-		$idata = str_replace('{AUTOTEMPLATELOGIC}', $this->autoTemplateLogic, $idata);
-		$idata = str_replace('{DATE_NOW}', time(), $idata);
-		$idata = str_replace('ENGINE=MyISAM', 'ENGINE=MyISAM' . $char_collate, $idata);
-		/*$idata = str_replace('{VERSION}', $modx_version, $idata);*/
+		$ph = array();
+		$ph['PREFIX'] = $this->prefix;
+		$ph['ADMINNAME'] = $this->adminname;
+		$ph['ADMINFULLNAME'] = substr($this->adminemail,0,strpos($this->adminemail,'@'));
+		$ph['ADMINEMAIL'] = $this->adminemail;
+		$ph['ADMINPASS'] = $this->adminpass;
+		$ph['IMAGEPATH'] = $this->imagePath;
+		$ph['IMAGEURL'] = $this->imageUrl;
+		$ph['FILEMANAGERPATH'] = $this->fileManagerPath;
+		$ph['MANAGERLANGUAGE'] = $this->managerlanguage;
+		$ph['AUTOTEMPLATELOGIC'] = $this->autoTemplateLogic;
+		$ph['DATE_NOW'] = time();
+		$idata = parse($idata,$ph,'{','}');
+		
+		/*$ph['VERSION'] = $modx_version;*/
 
 		$sql_array = preg_split('@;[ \t]*\n@', $idata);
 
 		$num = 0;
-		foreach($sql_array as $sql_entry) {
+		foreach($sql_array as $sql_entry)
+		{
 			$sql_do = trim($sql_entry, "\r\n; ");
 
 			// strip out comments and \n for mysql 3.x
@@ -98,12 +104,13 @@ class SqlParser {
 				$sql_do = str_replace('\n', "", $sql_do);
 			}
 
-
-			$num = $num + 1;
+			$num++;
 			if ($sql_do) mysql_query($sql_do, $this->conn);
-			if(mysql_error()) {
+			if(mysql_error())
+			{
 				// Ignore duplicate and drop errors - Raymond
-				if ($this->ignoreDuplicateErrors){
+				if ($this->ignoreDuplicateErrors)
+				{
 					if (mysql_errno() == 1060 || mysql_errno() == 1061 || mysql_errno() == 1091) continue;
 				}
 				// End Ignore duplicate
@@ -117,5 +124,3 @@ class SqlParser {
 		mysql_close($this->conn);
 	}
 }
-
-?>
