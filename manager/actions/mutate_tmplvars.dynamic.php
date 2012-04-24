@@ -9,8 +9,6 @@ if(!$modx->hasPermission('new_template') && $_REQUEST['a']=='300') {
     $e->dumpError();
 }
 
-
-
 if(isset($_REQUEST['id'])) {
     $id = $_REQUEST['id'];
 } else {
@@ -245,13 +243,14 @@ function decode(s){
 
 </script>
 
-<form name="mutate" method="post" action="index.php?a=302" enctype="multipart/form-data">
+<form name="mutate" method="post" action="index.php" enctype="multipart/form-data">
 <?php
     // invoke OnTVFormPrerender event
     $evtOut = $modx->invokeEvent("OnTVFormPrerender",array("id" => $id));
     if(is_array($evtOut)) echo implode("",$evtOut);
 ?>
 <input type="hidden" name="id" value="<?php echo $content['id'];?>">
+<input type="hidden" name="a" value="302">
 <input type="hidden" name="mode" value="<?php echo $_GET['a'];?>">
 <input type="hidden" name="params" value="<?php echo htmlspecialchars($content['display_params']);?>">
 
@@ -270,7 +269,8 @@ function decode(s){
     			</select>		
     		  </li>
     		  <?php
-    			if ($_GET['a'] == '301') { ?>
+    			if ($_GET['a'] == '301') {
+    			?>
     		  <li id="Button2"><a href="#" onclick="duplicaterecord();"><img src="<?php echo $_style["icons_resource_duplicate"] ?>" /> <?php echo $_lang["duplicate"]; ?></a></li>
     		  <li id="Button3" class="disabled"><a href="#" onclick="deletedocument();"><img src="<?php echo $_style["icons_delete_document"]?>" /> <?php echo $_lang['delete']?></a></li>
     		  <?php } else { ?>

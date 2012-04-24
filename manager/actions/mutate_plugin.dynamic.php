@@ -430,9 +430,9 @@ if(is_array($evtOut)) echo implode("",$evtOut);
                 </a>
                   <span class="and"> + </span>
                 <select id="stay" name="stay">
-                  <option id="stay1" value="1" <?php echo $_REQUEST['stay']=='1' ? ' selected=""' : ''?> ><?php echo $_lang['stay_new']?></option>
-                  <option id="stay2" value="2" <?php echo $_REQUEST['stay']=='2' ? ' selected="selected"' : ''?> ><?php echo $_lang['stay']?></option>
-                  <option id="stay3" value=""  <?php echo $_REQUEST['stay']=='' ? ' selected=""' : ''?>  ><?php echo $_lang['close']?></option>
+    			  <option id="stay1" value="1" <?php echo selected($_REQUEST['stay']=='1');?> ><?php echo $_lang['stay_new']?></option>
+    			  <option id="stay2" value="2" <?php echo selected($_REQUEST['stay']=='2');?> ><?php echo $_lang['stay']?></option>
+    			  <option id="stay3" value=""  <?php echo selected($_REQUEST['stay']=='');?>  ><?php echo $_lang['close']?></option>
                 </select>
               </li>
               <?php
@@ -498,7 +498,7 @@ if(is_array($evtOut)) echo implode("",$evtOut);
                     include_once "categories.inc.php";
                     $ds = getCategories();
                     if($ds) foreach($ds as $n=>$v){
-                        echo "<option value='".$v['id']."'".($content["category"]==$v["id"]? " selected='selected'":"").">".htmlspecialchars($v["category"])."</option>";
+						echo "<option value='".$v['id']."'" . selected($content["category"]==$v["id"]) . ">".htmlspecialchars($v["category"])."</option>";
                     }
                 ?>
             </select>
@@ -521,7 +521,7 @@ if(is_array($evtOut)) echo implode("",$evtOut);
                             "ORDER BY sm.name ";
                     $ds = $modx->dbQuery($sql);
                     if($ds) while($row = $modx->fetchRow($ds)){
-                        echo "<option value='".$row['guid']."'".($content["moduleguid"]==$row["guid"]? " selected='selected'":"").">".htmlspecialchars($row["name"])."</option>";
+						echo "<option value='".$row['guid']."'". selected($content["moduleguid"]==$row["guid"]) . ">".htmlspecialchars($row["name"])."</option>";
                     }
                 ?>
             </select>
@@ -599,20 +599,22 @@ if(is_array($evtOut)) echo implode("",$evtOut);
 	while($row = mysql_fetch_assoc($rs))
 	{
         // display records
-        if($srv!=$row['service']){
+		if($srv!=$row['service'])
+		{
             $srv=$row['service'];
             if(count($evtnames)>0) echoEventRows($evtnames);
-                echo "<tr><td colspan='2'><div class='split' style='margin:10px 0;'></div></td></tr>";
-                echo "<tr><td colspan='2'><b>".$services[$srv-1]."</b></td></tr>";
+     		echo '<tr><td colspan="2"><div class="split" style="margin:10px 0;"></div></td></tr>';
+			echo '<tr><td colspan="2"><b>'.$services[$srv-1].'</b></td></tr>';
         }
         // display group name
-        if($grp!=$row['groupname']){
+		if($grp!=$row['groupname'])
+		{
             $grp=$row['groupname'];
             if(count($evtnames)>0) echoEventRows($evtnames);
-                echo "<tr><td colspan='2'><div class='split' style='margin:10px 0;'></div></td></tr>";
-                echo "<tr><td colspan='2'><b>".$row['groupname']."</b></td></tr>";
+			echo '<tr><td colspan="2"><div class="split" style="margin:10px 0;"></div></td></tr>';
+			echo '<tr><td colspan="2"><b>'.$row['groupname'].'</b></td></tr>';
         }
-		$evtnames[] = '<input name="sysevents[]" type="checkbox"'.(in_array($row[id],$evts) ? " checked='checked' " : "").' class="inputBox" value="'.$row['id'].'" id="'.$row['name'].'"/><label for="'.$row['name'].'">'.$row['name'].'</label>'."\n";
+		$evtnames[] = '<input name="sysevents[]" type="checkbox"'. checked(in_array($row[id],$evts)) . ' class="inputBox" value="'.$row['id'].'" id="'.$row['name'].'"/><label for="'.$row['name']. '"' . bold(in_array($row[id],$evts)) . '>'.$row['name'].'</label>'."\n";
         if(count($evtnames)==2) echoEventRows($evtnames);
     }
     if(count($evtnames)>0) echoEventRows($evtnames);
@@ -643,3 +645,21 @@ if(is_array($evtOut)) echo implode("",$evtOut);
 <script type="text/javascript">
 setTimeout('showParameters()',10);
 </script>
+<?php
+function selected($cond=false)
+{
+	if($cond!==false) return ' selected="selected"';
+	else return;
+}
+
+function checked($cond=false)
+{
+	if($cond!==false) return ' checked="checked"';
+	else return;
+}
+
+function bold($cond=false)
+{
+	if($cond!==false) return ' style="background-color:#777;color:#fff;"';
+	else return;
+}
