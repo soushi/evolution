@@ -700,7 +700,7 @@ UPDATE `{PREFIX}site_content` SET `type`='document', `contentType`='text/html' W
 # Default Site Template
 
 REPLACE INTO `{PREFIX}site_templates` 
-(id, templatename, description, editor_type, category, icon, template_type, content, locked) VALUES ('3','Minimal Template','Default minimal empty template (content returned only)','0','0','','0','[*content*]','0');
+(id, templatename, description, editor_type, category, icon, template_type, content, locked) VALUES ('1','Minimal Template','Default minimal empty template (content returned only)','0','0','','0','[*content*]','0');
 
 # Default Site Documents
 
