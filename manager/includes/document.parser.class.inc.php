@@ -2984,15 +2984,8 @@ class DocumentParser {
         $this->loadedjscripts[$key]['pos']= $pos;
     }
 
-    # Registers Client-side Startup HTML block
-    function regClientStartupHTMLBlock($html) {
-        $this->regClientScript($html, true, true);
-    }
-
-    # Registers Client-side HTML block
-    function regClientHTMLBlock($html) {
-        $this->regClientScript($html, true);
-    }
+    function regClientStartupHTMLBlock($html) {$this->regClientScript($html, true, true);} // Registers Client-side Startup HTML block
+    function regClientHTMLBlock($html)        {$this->regClientScript($html, true);} // Registers Client-side HTML block
 
     # Registers Startup Client-side JavaScript - these scripts are loaded at inside the <head> tag
 	function regClientStartupScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false))
