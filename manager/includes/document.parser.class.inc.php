@@ -2477,16 +2477,17 @@ class DocumentParser {
         }
     }
 
-    function getDocumentChildrenTVarOutput($parentid= 0, $tvidnames= array (), $published= 1, $docsort= "menuindex", $docsortdir= "ASC") {
+	function getDocumentChildrenTVarOutput($parentid= 0, $tvidnames= array (), $published= 1, $docsort= 'menuindex', $docsortdir= 'ASC')
+	{
         $docs= $this->getDocumentChildren($parentid, $published, 0, '*', '', $docsort, $docsortdir);
-        if (!$docs)
-            return false;
-        else {
+		if (!$docs) return false;
+		else
+		{
             $result= array ();
-            for ($i= 0; $i < count($docs); $i++) {
+			for ($i= 0; $i < count($docs); $i++)
+			{
                 $tvs= $this->getTemplateVarOutput($tvidnames, $docs[$i]["id"], $published);
-                if ($tvs)
-                    $result[$docs[$i]['id']]= $tvs; // Use docid as key - netnoise 2006/08/14
+				if ($tvs) $result[$docs[$i]['id']]= $tvs; // Use docid as key - netnoise 2006/08/14
             }
             return $result;
         }
