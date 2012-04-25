@@ -2202,12 +2202,10 @@ class DocumentParser {
 		return $url;
     }
 
-    function getConfig($name= '') {
-        if (!empty ($this->config[$name])) {
-            return $this->config[$name];
-        } else {
-            return false;
-        }
+	function getConfig($name= '')
+	{
+		if(empty($this->config[$name])) return false;
+		else                            return $this->config[$name];
     }
 
     function getVersionData() {
