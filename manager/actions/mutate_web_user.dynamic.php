@@ -98,13 +98,6 @@ if($modx->manager->hasFormValues()) {
 	extract($usersettings, EXTR_OVERWRITE);
 }
 
-// converts date format dd-mm-yyyy to php date
-function ConvertDate($date) {
-	global $modx;
-	if ($date == "") {return "0";}
-	else {}          {return $modx->toTimeStamp($date);}
-}
-
 // include the country list language file
 $_country_lang = array();
 if($manager_language!="english" && file_exists($modx->config['base_path']."manager/includes/lang/country/".$manager_language."_country.inc.php")){
@@ -576,3 +569,10 @@ if($use_udperms==1)
 	if(is_array($evtOut)) echo implode("",$evtOut);
 ?>
 </form>
+<?php
+// converts date format dd-mm-yyyy to php date
+function ConvertDate($date) {
+	global $modx;
+	if ($date == "") {return "0";}
+	else {}          {return $modx->toTimeStamp($date);}
+}
