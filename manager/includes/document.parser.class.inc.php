@@ -1584,22 +1584,21 @@ class DocumentParser {
      * name: parseDocumentSource - used by parser
      * desc: return document source aftering parsing tvs, snippets, chunks, etc.
      */
-    function parseDocumentSource($source) {
-        // set the number of times we are to parse the document source
-        $this->minParserPasses= empty ($this->minParserPasses) ? 2 : $this->minParserPasses;
-        $this->maxParserPasses= empty ($this->maxParserPasses) ? 10 : $this->maxParserPasses;
+	function parseDocumentSource($source)
+	{
         $passes= $this->minParserPasses;
-        for ($i= 0; $i < $passes; $i++) {
+		for ($i= 0; $i < $passes; $i++)
+		{
             // get source length if this is the final pass
-            if ($i == ($passes -1))
-                $st= strlen($source);
-            if ($this->dumpSnippets == 1) {
-                echo "<fieldset><legend><b style='color: #821517;'>PARSE PASS " . ($i +1) . "</b></legend>The following snippets (if any) were parsed during this pass.<div style='width:100%' align='center'>";
+			if ($i == ($passes -1)) $bt= md5($source);
+			if ($this->dumpSnippets == 1)
+			{
+				$this->snipCode .= "<fieldset><legend><b style='color: #821517;'>PARSE PASS " . ($i +1) . "</b></legend>The following snippets (if any) were parsed during this pass.<div style='width:100%' align='center'>";
             }
 
             // invoke OnParseDocument event
             $this->documentOutput= $source; // store source code so plugins can
-            $this->invokeEvent("OnParseDocument"); // work on it via $modx->documentOutput
+			$this->invokeEvent('OnParseDocument'); // work on it via $modx->documentOutput
             $source= $this->documentOutput;
 
             // combine template and document variables
@@ -1614,14 +1613,17 @@ class DocumentParser {
             if(strpos($source,'[[')!==false) $source= $this->evalSnippets($source);
             // find and replace Placeholders (must be parsed last) - Added by Raymond
             if(strpos($source,'[+')!==false) $source= $this->mergePlaceholderContent($source);
-            if ($this->dumpSnippets == 1) {
-                echo "</div></fieldset>";
+			if ($this->dumpSnippets == 1)
+			{
+				$this->snipCode .= '</div></fieldset>';
             }
-            if ($i == ($passes -1) && $i < ($this->maxParserPasses - 1)) {
+			if ($i == ($passes -1) && $i < ($this->maxParserPasses - 1))
+			{
                 // check if source length was changed
-                $et= strlen($source);
-                if ($st != $et)
+				if ($bt != md5($source))
+				{
                     $passes++; // if content change then increase passes because
+				}
             } // we have not yet reached maxParserPasses
             if(strpos($source,'[~')!==false) $source = $this->rewriteUrls($source);//yama
         }
