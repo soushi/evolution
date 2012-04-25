@@ -1,7 +1,7 @@
 <?php
 // cache & synchronise class
 
-class synccache{
+class synccache {
     var $cachePath;
     var $showReport;
     var $deletedfiles = array();
@@ -12,6 +12,7 @@ class synccache{
 	function synccache()
 	{
 		if(empty($this->target)) $this->target = 'pagecache,sitecache';
+		if(defined('MODX_BASE_PATH')) $this->cachePath = MODX_BASE_PATH . 'assets/cache/';
 	}
 	
 	function setTarget($target)
@@ -128,9 +129,9 @@ class synccache{
 		}
 	}
 
-/****************************************************************************/
-/*  PUBLISH TIME FILE                                                       */
-/****************************************************************************/
+	/****************************************************************************/
+	/*  PUBLISH TIME FILE                                                       */
+	/****************************************************************************/
 	function publish_time_file($modx)
 	{
         // update publish time file
@@ -204,7 +205,7 @@ class synccache{
 		
 		if(!file_put_contents($this->cachePath.'siteCache.idx.php', $content))
 		{
-			echo 'Cannot write main MODX cache file! Make sure the assets/cache directory is writable!';
+			echo 'Cannot write main MODX cache file! Make sure the "' . $this->cachePath . '" directory is writable!';
 			exit;
         }
 
@@ -270,6 +271,9 @@ class synccache{
 			$tmpPHP .= '$' . "d['{$alias_path}'] = {$docid};\n";
 			$tmpPHP .= '$' . "a[{$docid}] = array('id' => {$docid}, 'alias' => '{$alias}', 'path' => '{$path}', 'parent' => {$parent});\n";
 			$tmpPHP .= '$' . "m[] = array('{$parent}' => '{$docid}');\n";
+			$modx->documentListing[$alias_path] = $docid;
+			$modx->aliasListing[$docid] = array('id' => $docid, 'alias' => $alias, 'path' => $path, 'parent' => $parent);
+			$modx->documentMap[] = array($parent => $docid);
             }
 		return $tmpPHP;
         }
