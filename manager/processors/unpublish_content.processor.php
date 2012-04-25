@@ -6,6 +6,7 @@ if(!$modx->hasPermission('save_document')||!$modx->hasPermission('publish_docume
 }
 
 $id = $_REQUEST['id'];
+$tbl_site_content = $modx->getFullTableName('site_content');
 
 // check permissions on the document
 include_once "./processors/user_documents_permissions.class.php";
@@ -25,10 +26,14 @@ if(!$udperms->checkPermissions()) {
 }
 
 // update the document
-$sql = "UPDATE $dbase.`".$table_prefix."site_content` SET published=0, pub_date=0, unpub_date=0, editedby=".$modx->getLoginUserID().", editedon=".time().", publishedby=0, publishedon=0 WHERE id=$id;";
-
-$rs = mysql_query($sql);
-if(!$rs){
+$field['published']   = 0;
+$field['pub_date']    = 0;
+$field['unpub_date']  = 0;
+$field['publishedby'] = 0;
+$field['publishedon'] = 0;
+$rs = $modx->db->update($field,$tbl_site_content,"id={$id}");
+if(!$rs)
+{
 	echo "An error occured while attempting to unpublish the document.";
 }
 
