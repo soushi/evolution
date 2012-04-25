@@ -3001,14 +3001,15 @@ class DocumentParser {
     }
 
     # Remove unwanted html tags and snippet, settings and tags
-    function stripTags($html, $allowed= "") {
+    function stripTags($html, $allowed= '')
+    {
         $t= strip_tags($html, $allowed);
-        $t= preg_replace('~\[\*(.*?)\*\]~', "", $t); //tv
-        $t= preg_replace('~\[\[(.*?)\]\]~', "", $t); //snippet
-        $t= preg_replace('~\[\!(.*?)\!\]~', "", $t); //snippet
-        $t= preg_replace('~\[\((.*?)\)\]~', "", $t); //settings
-        $t= preg_replace('~\[\+(.*?)\+\]~', "", $t); //placeholders
-        $t= preg_replace('~{{(.*?)}}~', "", $t); //chunks
+        $t= preg_replace('~\[\*(.*?)\*\]~', '', $t); //tv
+        $t= preg_replace('~\[\[(.*?)\]\]~', '', $t); //snippet
+        $t= preg_replace('~\[\!(.*?)\!\]~', '', $t); //snippet
+        $t= preg_replace('~\[\((.*?)\)\]~', '', $t); //settings
+        $t= preg_replace('~\[\+(.*?)\+\]~', '', $t); //placeholders
+        $t= preg_replace('~{{(.*?)}}~', '', $t); //chunks
         return $t;
     }
 
