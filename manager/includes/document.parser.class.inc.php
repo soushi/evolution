@@ -1942,63 +1942,61 @@ class DocumentParser {
         return $resourceArray;
     }
 
-    function getDocumentChildren($parentid= 0, $published= 1, $deleted= 0, $fields= "*", $where= '', $sort= "menuindex", $dir= "ASC", $limit= "") {
-        $limit= ($limit != "") ? "LIMIT $limit" : "";
-        $tblsc= $this->getFullTableName("site_content");
-        $tbldg= $this->getFullTableName("document_groups");
+	function getDocumentChildren($parentid= 0, $published= 1, $deleted= 0, $fields= '*', $where= '', $sort= 'menuindex', $dir= 'ASC', $limit= '')
+	{
+		$tbl_site_content= $this->getFullTableName('site_content');
+		$tbl_document_groups= $this->getFullTableName('document_groups');
         // modify field names to use sc. table reference
-        $fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", "", explode(',', $fields)));
-        $sort= ($sort == "") ? "" : 'sc.' . implode(',sc.', preg_replace("/^\s/i", "", explode(',', $sort)));
-        if ($where != '')
-            $where= 'AND ' . $where;
+		$fields = 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $fields)));
+		if($where != '') $where= "AND {$where}";
         // get document groups for current user
-        if ($docgrp= $this->getUserDocGroups())
-            $docgrp= implode(",", $docgrp);
+		if ($docgrp= $this->getUserDocGroups()) $docgrp= implode(',', $docgrp);
         // build query
-        $access= ($this->isFrontend() ? "sc.privateweb=0" : "1='" . $_SESSION['mgrRole'] . "' OR sc.privatemgr=0") .
-         (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)");
-        $sql= "SELECT DISTINCT $fields
-              FROM $tblsc sc
-              LEFT JOIN $tbldg dg on dg.document = sc.id
-              WHERE sc.parent = '$parentid' AND sc.published=$published AND sc.deleted=$deleted $where
-              AND ($access)
-              GROUP BY sc.id " .
-         ($sort ? " ORDER BY $sort $dir " : "") . " $limit ";
-        $result= $this->db->query($sql);
+		$access  = $this->isFrontend() ? 'sc.privateweb=0' : "1='{$_SESSION['mgrRole']}' OR sc.privatemgr=0";
+		$access .= !$docgrp ? '' : " OR dg.document_group IN ({$docgrp})";
+		$from = "{$tbl_site_content} sc LEFT JOIN {$tbl_document_groups} dg on dg.document = sc.id";
+		$where = "sc.parent = '{$parentid}' AND sc.published={$published} AND sc.deleted={$deleted} {$where} AND ({$access}) GROUP BY sc.id";
+		$sort = ($sort != '') ? 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $sort))) : '';
+		$orderby = $sort ? "{$sort} {$dir}" : '';
+		$result= $this->db->select("DISTINCT {$fields}",$from,$where,$orderby,$limit);
         $resourceArray= array ();
-        for ($i= 0; $i < @ $this->db->getRecordCount($result); $i++) {
-            $resourceArray[] = @ $this->db->getRow($result);
+		for ($i= 0; $i < $this->db->getRecordCount($result); $i++)
+		{
+			$resourceArray[] = $this->db->getRow($result);
         }
         return $resourceArray;
     }
 
-    function getDocuments($ids= array (), $published= 1, $deleted= 0, $fields= "*", $where= '', $sort= "menuindex", $dir= "ASC", $limit= "") {
-        if (count($ids) == 0) {
+	function getDocuments($ids= array (), $published= 1, $deleted= 0, $fields= '*', $where= '', $sort= 'menuindex', $dir= 'ASC', $limit= '')
+	{
+		if (count($ids) == 0)
+		{
             return false;
-        } else {
-            $limit= ($limit != "") ? "LIMIT $limit" : ""; // LIMIT capabilities - rad14701
-            $tblsc= $this->getFullTableName("site_content");
-            $tbldg= $this->getFullTableName("document_groups");
+		}
+		else
+		{
+			$tbl_site_content= $this->getFullTableName('site_content');
+			$tbl_document_groups= $this->getFullTableName('document_groups');
+			
             // modify field names to use sc. table reference
-            $fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", "", explode(',', $fields)));
-            $sort= ($sort == "") ? "" : 'sc.' . implode(',sc.', preg_replace("/^\s/i", "", explode(',', $sort)));
-            if ($where != '')
-                $where= 'AND ' . $where;
+			$fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $fields)));
+			if($sort !== '')  $sort = 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $sort)));
+			if ($where != '') $where= "AND {$where}";
             // get document groups for current user
-            if ($docgrp= $this->getUserDocGroups())
-                $docgrp= implode(",", $docgrp);
-            $access= ($this->isFrontend() ? "sc.privateweb=0" : "sc.privatemgr=0") .
-             (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)") . " OR 1='" . $_SESSION['mgrRole'] . "'";
-            $sql= "SELECT DISTINCT $fields FROM $tblsc sc
-                    LEFT JOIN $tbldg dg on dg.document = sc.id
-                    WHERE (sc.id IN (" . implode(",",$ids) . ") AND sc.published=$published AND sc.deleted=$deleted $where)
-                    AND ($access)
-                    GROUP BY sc.id " .
-             ($sort ? " ORDER BY $sort $dir" : "") . " $limit ";
-            $result= $this->db->query($sql);
+			if ($docgrp= $this->getUserDocGroups()) $docgrp= implode(',', $docgrp);
+			$context = ($this->isFrontend()) ? 'web' : 'mgr';
+			$cond = $docgrp ? "OR dg.document_group IN ({$docgrp})" : '';
+			
+			$fields = "DISTINCT {$fields}";
+			$from = "{$tbl_site_content} sc LEFT JOIN {$tbl_document_groups} dg on dg.document = sc.id";
+			$ids_str = implode(',',$ids);
+			$where = "(sc.id IN ({$ids_str}) AND sc.published={$published} AND sc.deleted={$deleted} {$where}) AND (sc.private{$context}=0 {$cond} OR 1='{$_SESSION['mgrRole']}') GROUP BY sc.id";
+			$orderby = ($sort) ? "{$sort} {$dir}" : '';
+			$result= $this->db->select($fields,$from,$where,$orderby,$limit);
             $resourceArray= array ();
-            for ($i= 0; $i < @ $this->db->getRecordCount($result); $i++) {
-                $resourceArray[] = @ $this->db->getRow($result);
+			for ($i= 0; $i < $this->db->getRecordCount($result); $i++)
+			{
+				$resourceArray[] = $this->db->getRow($result);
             }
             return $resourceArray;
         }
