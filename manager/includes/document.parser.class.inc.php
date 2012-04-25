@@ -1721,18 +1721,25 @@ class DocumentParser {
     }
 
     # Displays a javascript alert message in the web browser
-    function webAlert($msg, $url= "") {
+	function webAlert($msg, $url= '')
+	{
         $msg= addslashes($this->db->escape($msg));
-        if (substr(strtolower($url), 0, 11) == "javascript:") {
-            $act= "__WebAlert();";
-            $fnc= "function __WebAlert(){" . substr($url, 11) . "};";
-        } else {
-            $act= ($url ? "window.location.href='" . addslashes($url) . "';" : "");
+		if (substr(strtolower($url), 0, 11) == 'javascript:')
+		{
+			$act= '__WebAlert();';
+			$fnc= 'function __WebAlert(){' . substr($url, 11) . '};';
+		}
+		else
+		{
+			$act= $url ? "window.location.href='" . addslashes($url) . "';" : '';
         }
-        $html= "<script>$fnc window.setTimeout(\"alert('$msg');$act\",100);</script>";
+		$html= "<script>{$fnc} window.setTimeout(\"alert('{$msg}');{$act}\",100);</script>";
         if ($this->isFrontend())
+		{
             $this->regClientScript($html);
-        else {
+		}
+		else
+		{
             echo $html;
         }
     }
