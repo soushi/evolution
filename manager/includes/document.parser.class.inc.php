@@ -2252,18 +2252,25 @@ class DocumentParser {
         return $listhtml;
     }
 
-    function runSnippet($snippetName, $params= array ()) {
-        if (isset ($this->snippetCache[$snippetName])) {
+	function runSnippet($snippetName, $params= array ())
+	{
+		if (isset ($this->snippetCache[$snippetName]))
+		{
             $snippet= $this->snippetCache[$snippetName];
-            $properties= $this->snippetCache[$snippetName . "Props"];
-        } else { // not in cache so let's check the db
-            $sql= "SELECT `name`, `snippet`, `properties` FROM " . $this->getFullTableName("site_snippets") . " WHERE " . $this->getFullTableName("site_snippets") . ".`name`='" . $this->db->escape($snippetName) . "';";
-            $result= $this->db->query($sql);
-            if ($this->db->getRecordCount($result) == 1) {
-                $row= $this->db->getRow($result);
-                $snippet= $this->snippetCache[$row['name']]= $row['snippet'];
-                $properties= $this->snippetCache[$row['name'] . "Props"]= $row['properties'];
-            } else {
+			$properties= $this->snippetCache["{$snippetName}Props"];
+		}
+		else
+		{ // not in cache so let's check the db
+			$tbl_site_snippets = $this->getFullTableName('site_snippets');
+			$esc_name = $this->db->escape($snippetName);
+			$result= $this->db->select('name,snippet,properties',$tbl_site_snippets,"name='{$esc_name}'");
+			if ($this->db->getRecordCount($result) == 1)
+			{
+				$snippet= $this->snippetCache[$snippetName]= $row['snippet'];
+				$properties= $this->snippetCache["{$snippetName}Props"]= $row['properties'];
+			}
+			else
+			{
                 $snippet= $this->snippetCache[$snippetName]= "return false;";
                 $properties= '';
             }
