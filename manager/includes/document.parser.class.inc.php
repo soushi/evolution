@@ -1376,7 +1376,11 @@ class DocumentParser {
         $alias    = array_pop($elements);
         $dir      = implode('/', $elements);
         unset($elements);
-        if((strpos($alias, '.') !== false) && (isset($this->config['smart_suffix']) && $this->config['smart_suffix']==1)) $suff = ''; // jp-edition only
+		if((strpos($alias, '.') !== false))
+		{
+			if(isset($this->config['suffix_mode']) && $this->config['suffix_mode']==1) $suff = ''; // jp-edition only
+		}
+		//container_suffix
         return ($dir !== '' ? $dir . '/' : '') . $pre . $alias . $suff;
     }
 
