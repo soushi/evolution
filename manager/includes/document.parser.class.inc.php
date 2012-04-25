@@ -2208,8 +2208,9 @@ class DocumentParser {
 		else                            return $this->config[$name];
     }
 
-    function getVersionData() {
-        include_once($this->config["base_path"] . "manager/includes/version.inc.php");
+	function getVersionData()
+	{
+		include_once($this->config["base_path"] . 'manager/includes/version.inc.php');
         $v= array ();
         $v['version']= $modx_version;
         $v['branch']= $modx_branch;
