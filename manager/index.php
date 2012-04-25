@@ -665,9 +665,15 @@ switch ($action)
 	case 501: //delete category
         include_once "processors/delete_category.processor.php";
     break;
-
-// default action: show not implemented message
-    default :
+	case 998: //Output of OnManagerPageInit with Header/Footer
+		include_once "header.inc.php";
+		if (is_array($evtOutOnMPI)) echo implode('', $evtOutOnMPI);
+		include_once "footer.inc.php";
+		break;
+	case 999: //Output of OnManagerPageInit
+		if (is_array($evtOutOnMPI)) echo implode('', $evtOutOnMPI);
+		break;
+	default : // default action: show not implemented message
         // say that what was requested doesn't do anything yet
         include_once "header.inc.php";
         echo "
