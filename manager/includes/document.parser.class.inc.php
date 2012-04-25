@@ -2862,24 +2862,29 @@ class DocumentParser {
     }
 	
     # returns true if the current web user is a member the specified groups
-    function isMemberOfWebGroup($groupNames= array ()) {
-        if (!is_array($groupNames))
-            return false;
+	function isMemberOfWebGroup($groupNames= array ())
+	{
+		if (!is_array($groupNames)) return false;
+		
         // check cache
         $grpNames= isset ($_SESSION['webUserGroupNames']) ? $_SESSION['webUserGroupNames'] : false;
-        if (!is_array($grpNames)) {
-            $tbl= $this->getFullTableName("webgroup_names");
-            $tbl2= $this->getFullTableName("web_groups");
+		if (!is_array($grpNames))
+		{
+			$tbl_webgroup_names= $this->getFullTableName("webgroup_names");
+			$tbl_web_groups= $this->getFullTableName("web_groups");
+			$uid = $this->getLoginUserID();
             $sql= "SELECT wgn.name
-                    FROM $tbl wgn
-                    INNER JOIN $tbl2 wg ON wg.webgroup=wgn.id AND wg.webuser='" . $this->getLoginUserID() . "'";
+			FROM {$tbl_webgroup_names} wgn
+			INNER JOIN {$tbl_web_groups} wg ON wg.webgroup=wgn.id AND wg.webuser='{$uid}'";
             $grpNames= $this->db->getColumn("name", $sql);
+			
             // save to cache
             $_SESSION['webUserGroupNames']= $grpNames;
         }
         foreach ($groupNames as $k => $v)
-            if (in_array(trim($v), $grpNames))
-                return true;
+		{
+			if (in_array(trim($v), $grpNames)) return true;
+		}
         return false;
     }
 
