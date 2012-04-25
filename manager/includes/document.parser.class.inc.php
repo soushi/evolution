@@ -2903,12 +2903,6 @@ class DocumentParser {
         }
     }
 
-    # Registers Startup Client-side JavaScript - these scripts are loaded at inside the <head> tag
-	function regClientStartupScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false))
-	{
-        $this->regClientScript($src, $options, true);
-    }
-
     # Registers Client-side JavaScript 	- these scripts are loaded at the end of the page unless $startup is true
 	function regClientScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false), $startup= false)
 	{
@@ -2998,6 +2992,12 @@ class DocumentParser {
     # Registers Client-side HTML block
     function regClientHTMLBlock($html) {
         $this->regClientScript($html, true);
+    }
+
+    # Registers Startup Client-side JavaScript - these scripts are loaded at inside the <head> tag
+	function regClientStartupScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false))
+	{
+        $this->regClientScript($src, $options, true);
     }
 
     # Remove unwanted html tags and snippet, settings and tags
@@ -3207,6 +3207,30 @@ class DocumentParser {
         return $template;
     }
 
+    function getMETATags($id= 0) {
+        if ($id == 0) {
+            $id= $this->documentObject['id'];
+        }
+        $sql= "SELECT smt.* " .
+        "FROM " . $this->getFullTableName("site_metatags") . " smt " .
+        "INNER JOIN " . $this->getFullTableName("site_content_metatags") . " cmt ON cmt.metatag_id=smt.id " .
+        "WHERE cmt.content_id = '$id'";
+        $ds= $this->db->query($sql);
+        $limit= $this->db->getRecordCount($ds);
+        $metatags= array ();
+        if ($limit > 0) {
+            for ($i= 0; $i < $limit; $i++) {
+                $row= $this->db->getRow($ds);
+                $metatags[$row['name']]= array (
+                    "tag" => $row['tag'],
+                    "tagvalue" => $row['tagvalue'],
+                    "http_equiv" => $row['http_equiv']
+                );
+            }
+        }
+        return $metatags;
+    }
+
     function userLoggedIn() {
         $userdetails= array ();
         if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
@@ -3246,30 +3270,6 @@ class DocumentParser {
             }
         }
         return $keywords;
-    }
-
-    function getMETATags($id= 0) {
-        if ($id == 0) {
-            $id= $this->documentObject['id'];
-        }
-        $sql= "SELECT smt.* " .
-        "FROM " . $this->getFullTableName("site_metatags") . " smt " .
-        "INNER JOIN " . $this->getFullTableName("site_content_metatags") . " cmt ON cmt.metatag_id=smt.id " .
-        "WHERE cmt.content_id = '$id'";
-        $ds= $this->db->query($sql);
-        $limit= $this->db->getRecordCount($ds);
-        $metatags= array ();
-        if ($limit > 0) {
-            for ($i= 0; $i < $limit; $i++) {
-                $row= $this->db->getRow($ds);
-                $metatags[$row['name']]= array (
-                    "tag" => $row['tag'],
-                    "tagvalue" => $row['tagvalue'],
-                    "http_equiv" => $row['http_equiv']
-                );
-            }
-        }
-        return $metatags;
     }
 
     /*############################################
