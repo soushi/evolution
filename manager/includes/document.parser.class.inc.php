@@ -1200,13 +1200,11 @@ class DocumentParser {
 		$stack = $documentSource;
 		unset($documentSource);
 
-		if(empty($this->minParserPasses)) $this->minParserPasses = 2;
-		if(empty($this->maxParserPasses)) $this->maxParserPasses = 10;
 		$passes = $this->minParserPasses;
 		
 		for($i= 0; $i < $passes; $i++)
 		{
-			if($i == ($passes -1)) $st = md5($stack);
+			if($i == ($passes -1)) $bt = md5($stack);
 			$pieces = array();
 			$pieces = explode('[[', $stack);
 			$stack = '';
@@ -1222,8 +1220,7 @@ class DocumentParser {
 			}
 			if($i == ($passes -1) && $i < ($this->maxParserPasses - 1))
 			{
-				$et = md5($stack);
-				if($st != $et) $passes++;
+				if($bt != md5($stack)) $passes++;
 			}
 		}
 		return $stack;
