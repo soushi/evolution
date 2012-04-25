@@ -2082,7 +2082,8 @@ class DocumentParser {
         return 0;
     }
 
-    function getSnippetName() {
+	function getSnippetName()
+	{
         return $this->currentSnippet;
     }
 
