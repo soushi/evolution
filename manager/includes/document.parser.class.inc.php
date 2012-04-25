@@ -2282,7 +2282,8 @@ class DocumentParser {
         return $this->evalSnippet($snippet, $parameters);
     }
 
-    function getChunk($chunkName) {
+	function getChunk($chunkName)
+	{
         if(isset($this->chunkCache[$chunkName]))
         {
         $t= $this->chunkCache[$chunkName];
@@ -2290,37 +2291,39 @@ class DocumentParser {
     }
     }
 
-    function parseChunk($chunkName, $chunkArr, $prefix= "{", $suffix= "}",$mode='chunk') {
-        if (!is_array($chunkArr)) {
-            return false;
-        }
-        if($mode==='chunk')
+	function parseChunk($chunkName, $chunkArr, $prefix= '{', $suffix= '}',$mode='chunk')
         {
-            $src= $this->getChunk($chunkName);
-        }
+		if (!is_array($chunkArr)) return false;
+		
+		if($mode==='chunk') $src= $this->getChunk($chunkName);
         else $src = $chunkName;
         
-        foreach ($chunkArr as $key => $value) {
+		foreach ($chunkArr as $key => $value)
+		{
             $src= str_replace("{$prefix}{$key}{$suffix}", $value, $src);
         }
         return $src;
     }
 
-	function parsePlaceholder($src, $ph, $left= "[+", $right= "+]",$mode='ph')
+	function parsePlaceholder($src='', $ph=array(), $left= '[+', $right= '+]',$mode='ph')
 	{ // jp-edition only
+		if(!$ph) return $src;
 		return $this->parseChunk($src, $ph, $left, $right, $mode);
 	}
 	
-    function getUserData() {
+	function getUserData()
+	{
         include_once($this->config["base_path"] . "manager/includes/extenders/getUserData.extender.php");
         return $tmpArray;
     }
 
-    function toDateFormat($timestamp = 0, $mode = '') {
+	function toDateFormat($timestamp = 0, $mode = '')
+	{
         $timestamp = trim($timestamp);
         $timestamp = intval($timestamp);
         
-        switch($this->config['datetime_format']) {
+		switch($this->config['datetime_format'])
+		{
             case 'YYYY/mm/dd':
                 $dateFormat = '%Y/%m/%d';
                 break;
@@ -2330,18 +2333,18 @@ class DocumentParser {
             case 'mm/dd/YYYY':
                 $dateFormat = '%m/%d/%Y';
                 break;
-            /*
-            case 'dd-mmm-YYYY':
-                $dateFormat = '%e-%b-%Y';
-                break;
-            */
         }
         
-        if (empty($mode)) {
+		if (empty($mode))
+		{
             $strTime = $this->mb_strftime($dateFormat . " %H:%M:%S", $timestamp);
-        } elseif ($mode == 'dateOnly') {
+		}
+		elseif ($mode == 'dateOnly')
+		{
             $strTime = $this->mb_strftime($dateFormat, $timestamp);
-        } elseif ($mode == 'formatOnly') {
+		}
+		elseif ($mode == 'formatOnly')
+		{
         	$strTime = $dateFormat;
         }
         return $strTime;
