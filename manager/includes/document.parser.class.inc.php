@@ -2046,18 +2046,25 @@ class DocumentParser {
         }
     }
 
-    function getParent($pid= -1, $active= 1, $fields= 'id, pagetitle, description, alias, parent') {
-        if ($pid == -1) {
+	function getParent($pid= -1, $active= 1, $fields= 'id, pagetitle, description, alias, parent')
+	{
+		if ($pid == -1)
+		{
             $pid= $this->documentObject['parent'];
             return ($pid == 0) ? false : $this->getPageInfo($pid, $active, $fields);
-        } else
-            if ($pid == 0) {
+		}
+		elseif ($pid == 0)
+		{
                 return false;
-            } else {
+		}
+		else
+		{
                 // first get the child document
                 $child= $this->getPageInfo($pid, $active, "parent");
+			
                 // now return the child's parent
                 $pid= ($child['parent']) ? $child['parent'] : 0;
+			
                 return ($pid == 0) ? false : $this->getPageInfo($pid, $active, $fields);
             }
     }
