@@ -1133,29 +1133,47 @@ class DocumentParser {
         unset ($modx->event->params);
     }
 
-    function evalSnippet($snippet, $params) {
+	function evalSnippet($snippet, $params)
+	{
         $etomite= $modx= & $this;
-
+		if(isset($params) && is_array($params))
+		{
+			foreach($params as $k=>$v)
+			{
+				if($v==='false')    $params[$k] = false;
+				elseif($v==='true') $params[$k] = true;
+			}
+		}
         $modx->event->params = $params; // store params inside event object
-        if (is_array($params)) {
+		if (is_array($params))
+		{
             extract($params, EXTR_SKIP);
         }
         ob_start();
-        $snip= eval ($snippet);
+		$result= eval($snippet);
         $msg= ob_get_contents();
-        $request_uri = getenv('REQUEST_URI');
-        $request_uri = htmlspecialchars($request_uri, ENT_QUOTES);
         ob_end_clean();
-        if ($msg && isset ($php_errormsg)) {
-            if (strpos(strtolower($php_errormsg), 'deprecated')===false) { // ignore php5 strict errors
+		if ($msg && isset ($php_errormsg))
+		{
+			if (strpos(strtolower($php_errormsg), 'deprecated')===false)
+			{
+				// ignore php5 strict errors
                 // log error
-                $this->logEvent(1, 3, "<b>$php_errormsg</b><br /><br /> $msg<br />REQUEST_URI = $request_uri<br />ID = $this->documentIdentifier", $this->currentSnippet . " - Snippet");
+				$request_uri = getenv('REQUEST_URI');
+				$request_uri = 'REQUEST_URI = ' . htmlspecialchars($request_uri, ENT_QUOTES) . '<br />';
+				$docid = "ID = {$this->documentIdentifier}<br />";
+//				$bt = $this->get_backtrace(debug_backtrace()) . '<br />';
+				$log = "<b>{$php_errormsg}</b><br />{$msg}<br />{$request_uri}{$docid}";
+				$snip = $this->currentSnippet . ' - Snippet<br />';
+				$this->logEvent(1, 3, $log,$snip);
                 if ($this->isBackend())
-                    $this->event->alert("An error occurred while loading. Please see the event log for more information<p />$msg");
+				{
+					$this->event->alert("An error occurred while loading. Please see the event log for more information<p>{$msg}</p>");
+				}
             }
         }
         unset ($modx->event->params);
-        return $msg . $snip;
+		return $msg . $result;
     }
 
 	function get_backtrace($backtrace)
