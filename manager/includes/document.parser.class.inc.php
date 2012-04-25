@@ -2219,29 +2219,36 @@ class DocumentParser {
         return $v;
     }
 
-    function makeList($array, $ulroot= 'root', $ulprefix= 'sub_', $type= '', $ordered= false, $tablevel= 0) {
+	function makeList($array,$ulroot='root',$ulprefix='sub_',$type='',$ordered= false,$tablevel= 0)
+	{
         // first find out whether the value passed is an array
-        if (!is_array($array)) {
-            return "<ul><li>Bad list</li></ul>";
-        }
-        if (!empty ($type)) {
-            $typestr= " style='list-style-type: $type'";
-        } else {
-            $typestr= "";
-        }
-        $tabs= "";
-        for ($i= 0; $i < $tablevel; $i++) {
+		if (!is_array($array)) return "<ul><li>Bad list</li></ul>";
+		
+		$tabs= '';
+		for ($i= 0; $i < $tablevel; $i++)
+		{
             $tabs .= "\t";
         }
-        $listhtml= $ordered == true ? $tabs . "<ol class='$ulroot'$typestr>\n" : $tabs . "<ul class='$ulroot'$typestr>\n";
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $listhtml .= $tabs . "\t<li>" . $key . "\n" . $this->makeList($value, $ulprefix . $ulroot, $ulprefix, $type, $ordered, $tablevel +2) . $tabs . "\t</li>\n";
-            } else {
-                $listhtml .= $tabs . "\t<li>" . $value . "</li>\n";
+
+		$tag = ($ordered == true) ? 'ol' : 'ul';
+		
+		if(!empty($type)) $typestr= " style='list-style-type: {$type}'";
+		else              $typestr= '';
+		
+		$listhtml= "{$tabs}<{$tag} class='{$ulroot}'{$typestr}>\n";
+		foreach ($array as $key => $value)
+		{
+			if (is_array($value))
+			{
+				$line = $this->makeList($value, "{$ulprefix}{$ulroot}", $ulprefix, $type, $ordered, $tablevel +2);
+				$listhtml .= "{$tabs}\t<li>{$key}\n{$line}{$tabs}\t</li>\n";
+        }
+			else
+			{
+				$listhtml .= "{$tabs}\t<li>{$value}</li>\n";
             }
         }
-        $listhtml .= $ordered == true ? $tabs . "</ol>\n" : $tabs . "</ul>\n";
+		$listhtml = "{$tabs}</{$tag}>\n";
         return $listhtml;
     }
 
