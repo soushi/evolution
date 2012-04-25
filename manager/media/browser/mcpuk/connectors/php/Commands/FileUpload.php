@@ -16,6 +16,16 @@
  * 
  * File Authors:
  * 		Grant French (grant@mcpuk.net)
+ *
+ * Modified:
+ * 		2009-03-23 by Kazuyuki Ikeda (http://www.hikidas.com/)
+ * 		(*1) fix the bug `MaxSize` unit mismatch (Kbytes => Bytes)
+ * 		(*2) replace `basename` other codes, because it has bugs for multibyte characters
+ * 		(*3) refuse the filename has disallowed characters
+ * 		     (multibyte characters cause trouble for browsing resources)
+ * 		 ++  japanese localization
+ * 		2009-03-24 by Kazuyuki Ikeda (http://www.hikidas.com/)
+ * 		(*4) add invoking event `OnFileManagerUpload`
  */
 class FileUpload {
 	var $fckphp_config;
@@ -32,6 +42,16 @@ class FileUpload {
 		$this->real_cwd=str_replace("//","/",($this->fckphp_config['basedir']."/".$this->actual_cwd));
 	}
 
+	function cleanFilename($filename) {
+		$n_filename="";
+		
+		//Check that it only contains valid characters
+		for($i=0;$i<strlen($filename);$i++) if (in_array(substr($filename,$i,1),$this->fckphp_config['FileNameAllowedChars'])) $n_filename.=substr($filename,$i,1);
+		
+		//If it got this far all is ok
+		return $n_filename;
+	}
+	
 	function run() {
 		//If using CGI Upload script, get file info and insert into $_FILE array
 		if 	(
@@ -41,7 +61,8 @@ class FileUpload {
 				is_array($_GET['file']['NewFile'])
 			) {
 			if (isset($_GET['file']['NewFile']['name'])&&$_GET['file']['NewFile']['size']&&$_GET['file']['NewFile']['tmp_name']) {
-				$_FILES['NewFile']['name']=basename(str_replace("\\","/",$_GET['file']['NewFile']['name']));
+//				$_FILES['NewFile']['name']=basename(str_replace("\\","/",$_GET['file']['NewFile']['name']));
+				$_FILES['NewFile']['name']=end(explode('/',str_replace("\\","/",$_GET['file']['NewFile']['name'])));	// (*2)
 				$_FILES['NewFile']['size']=$_GET['file']['NewFile']['size'];
 				$_FILES['NewFile']['tmp_name']=$_GET['file']['NewFile']['tmp_name'];
 			} else {
@@ -49,19 +70,20 @@ class FileUpload {
 			}
 		}
 
+// 		if (isset($_FILES['NewFile'])&&isset($_FILES['NewFile']['name'])&&($_FILES['NewFile']['name']!=""))
+// 			$_FILES['NewFile']['name']=$_FILES['NewFile']['name']; //$this->cleanFilename($_FILES['NewFile']['name']);
+		
 		$typeconfig=$this->fckphp_config['ResourceAreas'][$this->type];
 		
 		header ("content-type: text/html");
 		if (sizeof($_FILES)>0) {
 			if (array_key_exists("NewFile",$_FILES)) {
-				if ($_FILES['NewFile']['size']<($typeconfig['MaxSize']*1024)) {
+				if (! $_FILES['NewFile']['error'] && $_FILES['NewFile']['size']<($typeconfig['MaxSize'])) {	// (*1)
 
-					$filename=basename(str_replace("\\","/",$_FILES['NewFile']['name']));
-					//if($this->modx->config['clean_uploaded_filename']) {
-					//	$nameparts = explode('.', $filename);
-					//	array_map(array($this->modx, 'stripAlias'), $nameparts);
-					//	$filename = implode($nameparts);
-					//}
+//					$filename=basename(str_replace("\\","/",$_FILES['NewFile']['name']));
+					$filename=end(explode('/',str_replace("\\","/",$_FILES['NewFile']['name'])));	// (*2)
+					
+					if ($this->cleanFilename($filename) == $filename) {	// (*3)
 					
 					$lastdot=strrpos($filename,".");
 					
@@ -145,6 +167,7 @@ class FileUpload {
 													$disp="202,'Failed to upload file, internal error.'";
 												}
 											}
+												$uploaded_name = "$filename($i).$ext";	// (*4)
 											$taskDone=true;	
 										}
 									}
@@ -168,6 +191,20 @@ class FileUpload {
 											$disp="202,'Failed to upload file, internal error...'";
 										}
 									}
+										$uploaded_name = "$filename.$ext";	// (*4)
+									}
+									// (*4)
+									if (reset(explode(',', $disp)) != '202') {
+										$uploaded_path = preg_replace('|\\/$|', '', $this->real_cwd);
+										include_once("../../../../../includes/document.parser.class.inc.php");
+										global $modx;
+										$modx = new DocumentParser;
+										$modx->getSettings();
+										$modx->invokeEvent("OnFileManagerUpload",
+												array(
+													"filepath"	=> $uploaded_path,
+													"filename"	=> $uploaded_name
+												));
 								}
 							}
 						} else {
@@ -179,7 +216,9 @@ class FileUpload {
 						//No file extension to check
 						$disp="202,'Unable to determine file type of file'";
 					}	
-					
+					} else {	// (*3)
+						$disp="202,'The character which cannot be used for a file name is contained.'";
+					}
 				} else {
 					//Too big
 					$disp="202,'This file exceeds the maximum upload size.'";
@@ -215,8 +254,11 @@ class FileUpload {
 	
 	function getDirSize($dir) {
 		$dirSize=0;
-		if ($dh=@opendir($dir)) {
-			while ($file=@readdir($dh)) {
+		$files = scandir($dir);
+		if ($files)
+		{
+			foreach ($files as $file)
+			{
 				if (($file!=".")&&($file!="..")) {
 					if (is_dir($dir."/".$file)) {
 						$tmp_dirSize=$this->getDirSize($dir."/".$file);
@@ -226,7 +268,6 @@ class FileUpload {
 					}
 				}
 			}
-			@closedir($dh);
 		} else {
 			return false;
 		}
@@ -234,5 +275,3 @@ class FileUpload {
 		return $dirSize;
 	}
 }
-
-?>
