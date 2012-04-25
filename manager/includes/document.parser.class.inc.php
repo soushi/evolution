@@ -2112,7 +2112,7 @@ class DocumentParser {
         $f_url_suffix = $this->config['friendly_url_suffix'];
 		if (!is_numeric($id))
 		{
-            $this->messageQuit('`' . $id . '` is not numeric and may not be passed to makeUrl()');
+			$this->messageQuit("'{$id}' is not numeric and may not be passed to makeUrl()");
         }
 		if ($args != '' && $this->config['friendly_urls'] == 1)
 		{
@@ -2120,68 +2120,48 @@ class DocumentParser {
             $c= substr($args, 0, 1);
 			if (strpos($f_url_prefix, '?') === false)
 			{
-                if ($c == '&')
-				{
-					$args= '?' . ltrim($args, '&');
+				if ($c == '&')     $args= '?' . ltrim($args, '&');
+				elseif ($c != '?') $args= '?' . $args;
 				}
-				elseif ($c != '?')
-				{
-					$args= '?' . $args;
-				}
-			}
 			else
 			{
-                if ($c == '?')
-				{
-					$args= '&' . ltrim($args, '?');
-				}
-				elseif ($c != '&')
-				{
-					$args= '&' . $args;
+				if ($c == '?')     $args= '&' . ltrim($args, '?');
+				elseif ($c != '&') $args= '&' . $args;
             }
         }
-		}
 		elseif ($args != '')
 		{
             // add & to $args if missing
             $c= substr($args, 0, 1);
-            if ($c == '?')
-			{
-				$args= '&' . ltrim($args, '?');
+			if ($c == '?')     $args= '&' . ltrim($args, '?');
+			elseif ($c != '&') $args= '&' . $args;
 			}
-			elseif ($c != '&')
-			{
-				$args= '&' . $args;
-			}
-		}
-		if ($this->config['friendly_urls'] == 1 && $alias != '')
+		if ($this->config['friendly_urls'] == 1)
 		{
-			if((strpos($alias, '.') !== false)
-			    && (isset($this->config['suffix_mode'])
-			    && $this->config['suffix_mode']==1))
+			$alPath = '';
+			if(empty($alias))
 			{
-				    $f_url_suffix = ''; // jp-edition only
-        }
-            $url= $f_url_prefix . $alias . $f_url_suffix . $args;
-        }
-		elseif ($this->config['friendly_urls'] == 1 && $alias == '')
-		{
 			$alias = $id;
 			if ($this->config['friendly_alias_urls'] == 1)
 			{
                 $al= $this->aliasListing[$id];
-                $alPath= !empty ($al['path']) ? $al['path'] . '/' : '';
-                if ($al && $al['alias'])
+					if(!empty ($al['path'])) $alPath = $al['path'] . '/';
+					if ($al && $al['alias']) $alias  = $al['alias'];
+				}
+			}
+			
+			if((strpos($alias, '.') !== false) && (isset($this->config['suffix_mode']) && $this->config['suffix_mode']==1))
 				{
-                    $alias= $al['alias'];
+				$f_url_suffix = ''; // jp-edition only
             }
 			}
-			$alias = $alPath . $f_url_prefix . $alias . $f_url_suffix;
-			$url = $alias . $args;
+		if ($this->config['friendly_urls'] == 1)
+		{
+			$url = $alPath . $f_url_prefix . $alias . $f_url_suffix . $args;
 		}
 		else
 		{
-            $url= 'index.php?id=' . $id . $args;
+			$url= "index.php?id={$id}{$args}";
         }
 
         $host= $this->config['base_url'];
@@ -2200,12 +2180,26 @@ class DocumentParser {
 
 		if ($this->config['xhtml_urls'])
 		{
-        	return preg_replace("/&(?!amp;)/","&amp;", $host . $virtualDir . $url);
+			$url = preg_replace("/&(?!amp;)/",'&amp;', $host . $virtualDir . $url);
 		}
 		else
 		{
-        	return $host . $virtualDir . $url;
+			$url = $host . $virtualDir . $url;
         }
+		$rs = $this->invokeEvent('OnMakeUrl',
+				array(
+					"id"    => $id,
+					"alias" => $alias,
+					"args"  => $args,
+					"scheme"=> $scheme,
+					"url"   => $url
+				)
+			);
+		if (!empty($rs))
+		{
+			$url = end($rs);
+		}
+		return $url;
     }
 
     function getConfig($name= '') {
