@@ -386,7 +386,11 @@ function showHide(what, onoff){
 		  <tr>
 			<td><?php echo $_lang['user_prevlogin']; ?>:</td>
 			<td>&nbsp;</td>
-			<td><?php echo $modx->toDateFormat($userdata['lastlogin']+$server_offset_time) ?></td>
+			<?php
+				if(!empty($userdata['lastlogin'])) $lastlogin = $modx->toDateFormat($userdata['lastlogin']+$server_offset_time);
+				else                               $lastlogin = '-';
+			?>
+			<td><?php echo $lastlogin; ?></td>
 		  </tr>
 		  <tr>
 			<td><?php echo $_lang['user_failedlogincount']; ?>:</td>
