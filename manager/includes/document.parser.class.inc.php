@@ -2686,21 +2686,6 @@ class DocumentParser {
 		$rs= $this->db->insert($f,$this->getFullTableName('user_messages'));
     }
 
-    # Returns true, install or interact when inside manager
-    // deprecated
-    function insideManager() {
-        $m= false;
-        if (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true') {
-            $m= true;
-            if (defined('SNIPPET_INTERACTIVE_MODE') && SNIPPET_INTERACTIVE_MODE == 'true')
-                $m= "interact";
-            else
-                if (defined('SNIPPET_INSTALL_MODE') && SNIPPET_INSTALL_MODE == 'true')
-                    $m= "install";
-        }
-        return $m;
-    }
-
     # Returns current user id
     function getLoginUserID($context= '') {
         if ($context && isset ($_SESSION[$context . 'Validated'])) {
