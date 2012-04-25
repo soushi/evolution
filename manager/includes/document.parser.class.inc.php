@@ -2015,28 +2015,33 @@ class DocumentParser {
         }
     }
 
-    function getPageInfo($pageid= -1, $active= 1, $fields= 'id, pagetitle, description, alias') {
-        if ($pageid == 0) {
-            return false;
-        } else {
-            $tblsc= $this->getFullTableName("site_content");
-            $tbldg= $this->getFullTableName("document_groups");
-            $activeSql= $active == 1 ? "AND sc.published=1 AND sc.deleted=0" : "";
+	function getPageInfo($docid= 0, $active= 1, $fields= 'id, pagetitle, description, alias')
+	{
+		if($docid == 0) return false;
+		else
+		{
+			$tbl_site_content    = $this->getFullTableName('site_content');
+			$tbl_document_groups = $this->getFullTableName('document_groups');
+			
             // modify field names to use sc. table reference
-            $fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", "", explode(',', $fields)));
+			$fields = preg_replace("/\s/i", '',$fields);
+			$fields = 'sc.' . implode(',sc.', explode(',', $fields));
+			
+			$published = ($active == 1) ? 'AND sc.published=1 AND sc.deleted=0' : '';
+			
             // get document groups for current user
-            if ($docgrp= $this->getUserDocGroups())
-                $docgrp= implode(",", $docgrp);
-            $access= ($this->isFrontend() ? "sc.privateweb=0" : "1='" . $_SESSION['mgrRole'] . "' OR sc.privatemgr=0") .
-             (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)");
-            $sql= "SELECT $fields
-                    FROM $tblsc sc
-                    LEFT JOIN $tbldg dg on dg.document = sc.id
-                    WHERE (sc.id=$pageid $activeSql)
-                    AND ($access)
-                    LIMIT 1 ";
-            $result= $this->db->query($sql);
-            $pageInfo= @ $this->db->getRow($result);
+			if($docgrp= $this->getUserDocGroups())
+			{
+				$docgrp= implode(',', $docgrp);
+			}
+			if($this->isFrontend()) $context = 'sc.privateweb=0';
+			else                    $context = "1='{$_SESSION['mgrRole']}' OR sc.privatemgr=0";
+			$cond   =  ($docgrp) ? "OR dg.document_group IN ({$docgrp})" : '';
+			
+			$from = "{$tbl_site_content} sc LEFT JOIN {$tbl_document_groups} dg on dg.document = sc.id";
+			$where = "(sc.id={$docid} {$published}) AND ({$context} {$cond})";
+			$result = $this->db->select($fields,$from,$where,'',1);
+			$pageInfo = $this->db->getRow($result);
             return $pageInfo;
         }
     }
