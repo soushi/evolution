@@ -901,8 +901,8 @@ class DocumentParser {
 				if($this->config['unauthorized_page'])
 				{
                             // check if file is not public
-					$tbldg = $this->getFullTableName('document_groups');
-					$secrs = $this->db->query("SELECT id FROM {$tbldg} WHERE document = '{$id}' LIMIT 1;");
+					$tbl_document_groups = $this->getFullTableName('document_groups');
+					$secrs = $this->db->select('id', $tbl_document_groups, "document='{$id}'",'',1);
 					if($secrs)
 					{
 						$seclimit = $this->db->getRecordCount($secrs);
@@ -927,11 +927,10 @@ class DocumentParser {
 
 				// Remove intermediate variables
                 unset($docObj['__MODxDocGroups__'], $docObj['__MODxSJScripts__'], $docObj['__MODxJScripts__']);
-
+		}
 			$this->documentObject = $docObj;
                 return $a[1]; // return document content
             }
-    }
 
 	function checkPublishStatus()
 	{
