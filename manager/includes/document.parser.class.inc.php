@@ -3137,6 +3137,24 @@ class DocumentParser {
 	function dbClose()                   {$this->db->disconnect();}
 
     // deprecated
+	function insideManager()
+	{
+		$m= false;
+		if (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true')
+		{
+			$m= true;
+			if(defined('SNIPPET_INTERACTIVE_MODE') && SNIPPET_INTERACTIVE_MODE == 'true')
+			{
+				$m= "interact";
+			}
+			elseif(defined('SNIPPET_INSTALL_MODE') && SNIPPET_INSTALL_MODE == 'true')
+			{
+				$m= "install";
+			}
+		}
+		return $m;
+	}
+
     function putChunk($chunkName) { // alias name >.<
         return $this->getChunk($chunkName);
     }
