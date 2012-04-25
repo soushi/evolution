@@ -1063,21 +1063,30 @@ class DocumentParser {
     }
 
     // Added by Raymond
-    function mergePlaceholderContent($content) {
+	function mergePlaceholderContent($content)
+	{
         $replace= array ();
         $matches= array ();
-        if (preg_match_all('~\[\+(.*?)\+\]~', $content, $matches)) {
+		if(preg_match_all('~\[\+(.*?)\+\]~', $content, $matches))
+		{
             $cnt= count($matches[1]);
-            for ($i= 0; $i < $cnt; $i++) {
+			for ($i= 0; $i < $cnt; $i++)
+			{
                 $v= '';
                 $key= $matches[1][$i];
                 if (is_array($this->placeholders) && isset($this->placeholders[$key]))
+				{
                     $v= $this->placeholders[$key];
+				}
                 if ($v === '')
+				{
                     unset ($matches[0][$i]); // here we'll leave empty placeholders for last.
+				}
                 else
+				{
                     $replace[$i]= $v;
             }
+			}
             $content= str_replace($matches[0], $replace, $content);
         }
         return $content;
