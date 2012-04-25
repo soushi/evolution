@@ -1004,15 +1004,20 @@ class DocumentParser {
         return $template;
     }
 
-    function mergeSettingsContent($template) {
+	function mergeSettingsContent($template)
+	{
         $replace= array ();
         $matches= array ();
-        if (preg_match_all('~\[\(([a-z\_]*?)\)\]~', $template, $matches)) {
-            $settingsCount= count($matches[1]);
-            for ($i= 0; $i < $settingsCount; $i++) {
-                if (isset($this->config[$matches[1][$i]]))
+		if(preg_match_all('~\[\(([a-z\_]*?)\)\]~', $template, $matches))
+		{
+			$total= count($matches[1]);
+			for($i= 0; $i < $total; $i++)
+			{
+				if(isset($this->config[$matches[1][$i]]))
+				{
                     $replace[$i]= $this->config[$matches[1][$i]];
             }
+			}
 
             $template= str_replace($matches[0], $replace, $template);
         }
