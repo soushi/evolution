@@ -2252,71 +2252,6 @@ class DocumentParser {
         return $listhtml;
     }
 
-    function userLoggedIn() {
-        $userdetails= array ();
-        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
-            // web user
-            $userdetails['loggedIn']= true;
-            $userdetails['id']= $_SESSION['webInternalKey'];
-            $userdetails['username']= $_SESSION['webShortname'];
-            $userdetails['usertype']= 'web'; // added by Raymond
-            return $userdetails;
-        } else
-            if ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
-                // manager user
-                $userdetails['loggedIn']= true;
-                $userdetails['id']= $_SESSION['mgrInternalKey'];
-                $userdetails['username']= $_SESSION['mgrShortname'];
-                $userdetails['usertype']= 'manager'; // added by Raymond
-                return $userdetails;
-            } else {
-                return false;
-            }
-    }
-
-    function getKeywords($id= 0) {
-        if ($id == 0) {
-            $id= $this->documentObject['id'];
-        }
-        $tblKeywords= $this->getFullTableName('site_keywords');
-        $tblKeywordXref= $this->getFullTableName('keyword_xref');
-        $sql= "SELECT keywords.keyword FROM " . $tblKeywords . " AS keywords INNER JOIN " . $tblKeywordXref . " AS xref ON keywords.id=xref.keyword_id WHERE xref.content_id = '$id'";
-        $result= $this->db->query($sql);
-        $limit= $this->db->getRecordCount($result);
-        $keywords= array ();
-        if ($limit > 0) {
-            for ($i= 0; $i < $limit; $i++) {
-                $row= $this->db->getRow($result);
-                $keywords[]= $row['keyword'];
-            }
-        }
-        return $keywords;
-    }
-
-    function getMETATags($id= 0) {
-        if ($id == 0) {
-            $id= $this->documentObject['id'];
-        }
-        $sql= "SELECT smt.* " .
-        "FROM " . $this->getFullTableName("site_metatags") . " smt " .
-        "INNER JOIN " . $this->getFullTableName("site_content_metatags") . " cmt ON cmt.metatag_id=smt.id " .
-        "WHERE cmt.content_id = '$id'";
-        $ds= $this->db->query($sql);
-        $limit= $this->db->getRecordCount($ds);
-        $metatags= array ();
-        if ($limit > 0) {
-            for ($i= 0; $i < $limit; $i++) {
-                $row= $this->db->getRow($ds);
-                $metatags[$row['name']]= array (
-                    "tag" => $row['tag'],
-                    "tagvalue" => $row['tagvalue'],
-                    "http_equiv" => $row['http_equiv']
-                );
-            }
-        }
-        return $metatags;
-    }
-
     function runSnippet($snippetName, $params= array ()) {
         if (isset ($this->snippetCache[$snippetName])) {
             $snippet= $this->snippetCache[$snippetName];
@@ -2346,44 +2281,6 @@ class DocumentParser {
         $t= $this->chunkCache[$chunkName];
         return $t;
     }
-    }
-
-    // deprecated
-    function putChunk($chunkName) { // alias name >.<
-        return $this->getChunk($chunkName);
-    }
-
-    function changePassword($o, $n) {
-        return changeWebUserPassword($o, $n);
-    } // deprecated
-
-    function mergeDocumentMETATags($template) {
-        if ($this->documentObject['haskeywords'] == 1) {
-            // insert keywords
-            $keywords = $this->getKeywords();
-            if (is_array($keywords) && count($keywords) > 0) {
-	            $keywords = implode(", ", $keywords);
-	            $metas= "\t<meta name=\"keywords\" content=\"$keywords\" />\n";
-            }
-
-	    // Don't process when cached
-	    $this->documentObject['haskeywords'] = '0';
-        }
-        if ($this->documentObject['hasmetatags'] == 1) {
-            // insert meta tags
-            $tags= $this->getMETATags();
-            foreach ($tags as $n => $col) {
-                $tag= strtolower($col['tag']);
-                $tagvalue= $col['tagvalue'];
-                $tagstyle= $col['http_equiv'] ? 'http-equiv' : 'name';
-                $metas .= "\t<meta $tagstyle=\"$tag\" content=\"$tagvalue\" />\n";
-            }
-
-	    // Don't process when cached
-	    $this->documentObject['hasmetatags'] = '0';
-        }
-	if (isset($metas) && $metas) $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
-        return $template;
     }
 
     function parseChunk($chunkName, $chunkArr, $prefix= "{", $suffix= "}",$mode='chunk') {
@@ -3207,6 +3104,109 @@ class DocumentParser {
 	function affectedRows($rs)           {return $this->db->getAffectedRows($rs);}
 	function insertId($rs)               {return $this->db->getInsertId($rs);}
 	function dbClose()                   {$this->db->disconnect();}
+
+    // deprecated
+    function putChunk($chunkName) { // alias name >.<
+        return $this->getChunk($chunkName);
+    }
+
+    function changePassword($o, $n) {
+        return changeWebUserPassword($o, $n);
+    } // deprecated
+
+    function mergeDocumentMETATags($template) {
+        if ($this->documentObject['haskeywords'] == 1) {
+            // insert keywords
+            $keywords = $this->getKeywords();
+            if (is_array($keywords) && count($keywords) > 0) {
+	            $keywords = implode(", ", $keywords);
+	            $metas= "\t<meta name=\"keywords\" content=\"$keywords\" />\n";
+            }
+
+	    // Don't process when cached
+	    $this->documentObject['haskeywords'] = '0';
+        }
+        if ($this->documentObject['hasmetatags'] == 1) {
+            // insert meta tags
+            $tags= $this->getMETATags();
+            foreach ($tags as $n => $col) {
+                $tag= strtolower($col['tag']);
+                $tagvalue= $col['tagvalue'];
+                $tagstyle= $col['http_equiv'] ? 'http-equiv' : 'name';
+                $metas .= "\t<meta $tagstyle=\"$tag\" content=\"$tagvalue\" />\n";
+            }
+
+	    // Don't process when cached
+	    $this->documentObject['hasmetatags'] = '0';
+        }
+	if (isset($metas) && $metas) $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
+        return $template;
+    }
+
+    function userLoggedIn() {
+        $userdetails= array ();
+        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            // web user
+            $userdetails['loggedIn']= true;
+            $userdetails['id']= $_SESSION['webInternalKey'];
+            $userdetails['username']= $_SESSION['webShortname'];
+            $userdetails['usertype']= 'web'; // added by Raymond
+            return $userdetails;
+        } else
+            if ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+                // manager user
+                $userdetails['loggedIn']= true;
+                $userdetails['id']= $_SESSION['mgrInternalKey'];
+                $userdetails['username']= $_SESSION['mgrShortname'];
+                $userdetails['usertype']= 'manager'; // added by Raymond
+                return $userdetails;
+            } else {
+                return false;
+            }
+    }
+
+    function getKeywords($id= 0) {
+        if ($id == 0) {
+            $id= $this->documentObject['id'];
+        }
+        $tblKeywords= $this->getFullTableName('site_keywords');
+        $tblKeywordXref= $this->getFullTableName('keyword_xref');
+        $sql= "SELECT keywords.keyword FROM " . $tblKeywords . " AS keywords INNER JOIN " . $tblKeywordXref . " AS xref ON keywords.id=xref.keyword_id WHERE xref.content_id = '$id'";
+        $result= $this->db->query($sql);
+        $limit= $this->db->getRecordCount($result);
+        $keywords= array ();
+        if ($limit > 0) {
+            for ($i= 0; $i < $limit; $i++) {
+                $row= $this->db->getRow($result);
+                $keywords[]= $row['keyword'];
+            }
+        }
+        return $keywords;
+    }
+
+    function getMETATags($id= 0) {
+        if ($id == 0) {
+            $id= $this->documentObject['id'];
+        }
+        $sql= "SELECT smt.* " .
+        "FROM " . $this->getFullTableName("site_metatags") . " smt " .
+        "INNER JOIN " . $this->getFullTableName("site_content_metatags") . " cmt ON cmt.metatag_id=smt.id " .
+        "WHERE cmt.content_id = '$id'";
+        $ds= $this->db->query($sql);
+        $limit= $this->db->getRecordCount($ds);
+        $metatags= array ();
+        if ($limit > 0) {
+            for ($i= 0; $i < $limit; $i++) {
+                $row= $this->db->getRow($ds);
+                $metatags[$row['name']]= array (
+                    "tag" => $row['tag'],
+                    "tagvalue" => $row['tagvalue'],
+                    "http_equiv" => $row['http_equiv']
+                );
+            }
+        }
+        return $metatags;
+    }
 
     /*############################################
       Etomite_dbFunctions.php
