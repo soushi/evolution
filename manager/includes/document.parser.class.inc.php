@@ -3174,17 +3174,9 @@ class DocumentParser {
 		return $m;
 	}
 
-    function putChunk($chunkName) { // alias name >.<
-        return $this->getChunk($chunkName);
-    }
-
-    function getDocGroups() {
-        return $this->getUserDocGroups();
-    } // deprecated
-
-    function changePassword($o, $n) {
-        return changeWebUserPassword($o, $n);
-    } // deprecated
+    function putChunk($chunkName) {return $this->getChunk($chunkName);}// deprecated alias name >.<
+    function getDocGroups() {return $this->getUserDocGroups();} // deprecated
+	function changePassword($o, $n) {return changeWebUserPassword($o, $n);} // deprecated
 
     function mergeDocumentMETATags($template) {
         if ($this->documentObject['haskeywords'] == 1) {
