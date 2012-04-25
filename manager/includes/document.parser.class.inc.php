@@ -2093,7 +2093,7 @@ class DocumentParser {
     		$showReport = ($params['showReport']) ? $params['showReport'] : false;
     		$target = ($params['target']) ? $params['target'] : 'pagecache,sitecache';
     		
-			include_once MODX_MANAGER_PATH . "processors/cache_sync.class.processor.php";
+			include_once MODX_MANAGER_PATH . 'processors/cache_sync.class.processor.php';
 			$sync = new synccache();
 			$sync->setCachepath(MODX_BASE_PATH . 'assets/cache/');
 			$sync->setReport($showReport);
