@@ -2815,10 +2815,6 @@ class DocumentParser {
                 }
     }
 	
-    function getDocGroups() {
-        return $this->getUserDocGroups();
-    } // deprecated
-
     # Change current web user's password - returns true if successful, oterhwise return error message
     function changeWebUserPassword($oldPwd, $newPwd) {
         $rt= false;
@@ -3158,6 +3154,10 @@ class DocumentParser {
     function putChunk($chunkName) { // alias name >.<
         return $this->getChunk($chunkName);
     }
+
+    function getDocGroups() {
+        return $this->getUserDocGroups();
+    } // deprecated
 
     function changePassword($o, $n) {
         return changeWebUserPassword($o, $n);
