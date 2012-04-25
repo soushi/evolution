@@ -248,7 +248,9 @@ function getTVDisplayFormat($name,$value,$format,$paramstring='',$tvtype='',$doc
             $widget_output = '';
             $o = '';
             /* If we are loading a file */
-            if(substr($params['output'], 0, 5) == "@FILE") {
+				$params['output'] = $modx->parsePlaceholder($params['output'],array('value'=>$value,'tvname'=>$name));
+				if(substr($params['output'], 0, 5) == '@FILE')
+				{
                 $file_name = MODX_BASE_PATH . trim(substr($params['output'], 6));
 					if( !file_exists($file_name) )
 					{
