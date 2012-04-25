@@ -449,37 +449,32 @@ switch ($_POST['mode']) {
 }
 
 // Send an email to the user
-function sendMailMessage($email, $uid, $pwd, $ufn) {
-	global $signupemail_message;
-	global $emailsubject, $emailsender;
-	global $site_name, $site_start, $site_url;
-	$manager_url = $site_url . "manager/";
-	$message = sprintf($signupemail_message, $uid, $pwd); // use old method
-	// replace placeholders
-	$message = str_replace("[+uid+]", $uid, $message);
-	$message = str_replace("[+pwd+]", $pwd, $message);
-	$message = str_replace("[+ufn+]", $ufn, $message);
-	$message = str_replace("[+sname+]", $site_name, $message);
-	$message = str_replace("[+saddr+]", $emailsender, $message);
-	$message = str_replace("[+semail+]", $emailsender, $message);
-	$message = str_replace("[+surl+]", $manager_url, $message);
+function sendMailMessage($email, $uid, $pwd, $ufn)
+{
+	global $modx;
+	$message = sprintf($modx->config['signupemail_message'], $uid, $pwd); // use old method
+	$ph['uid']    = $uid;
+	$ph['pwd']    = $pwd;
+	$ph['ufn']    = $ufn;
+	$ph['sname']  = $modx->config['site_name'];
+	$ph['saddr']  = $modx->config['emailsender'];
+	$ph['semail'] = $modx->config['emailsender'];
+	$ph['surl']   = $modx->config['site_url'] . 'manager/';
+	$message = $modx->parsePlaceholder($message,$ph);
 
-	$headers = "From: " . $emailsender . "\r\n";
-	$headers .= "X-Mailer: Content Manager - PHP/" . phpversion();
-	$headers .= "\r\n";
-	$headers .= "MIME-Version: 1.0\r\n";
-	$headers .= "Content-Type: text/plain; charset=utf-8\r\n";
-	$headers .= "Content-Transfer-Encoding: quoted-printable\r\n";
-	$subject = "=?UTF-8?Q?".$emailsubject."?=";
-	$message = save_user_quoted_printable($message);
-
-	if (ini_get('safe_mode') == FALSE) {
-		if (!mail($email, $subject, $message, $headers, "-f $emailsender")) {
-			webAlert("$email - {$_lang['error_sending_email']}");
-			exit;
-		}
-	} elseif (!mail($email, $subject, $message, $headers)) {
-		webAlert("$email - {$_lang['error_sending_email']}");
+	include_once MODX_BASE_PATH."manager/includes/controls/modxmailer.inc.php";
+	$mail = new MODxMailer();
+	$mail->IsMail();
+	$mail->IsHTML(0);
+	$mail->From		= $modx->config['emailsender'];
+	$mail->FromName	= $modx->config['site_name'];
+	$mail->Subject	= $modx->config['emailsubject'];
+	$mail->Body		= $message;
+	$mail->AddAddress($email);
+	$rs = $mail->Send();
+	if ($rs === false) //ignore mail errors in this cas
+	{
+		webAlert("{$email} - {$_lang['error_sending_email']}");
 		exit;
 	}
 }

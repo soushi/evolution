@@ -392,24 +392,30 @@ switch ($_POST['mode']) {
 
 // Send an email to the user
 function sendMailMessage($email, $uid, $pwd, $ufn) {
-	global $websignupemail_message;
+	global $modx,$websignupemail_message;
 	global $emailsubject, $emailsender;
 	global $site_name, $site_start, $site_url;
 	$message = sprintf($websignupemail_message, $uid, $pwd); // use old method
 	// replace placeholders
-	$message = str_replace("[+uid+]", $uid, $message);
-	$message = str_replace("[+pwd+]", $pwd, $message);
-	$message = str_replace("[+ufn+]", $ufn, $message);
-	$message = str_replace("[+sname+]", $site_name, $message);
-	$message = str_replace("[+saddr+]", $emailsender, $message);
-	$message = str_replace("[+semail+]", $emailsender, $message);
-	$message = str_replace("[+surl+]", $site_url, $message);
-	if (ini_get('safe_mode') == FALSE) {
-		if (!mail($email, $emailsubject, $message, "From: " . $emailsender . "\r\n" . "X-Mailer: Content Manager - PHP/" . phpversion(), "-f $emailsender")) {
-			webAlert("Error while sending mail to $mailto");
-			exit;
-		}
-	} elseif (!mail($email, $emailsubject, $message, "From: " . $emailsender . "\r\n" . "X-Mailer: Content Manager - PHP/" . phpversion())) {
+	$ph['uid'] = $uid;
+	$ph['pwd'] = $pwd;
+	$ph['ufn'] = $ufn;
+	$ph['sname'] = $site_name;
+	$ph['saddr'] = $emailsender;
+	$ph['semail'] = $emailsender;
+	$ph['surl'] = $site_url;
+	$message = $modx->parsePlaceholder($message,$ph);
+	include_once MODX_BASE_PATH . 'manager/includes/controls/modxmailer.inc.php';
+	$mail = new MODxMailer();
+	$mail->IsMail();
+	$mail->IsHTML(0);
+	$mail->From		= $emailsender;
+	$mail->FromName	= $modx->config['site_name'];
+	$mail->Subject	=  $emailsubject;
+	$mail->Body		= $message;
+	$mail->AddAddress($email);
+	if ($mail->Send() === false) //ignore mail errors in this cas
+	{
 		webAlert("Error while sending mail to $email");
 		exit;
 	}
