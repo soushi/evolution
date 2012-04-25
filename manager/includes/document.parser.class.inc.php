@@ -1884,28 +1884,29 @@ class DocumentParser {
 		else return true;
     }
 
-    function getAllChildren($id= 0, $sort= 'menuindex', $dir= 'ASC', $fields= 'id, pagetitle, description, parent, alias, menutitle') {
-        $tblsc= $this->getFullTableName("site_content");
-        $tbldg= $this->getFullTableName("document_groups");
+	function getAllChildren($id= 0, $sort= 'menuindex', $dir= 'ASC', $fields= 'id, pagetitle, description, parent, alias, menutitle')
+	{
+		$tbl_site_content= $this->getFullTableName('site_content');
+		$tbl_document_groups= $this->getFullTableName('document_groups');
         // modify field names to use sc. table reference
-        $fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", "", explode(',', $fields)));
-        $sort= 'sc.' . implode(',sc.', preg_replace("/^\s/i", "", explode(',', $sort)));
+		$fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $fields)));
+		$sort= 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $sort)));
         // get document groups for current user
         if ($docgrp= $this->getUserDocGroups())
-            $docgrp= implode(",", $docgrp);
+		{
+			$docgrp= implode(',', $docgrp);
+		}
         // build query
-        $access= ($this->isFrontend() ? "sc.privateweb=0" : "sc.privatemgr=0") .
-         (!$docgrp ? "" : " OR dg.document_group IN ($docgrp)") . " OR 1='" . $_SESSION['mgrRole'] . "'";
-        $sql= "SELECT DISTINCT $fields FROM $tblsc sc
-              LEFT JOIN $tbldg dg on dg.document = sc.id
-              WHERE sc.parent = '$id'
-              AND ($access)
-              GROUP BY sc.id
-              ORDER BY $sort $dir;";
-        $result= $this->db->query($sql);
+		$context = ($this->isFrontend() ? 'web' : 'mgr');
+		$cond    = ($docgrp) ? "OR dg.document_group IN ({$docgrp}) OR 1='{$_SESSION['mgrRole']}'" : '';
+		$from = "{$tbl_site_content} sc LEFT JOIN {$tbl_document_groups} dg on dg.document = sc.id";
+		$where = "sc.parent = '{$id}' AND (sc.private{$context}=0 {$cond}) GROUP BY sc.id";
+		$orderby = "{$sort} {$dir}";
+		$result= $this->db->select("DISTINCT {$fields}",$from,$where,$orderby);
         $resourceArray= array ();
-        for ($i= 0; $i < @ $this->db->getRecordCount($result); $i++) {
-            $resourceArray[] = @ $this->db->getRow($result);
+		for ($i= 0; $i < $this->db->getRecordCount($result); $i++)
+		{
+			$resourceArray[] = $this->db->getRow($result);
         }
         return $resourceArray;
     }
