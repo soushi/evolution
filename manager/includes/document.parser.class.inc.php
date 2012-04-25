@@ -1754,35 +1754,46 @@ class DocumentParser {
     }
 
     # Add an a alert message to the system event log
-    function logEvent($evtid, $type, $msg, $source= 'Parser') {
+	function logEvent($evtid, $type, $msg, $source= 'Parser')
+	{
+		$evtid= intval($evtid);
+		if ($type < 1) $type= 1; // Types: 1 = information, 2 = warning, 3 = error
+		if (3 < $type) $type= 3;
         $msg= $this->db->escape($msg);
         $source= $this->db->escape($source);
-	if ($GLOBALS['database_connection_charset'] == 'utf8' && extension_loaded('mbstring')) {
-		$source = mb_substr($source, 0, 50 , "UTF-8");
-	} else {
+		if (function_exists('mb_substr'))
+		{
+			$source = mb_substr($source, 0, 50 , $this->config['modx_charset']);
+		}
+		else
+		{
 		$source = substr($source, 0, 50);
 	}
 	$LoginUserID = $this->getLoginUserID();
-	if ($LoginUserID == '') $LoginUserID = 0;
-        $evtid= intval($evtid);
-        if ($type < 1) {
-            $type= 1;
-        }
-        elseif ($type > 3) {
-            $type= 3; // Types: 1 = information, 2 = warning, 3 = error
-        }
+		if ($LoginUserID == '' || $LoginUserID===false) $LoginUserID = '-';
+		
         $fields['eventid']     = $evtid;
         $fields['type']        = $type;
         $fields['createdon']   = time();
         $fields['source']      = $source;
         $fields['description'] = $msg;
         $fields['user']        = $LoginUserID;
-        $insert_id = @$this->db->insert($fields,$this->getFullTableName("event_log"));
-        if (!$insert_id) {
-            echo "Error while inserting event log into database.";
+		$insert_id = $this->db->insert($fields,$this->getFullTableName('event_log'));
+		if(isset($this->config['send_errormail']) && $this->config['send_errormail'] !== '0')
+		{
+			if($this->config['send_errormail'] <= $type)
+			{
+				$subject = 'Notice of error from ' . $this->config['site_name'];
+				$this->sendmail($subject,$source);
+			}
+		}
+		if (!$insert_id)
+		{
+			echo 'Error while inserting event log into database.';
             exit();
         }
-        else {
+		else
+		{
             $trim  = (isset($this->config['event_log_trim']))  ? intval($this->config['event_log_trim']) : 100;
             if(($insert_id % $trim) == 0)
             {
