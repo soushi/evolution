@@ -1292,7 +1292,7 @@ class DocumentParser {
 		$executedSnippets = $this->evalSnippet($snippetObject['content'], $params);
 		if($this->dumpSnippets == 1)
 		{
-			echo '<fieldset><legend><b>' . $snippetObject['name'] . '</b></legend><textarea style="width:60%;height:200px">' . htmlentities($executedSnippets,ENT_NOQUOTES,$this->config["modx_charset"]) . '</textarea></fieldset>';
+			$this->snipCode .= '<fieldset><legend><b>' . $snippetObject['name'] . '</b></legend><textarea style="width:60%;height:200px">' . htmlentities($executedSnippets,ENT_NOQUOTES,$this->config['modx_charset']) . '</textarea></fieldset>';
 		}
 		return $executedSnippets . $except_snip_call;
 	}
@@ -1348,8 +1348,7 @@ class DocumentParser {
 					$tbl_snippets  = $this->getFullTableName('site_snippets');
 			$esc_snip_name = $this->db->escape($snip_name);
                     // get from db and store a copy inside cache
-					$sql= "SELECT `name`,`snippet`,`properties` FROM {$tbl_snippets} WHERE {$tbl_snippets}.`name`='{$esc_snip_name}';";
-                    $result= $this->db->query($sql);
+			$result= $this->db->select('name,snippet,properties',$tbl_snippets,"name='{$esc_snip_name}'");
                     $added = false;
 					if($this->db->getRecordCount($result) == 1)
 					{
