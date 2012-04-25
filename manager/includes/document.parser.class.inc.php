@@ -2002,17 +2002,16 @@ class DocumentParser {
         }
     }
 
-    function getDocument($id= 0, $fields= "*", $published= 1, $deleted= 0) {
-        if ($id == 0) {
-            return false;
-        } else {
+	function getDocument($id= 0, $fields= '*', $published= 1, $deleted= 0)
+	{
+		if ($id == 0) return false;
+		else
+		{
             $tmpArr[]= $id;
-            $docs= $this->getDocuments($tmpArr, $published, $deleted, $fields, "", "", "", 1);
-            if ($docs != false) {
-                return $docs[0];
-            } else {
-                return false;
-            }
+			$docs= $this->getDocuments($tmpArr, $published, $deleted, $fields, '', '', '', 1);
+			
+			if ($docs != false) return $docs[0];
+			else                return false;
         }
     }
 
