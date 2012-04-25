@@ -1,14 +1,16 @@
-<?php 
+<?php
 if(IN_MANAGER_MODE!="true") die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please use the MODx Content Manager instead of accessing this file directly.");
 if(!$modx->hasPermission('save_chunk')) {
 	$e->setError(3);
-	$e->dumpError();	
+	$e->dumpError();
 }
 $id = intval($_POST['id']);
 $snippet = $modx->db->escape($_POST['post']);
 $name = $modx->db->escape(trim($_POST['name']));
 $description = $modx->db->escape($_POST['description']);
 $locked = $_POST['locked']=='on' ? 1 : 0 ;
+
+$tbl_site_htmlsnippets = $modx->getFullTableName('site_htmlsnippets');
 
 //Kyle Jaebker - added category support
 if (empty($_POST['newcategory']) && $_POST['categoryid'] > 0) {
@@ -38,35 +40,35 @@ switch ($_POST['mode']) {
 								));
 
 		// disallow duplicate names for new chunks
-		$sql = "SELECT COUNT(id) FROM {$dbase}.`{$table_prefix}site_htmlsnippets` WHERE name = '{$name}'";
-		$rs = $modx->db->query($sql);
+		$rs = $modx->db->select('COUNT(id)',$tbl_site_htmlsnippets,"name='{$name}'");
 		$count = $modx->db->getValue($rs);
-		if($count > 0) {
-			$modx->event->alert(sprintf($_lang['duplicate_name_found_general'], $_lang['chunk'], $name));
-
-			// prepare a few variables prior to redisplaying form...
-			$content = array();
-			$_REQUEST['id'] = 0;
-			$_REQUEST['a'] = '77';
-			$_GET['stay'] = $_POST['stay'];
-			$content['id'] = 0;
-			$content['locked'] = $_POST['locked'] == 'on' ? 1 : 0;
-			$content['category'] = $_POST['categoryid'];
-
-			include 'header.inc.php';
-			include(dirname(dirname(__FILE__)).'/actions/mutate_htmlsnippet.dynamic.php');
-			include 'footer.inc.php';
-			
+		if($count > 0)
+		{
+			$url = "index.php?a=77";
+			$msg = sprintf($_lang['duplicate_name_found_general'], $_lang['chunk'], $name);
+			$modx->manager->saveFormValues(77);
+			include_once "header.inc.php";
+			$modx->webAlert($msg, $url);
+			include_once "footer.inc.php";
 			exit;
 		}
 		//do stuff to save the new doc
-		$sql = "INSERT INTO $dbase.`".$table_prefix."site_htmlsnippets` (name, description, snippet, locked, category) VALUES('".$name."', '".$description."', '".$snippet."', '".$locked."', ".$categoryid.");";
-		$rs = $modx->db->query($sql);
-		if(!$rs){
+		$field = array();
+		$field['name'] = $name;
+		$field['description'] = $description;
+		$field['snippet'] = $snippet;
+		$field['locked'] = $locked;
+		$field['category'] = $categoryid;
+		$rs = $modx->db->insert($field,$tbl_site_htmlsnippets);
+		if(!$rs)
+		{
 			echo "\$rs not set! New Chunk not saved!";
-		} else {	
+		}
+		else
+		{
 			// get the id
-			if(!$newid=mysql_insert_id()) {
+			if(!$newid=$modx->db->getInsertId())
+			{
 				echo "Couldn't get last insert key!";
 				exit;
 			}
@@ -83,14 +85,13 @@ switch ($_POST['mode']) {
 			
 			// finished emptying cache - redirect
 			if($_POST['stay']!='') {
-				$a = ($_POST['stay']=='2') ? "78&id=$newid":"77";
-				$header="Location: index.php?a=".$a."&r=2&stay=".$_POST['stay'];
-				header($header);
+				$a = ($_POST['stay']=='2') ? "78&id={$newid}":"77";
+				$header="Location: index.php?a={$a}&stay={$_POST['stay']}";
 			} else {
-				$header="Location: index.php?a=76&r=2";
-				header($header);
+				$header="Location: index.php?a=76";
 			}
-		}		
+			header($header);
+		}
         break;
     case '78':
 
@@ -101,42 +102,70 @@ switch ($_POST['mode']) {
 									"id"	=> $id
 								));
 		
+		if(check_exist_name($name)!==false)
+		{
+			$url = "index.php?a=78&id={$id}";
+			$msg = sprintf($_lang['duplicate_name_found_general'], $_lang['chunk'], $name);
+			$modx->manager->saveFormValues(78);
+			include_once "header.inc.php";
+			$modx->webAlert($msg, $url);
+			include_once "footer.inc.php";
+			exit;
+		}
+		
 		//do stuff to save the edited doc
-		$sql = "UPDATE $dbase.`".$table_prefix."site_htmlsnippets` SET name='".$name."', description='".$description."', snippet='".$snippet."', locked='".$locked."', category=".$categoryid." WHERE id='".$id."';";
-		$rs = $modx->db->query($sql);
-		if(!$rs){
+		$was_name = $modx->db->getValue($modx->db->select('name',$tbl_site_htmlsnippets,"id='{$id}'"));
+		$field = array();
+		$field['name'] = $name;
+		$field['description'] = $description;
+		$field['snippet'] = $snippet;
+		$field['locked'] = $locked;
+		$field['category'] = $categoryid;
+		$rs = $modx->db->update($field,$tbl_site_htmlsnippets,"id='{$id}'");
+		if(!$rs)
+		{
 			echo "\$rs not set! Edited htmlsnippet not saved!";
-		} else {		
+		}
+		else
+		{
+			$modx->db->update("content=REPLACE(content,'{{{$was_name}}}','{{{$name}}}')",$modx->getFullTableName('site_content'));
+			$modx->db->update("content=REPLACE(content,'{{{$was_name}}}','{{{$name}}}')",$modx->getFullTableName('site_templates'));
+			$modx->db->update("snippet=REPLACE(snippet,'{{{$was_name}}}','{{{$name}}}')",$modx->getFullTableName('site_htmlsnippets'));
+			$modx->db->update("content=REPLACE(content,'{{{$was_name}:','{{{$name}:')",  $modx->getFullTableName('site_content'));
+			$modx->db->update("content=REPLACE(content,'{{{$was_name}:','{{{$name}:')",  $modx->getFullTableName('site_templates'));
+			$modx->db->update("snippet=REPLACE(snippet,'{{{$was_name}:','{{{$name}:')",  $modx->getFullTableName('site_htmlsnippets'));
+			
 			// invoke OnChunkFormSave event
 			$modx->invokeEvent("OnChunkFormSave",
 									array(
 										"mode"	=> "upd",
 										"id"	=> $id
 									));
-
+			
 			// empty cache
-			include_once "cache_sync.class.processor.php";
-			$sync = new synccache();
-			$sync->setCachepath("../assets/cache/");
-			$sync->setReport(false);
-			$sync->emptyCache(); // first empty the cache		
+			$modx->clearCache(); // first empty the cache		
 
 			// finished emptying cache - redirect	
 			if($_POST['stay']!='') {
-				$a = ($_POST['stay']=='2') ? "78&id=$id":"77";
-				$header="Location: index.php?a=".$a."&r=2&stay=".$_POST['stay'];
-				header($header);
+				$a = ($_POST['stay']=='2') ? "78&id={$id}":"77";
+				$header="Location: index.php?a={$a}&stay={$_POST['stay']}";
 			} else {
-				$header="Location: index.php?a=76&r=2";
-				header($header);
+				$header="Location: index.php?a=76";
 			}
-		}		
-
-		
-		
+			header($header);
+		}
         break;
     default:
-	?>
-	Erm... You supposed to be here now?
-	<?php
+}
+
+function check_exist_name($name)
+{	// disallow duplicate names for new chunks
+	global $modx;
+	$tbl_site_htmlsnippets = $modx->getFullTableName('site_htmlsnippets');
+	$where = "name='{$name}'";
+	if($_POST['mode']==78) {$where = $where . " AND id!={$_POST['id']}";}
+	$rs = $modx->db->select('COUNT(id)',$tbl_site_htmlsnippets,$where);
+	$count = $modx->db->getValue($rs);
+	if($count > 0) return true;
+	else           return false;
 }
