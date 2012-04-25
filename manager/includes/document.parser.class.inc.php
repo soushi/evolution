@@ -3049,6 +3049,7 @@ class DocumentParser {
     # invoke an event. $extParams - hash array: name=>value
 	function invokeEvent($evtName, $extParams= array ())
 	{
+		if ($this->safeMode == true)               return false;
 		if (!$evtName)                             return false;
 		if (!isset ($this->pluginEvent[$evtName])) return false;
 		
@@ -3102,6 +3103,7 @@ class DocumentParser {
 
                 // eval plugin
                 $this->evalPlugin($pluginCode, $parameter);
+				$e->setAllGlobalVariables();
 				if ($e->_output != '')
                     $results[]= $e->_output;
                 if ($e->_propagate != true)
