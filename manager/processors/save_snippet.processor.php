@@ -1,8 +1,8 @@
-<?php 
+<?php
 if(IN_MANAGER_MODE!="true") die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please use the MODx Content Manager instead of accessing this file directly.");
 if(!$modx->hasPermission('save_snippet')) {
 	$e->setError(3);
-	$e->dumpError();	
+	$e->dumpError();
 }
 $id = intval($_POST['id']);
 $name = $modx->db->escape(trim($_POST['name']));
@@ -86,8 +86,8 @@ switch ($_POST['mode']) {
 		if(!$rs){
 			echo "\$rs not set! New snippet not saved!";
 			exit;
-		} 
-		else {	
+		}
+		else {
 			// get the id
 			if(!$newid=mysql_insert_id()) {
 				echo "Couldn't get last insert key!";
@@ -104,13 +104,13 @@ switch ($_POST['mode']) {
 			$modx->clearCache(); // first empty the cache
 			// finished emptying cache - redirect
 			if($_POST['stay']!='') {
-				$a = ($_POST['stay']=='2') ? "22&id=$newid":"23";
-				$header="Location: index.php?a=".$a."&stay=".$_POST['stay'];
+				$a = ($_POST['stay']=='2') ? "22&id={$newid}":"23";
+				$header="Location: index.php?a={$a}&stay={$_POST['stay']}";
 			} else {
 				$header="Location: index.php?a=76";
-				header($header);
 			}
-		}		
+			header($header);
+		}
         break;
     case '22':
 		// invoke OnBeforeSnipFormSave event
@@ -118,9 +118,9 @@ switch ($_POST['mode']) {
 								array(
 									"mode"	=> "upd",
 									"id"	=> $id
-								));	
+								));
 								
-		//do stuff to save the edited doc	
+		//do stuff to save the edited doc
 		$field = array();
 		$field['name']        = $name;
 		$field['description'] = $description;
@@ -133,30 +133,29 @@ switch ($_POST['mode']) {
 		if(!$rs){
 			echo "\$rs not set! Edited snippet not saved!";
 			exit;
-		} 
-		else {		
+		}
+		else {
 			// invoke OnSnipFormSave event
 			$modx->invokeEvent("OnSnipFormSave",
 									array(
 										"mode"	=> "upd",
 										"id"	=> $id
-									));	
+									));
 			// empty cache
 			$modx->clearCache(); // first empty the cache
 			if($_POST['runsnippet']) run_snippet($snippet);
-			// finished emptying cache - redirect	
+			// finished emptying cache - redirect
 			if($_POST['stay']!='') {
-				$a = ($_POST['stay']=='2') ? "22&id=$id":"23";
-				$header="Location: index.php?a=".$a."&stay=".$_POST['stay'];
-				header($header);
+				$a = ($_POST['stay']=='2') ? "22&id={$id}":"23";
+				$header="Location: index.php?a={$a}&stay={$_POST['stay']}";
 			} else {
 				$header="Location: index.php?a=76";
-				header($header);
 			}
-		}		
+			header($header);
+		}
         break;
     default:
-	?>	
-		Erm... You supposed to be here now? 	
+	?>
+		Erm... You supposed to be here now?
 	<?php
 }
