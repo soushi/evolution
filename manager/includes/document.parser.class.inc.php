@@ -936,7 +936,8 @@ class DocumentParser {
 	{
 		$tbl_site_content = $this->getFullTableName('site_content');
 		$cacheRefreshTime = 0;
-		include_once("{$this->config['base_path']}assets/cache/sitePublishing.idx.php");
+		$cache_path= "{$this->config['base_path']}assets/cache/sitePublishing.idx.php";
+		include_once($cache_path);
         $timeNow= time() + $this->config['server_offset_time'];
 		
 		if ($timeNow < $cacheRefreshTime || $cacheRefreshTime == 0) return;
@@ -975,7 +976,6 @@ class DocumentParser {
 		if (count($timesArr) > 0) $nextevent = min($timesArr);
 		else                      $nextevent = 0;
 
-		$cache_path= "{$this->config['base_path']}assets/cache/sitePublishing.idx.php";
 		$content = '<?php $cacheRefreshTime=' . $nextevent . ';';
             file_put_contents($cache_path, $content);
         }
