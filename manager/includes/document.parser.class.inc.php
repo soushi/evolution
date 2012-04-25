@@ -2495,11 +2495,12 @@ class DocumentParser {
 
     // Modified by Raymond for TV - Orig Modified by Apodigm - DocVars
     # returns a single TV record. $idnames - can be an id or name that belongs the template that the current document is using
-    function getTemplateVar($idname= "", $fields= "*", $docid= "", $published= 1) {
-        if ($idname == "") {
-            return false;
-        } else {
-            $result= $this->getTemplateVars(array ($idname), $fields, $docid, $published, "", ""); //remove sorting for speed
+	function getTemplateVar($idname= '', $fields= '*', $docid= '', $published= 1)
+	{
+		if ($idname == '') return false;
+		else
+		{
+			$result= $this->getTemplateVars(array($idname), $fields, $docid, $published, '', ''); //remove sorting for speed
             return ($result != false) ? $result[0] : false;
         }
     }
@@ -2535,7 +2536,8 @@ class DocumentParser {
 			}
             else
 			{
-				$where= (is_numeric($idnames[0]) ? 'tv.id' : 'tv.name') . " IN ('" . implode("','", $idnames) . "')";
+				$tvnames = $this->db->escape(implode("','", $idnames));
+				$where = (is_numeric($idnames[0])) ? 'tv.id' : "tv.name IN ('{$tvnames}')";
 			}
             if ($docgrp= $this->getUserDocGroups())
 			{
