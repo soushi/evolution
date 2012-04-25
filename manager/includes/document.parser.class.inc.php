@@ -1846,15 +1846,13 @@ class DocumentParser {
 	{
 		if($limit < $trim) $trim = $limit;
 		
-		$tbl_event_log = $this->getFullTableName("event_log");
+		$tbl_event_log = $this->getFullTableName('event_log');
 		$count = $this->db->getValue($this->db->select('COUNT(id)',$tbl_event_log));
 		$over = $count - $limit;
 		if(0 < $over)
 		{
 			$trim = ($over + $trim);
-			$sql = "DELETE FROM {$tbl_event_log} LIMIT {$trim}";
-			$this->db->query($sql);
-			$sql = "OPTIMIZE TABLE {$tbl_event_log}";
+			$this->db->delete($tbl_event_log,'',$trim);
 			$this->db->query($sql);
 		}
 	}
