@@ -3224,24 +3224,29 @@ class DocumentParser {
         return $metatags;
     }
 
-    function userLoggedIn() {
+	function userLoggedIn()
+	{
         $userdetails= array ();
-        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+		if ($this->isFrontend() && isset ($_SESSION['webValidated']))
+		{
             // web user
             $userdetails['loggedIn']= true;
             $userdetails['id']= $_SESSION['webInternalKey'];
             $userdetails['username']= $_SESSION['webShortname'];
             $userdetails['usertype']= 'web'; // added by Raymond
             return $userdetails;
-        } else
-            if ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+		}
+		elseif($this->isBackend() && isset ($_SESSION['mgrValidated']))
+		{
                 // manager user
                 $userdetails['loggedIn']= true;
                 $userdetails['id']= $_SESSION['mgrInternalKey'];
                 $userdetails['username']= $_SESSION['mgrShortname'];
                 $userdetails['usertype']= 'manager'; // added by Raymond
                 return $userdetails;
-            } else {
+		}
+		else
+		{
                 return false;
             }
     }
