@@ -2731,7 +2731,8 @@ class DocumentParser {
     }
 
     # Returns a record for the manager user
-    function getUserInfo($uid) {
+	function getUserInfo($uid)
+	{
     	$tbl_manager_users = $this->getFullTableName('manager_users');
     	$tbl_user_attributes = $this->getFullTableName('user_attributes');
         $field = 'mu.username, mu.password, mua.*';
@@ -2748,7 +2749,8 @@ class DocumentParser {
     }
 
     # Returns a record for the web user
-    function getWebUserInfo($uid) {
+	function getWebUserInfo($uid)
+	{
     	$tbl_web_users = $this->getFullTableName('web_users');
     	$tbl_web_user_attributes = $this->getFullTableName('web_user_attributes');
     	$field = 'wu.username, wu.password, wua.*';
