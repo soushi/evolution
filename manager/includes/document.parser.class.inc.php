@@ -2687,16 +2687,21 @@ class DocumentParser {
     }
 
     # Returns current user id
-    function getLoginUserID($context= '') {
-        if ($context && isset ($_SESSION[$context . 'Validated'])) {
-            return $_SESSION[$context . 'InternalKey'];
+	function getLoginUserID($context= '')
+	{
+		if ($context && isset ($_SESSION["{$context}Validated"]))
+		{
+			return $_SESSION["{$context}InternalKey"];
         }
-        elseif ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+		elseif ($this->isFrontend() && isset ($_SESSION['webValidated']))
+		{
             return $_SESSION['webInternalKey'];
         }
-        elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+		elseif ($this->isBackend() && isset ($_SESSION['mgrValidated']))
+		{
             return $_SESSION['mgrInternalKey'];
         }
+		else return false;
     }
 
     # Returns current user name
