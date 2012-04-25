@@ -5,9 +5,9 @@ if(!$modx->hasPermission('save_template')) {
 	$e->dumpError();	
 }
 $id = intval($_POST['id']);
-$template = $modx->db->escape($_POST['post']);
+$template     = $modx->db->escape($_POST['post']);
 $templatename = $modx->db->escape(trim($_POST['templatename']));
-$description = $modx->db->escape($_POST['description']);
+$description  = $modx->db->escape($_POST['description']);
 $locked = $_POST['locked']=='on' ? 1 : 0 ;
 
 $tbl_site_templates = $modx->getFullTableName('site_templates');
@@ -42,18 +42,17 @@ switch ($_POST['mode']) {
 		// disallow duplicate names for new templates
 		$rs = $modx->db->select('COUNT(id)', $tbl_site_templates, "templatename = '{$templatename}'");
 		$count = $modx->db->getValue($rs);
-		if($count > 0) {
+		if($count > 0)
+		{
 			$modx->event->alert(sprintf($_lang['duplicate_name_found_general'], $_lang['template'], $templatename));
-
 			// prepare a few request/post variables for form redisplay...
 			$_REQUEST['a'] = '19';
 			$_POST['locked'] = isset($_POST['locked']) && $_POST['locked'] == 'on' ? 1 : 0;
 			$_POST['category'] = $categoryid;
 			$_GET['stay'] = $_POST['stay'];
 			include 'header.inc.php';
-			include(dirname(dirname(__FILE__)).'/actions/mutate_templates.dynamic.php');
+			include(MODX_BASE_PATH.'manager/actions/mutate_templates.dynamic.php');
 			include 'footer.inc.php';
-			
 			exit;
 		}
 
@@ -84,20 +83,22 @@ switch ($_POST['mode']) {
 									array(
 										"mode"	=> "new",
 										"id"	=> $newid
-								));				
+								));
 
 			// empty cache
 			$modx->clearCache();
-			// finished emptying cache - redirect		
-			if($_POST['stay']!='') {
+			// finished emptying cache - redirect
+			if($_POST['stay']!='')
+			{
 				$a = ($_POST['stay']=='2') ? "16&id=$newid":"19";
-				$header="Location: index.php?a=".$a."&r=2&stay=".$_POST['stay'];
-				header($header);
-			} else {
-				$header="Location: index.php?a=76&r=2";
-				header($header);
+				$header="Location: index.php?a={$a}&stay={$_POST['stay']}";
 			}
-		}		
+			else
+			{
+				$header="Location: index.php?a=76";
+			}
+			header($header);
+		}
         break;
     case '16':
 
@@ -120,12 +121,11 @@ switch ($_POST['mode']) {
 			$_POST['category'] = $categoryid;
 			$_GET['stay'] = $_POST['stay'];
 			include 'header.inc.php';
-			include(dirname(dirname(__FILE__)).'/actions/mutate_templates.dynamic.php');
+			include(MODX_BASE_PATH . 'manager/actions/mutate_templates.dynamic.php');
 			include 'footer.inc.php';
-			
 			exit;
 		}
-							
+		
 		//do stuff to save the edited doc
 		$field = array();
 		$field['templatename'] = $templatename;
@@ -147,18 +147,20 @@ switch ($_POST['mode']) {
 										"id"	=> $id
 								));	    		
 
-			// first empty the cache		
+			// first empty the cache
 			$modx->clearCache();
-			// finished emptying cache - redirect	
-			if($_POST['stay']!='') {
+			// finished emptying cache - redirect
+			if($_POST['stay']!='')
+			{
 				$a = ($_POST['stay']=='2') ? "16&id=$id":"19";
-				$header="Location: index.php?a=".$a."&r=2&stay=".$_POST['stay'];
-				header($header);
-			} else {
-				$header="Location: index.php?a=76&r=2";
-				header($header);
+				$header="Location: index.php?a={$a}&stay={$_POST['stay']}";
 			}
-		}		
+			else
+			{
+				$header="Location: index.php?a=76";
+			}
+			header($header);
+		}
         break;
     default:
 	?>
