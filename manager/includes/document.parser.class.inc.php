@@ -2069,13 +2069,15 @@ class DocumentParser {
             }
     }
 
-    function getSnippetId() {
-        if ($this->currentSnippet) {
-            $tbl= $this->getFullTableName("site_snippets");
-            $rs= $this->db->query("SELECT id FROM $tbl WHERE name='" . $this->db->escape($this->currentSnippet) . "' LIMIT 1");
+	function getSnippetId()
+	{
+		if ($this->currentSnippet)
+		{
+			$tbl_site_snippets = $this->getFullTableName("site_snippets");
+			$snip = $this->db->escape($this->currentSnippet);
+			$rs= $this->db->select('id', $tbl_site_snippets, "name='{$snip}'",'',1);
             $row= @ $this->db->getRow($rs);
-            if ($row['id'])
-                return $row['id'];
+			if ($row['id']) return $row['id'];
         }
         return 0;
     }
