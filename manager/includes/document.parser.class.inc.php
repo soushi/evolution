@@ -2816,36 +2816,51 @@ class DocumentParser {
     }
 	
     # Change current web user's password - returns true if successful, oterhwise return error message
-    function changeWebUserPassword($oldPwd, $newPwd) {
+	function changeWebUserPassword($oldPwd, $newPwd)
+	{
         $rt= false;
-        if ($_SESSION["webValidated"] == 1) {
-            $tbl= $this->getFullTableName("web_users");
-            $ds= $this->db->query("SELECT `id`, `username`, `password` FROM $tbl WHERE `id`='" . $this->getLoginUserID() . "'");
-            $limit= mysql_num_rows($ds);
-            if ($limit == 1) {
+		if ($_SESSION["webValidated"] == 1)
+		{
+			$tbl_web_users= $this->getFullTableName("web_users");
+			$uid = $this->getLoginUserID();
+			$ds= $this->db->select('id,username,password', $tbl_web_users, "`id`='{$uid}'");
+			$limit= $this->db->getRecordCount($ds);
+			if ($limit == 1)
+			{
                 $row= $this->db->getRow($ds);
-                if ($row["password"] == md5($oldPwd)) {
-                    if (strlen($newPwd) < 6) {
-                        return "Password is too short!";
+				if ($row["password"] == md5($oldPwd))
+				{
+					if (strlen($newPwd) < 6)
+					{
+						return 'Password is too short!';
                     }
-                    elseif ($newPwd == "") {
+					elseif ($newPwd == '')
+					{
                         return "You didn't specify a password for this user!";
-                    } else {
-                        $this->db->query("UPDATE $tbl SET password = md5('" . $this->db->escape($newPwd) . "') WHERE id='" . $this->getLoginUserID() . "'");
+					}
+					else
+					{
+						$newPwd = $this->db->escape($newPwd);
+						$this->db->update("password = md5('{$newPwd}')", $tbl_web_users, "id='{$uid}'");
                         // invoke OnWebChangePassword event
-                        $this->invokeEvent("OnWebChangePassword", array (
+						$this->invokeEvent("OnWebChangePassword",
+						array
+						(
                             "userid" => $row["id"],
                             "username" => $row["username"],
                             "userpassword" => $newPwd
                         ));
                         return true;
                     }
-                } else {
-                    return "Incorrect password.";
+				}
+				else
+				{
+					return 'Incorrect password.';
                 }
             }
         }
     }
+	
     # returns true if the current web user is a member the specified groups
     function isMemberOfWebGroup($groupNames= array ()) {
         if (!is_array($groupNames))
