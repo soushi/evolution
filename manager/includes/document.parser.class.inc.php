@@ -1024,24 +1024,35 @@ class DocumentParser {
         return $template;
     }
 
-    function mergeChunkContent($content) {
+	function mergeChunkContent($content)
+	{
         $replace= array ();
         $matches= array ();
-        if (preg_match_all('~{{(.*?)}}~', $content, $matches)) {
-            $settingsCount= count($matches[1]);
-            for ($i= 0; $i < $settingsCount; $i++) {
-                if (isset ($this->chunkCache[$matches[1][$i]])) {
-                    $replace[$i]= $this->chunkCache[$matches[1][$i]];
-                } else {
-                    $sql= "SELECT `snippet` FROM " . $this->getFullTableName("site_htmlsnippets") . " WHERE " . $this->getFullTableName("site_htmlsnippets") . ".`name`='" . $this->db->escape($matches[1][$i]) . "';";
-                    $result= $this->db->query($sql);
+		if (preg_match_all('~{{(.*?)}}~', $content, $matches))
+		{
+			$total= count($matches[1]);
+			for ($i= 0; $i < $total; $i++)
+			{
+				$name = $matches[1][$i];
+				if (isset ($this->chunkCache[$name]))
+				{
+					$replace[$i]= $this->chunkCache[$name];
+				}
+				else
+				{
+					$escaped_name = $this->db->escape($name);
+					$where = "`name`='{$escaped_name}'";
+					$result= $this->db->select('snippet',$this->getFullTableName('site_htmlsnippets'),$where);
                     $limit= $this->db->getRecordCount($result);
-                    if ($limit < 1) {
-                        $this->chunkCache[$matches[1][$i]]= "";
-                        $replace[$i]= "";
-                    } else {
+					if ($limit < 1)
+					{
+						$this->chunkCache[$name]= '';
+						$replace[$i]= '';
+					}
+					else
+					{
                         $row= $this->db->getRow($result);
-                        $this->chunkCache[$matches[1][$i]]= $row['snippet'];
+						$this->chunkCache[$name]= $row['snippet'];
                         $replace[$i]= $row['snippet'];
                     }
                 }
