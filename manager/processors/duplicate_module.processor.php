@@ -6,15 +6,6 @@ if(!$modx->hasPermission('new_module')) {
 }
 $id=$_GET['id'];
 
-// create globally unique identifiers (guid)
-function createGUID(){
-	srand((double)microtime()*1000000);
-	$r = rand() ;
-	$u = uniqid(getmypid() . $r . (double)microtime()*1000000,1);
-	$m = md5 ($u);
-	return $m;
-}
-
 // duplicate module
 $tbl_site_modules = $modx->getFullTableName('site_modules');
 $tpl = $_lang['duplicate_title_string'];
@@ -56,4 +47,13 @@ if(!$rs){
 // finish duplicating - redirect to new module
 header("Location: index.php?r=2&a=108&id={$newid}");
 
-?>
+
+
+// create globally unique identifiers (guid)
+function createGUID(){
+	srand((double)microtime()*1000000);
+	$r = rand() ;
+	$u = uniqid(getmypid() . $r . (double)microtime()*1000000,1);
+	$m = md5 ($u);
+	return $m;
+}
