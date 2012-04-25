@@ -2803,7 +2803,7 @@ class DocumentParser {
 			$dgn = array ();
 			$tbl_dgn = $this->getFullTableName('documentgroup_names');
 			$imploded_dg = implode(',', $dg);
-			$ds = $this->db->query("SELECT `name` FROM {$tbl_dgn} WHERE id IN ({$imploded_dg})");
+			$ds = $this->db->select('name', $tbl_dgn, "id IN ({$imploded_dg})");
 			while ($row = $this->db->getRow($ds))
 			{
 				$dgn[count($dgn)] = $row['name'];
