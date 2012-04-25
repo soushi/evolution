@@ -980,35 +980,6 @@ class DocumentParser {
             file_put_contents($cache_path, $content);
         }
 
-    function mergeDocumentMETATags($template) {
-        if ($this->documentObject['haskeywords'] == 1) {
-            // insert keywords
-            $keywords = $this->getKeywords();
-            if (is_array($keywords) && count($keywords) > 0) {
-	            $keywords = implode(", ", $keywords);
-	            $metas= "\t<meta name=\"keywords\" content=\"$keywords\" />\n";
-            }
-
-	    // Don't process when cached
-	    $this->documentObject['haskeywords'] = '0';
-        }
-        if ($this->documentObject['hasmetatags'] == 1) {
-            // insert meta tags
-            $tags= $this->getMETATags();
-            foreach ($tags as $n => $col) {
-                $tag= strtolower($col['tag']);
-                $tagvalue= $col['tagvalue'];
-                $tagstyle= $col['http_equiv'] ? 'http-equiv' : 'name';
-                $metas .= "\t<meta $tagstyle=\"$tag\" content=\"$tagvalue\" />\n";
-            }
-
-	    // Don't process when cached
-	    $this->documentObject['hasmetatags'] = '0';
-        }
-	if (isset($metas) && $metas) $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
-        return $template;
-    }
-
     // mod by Raymond
     function mergeDocumentContent($template) {
         $replace= array ();
@@ -2210,6 +2181,39 @@ class DocumentParser {
         return $this->getChunk($chunkName);
     }
 
+    function changePassword($o, $n) {
+        return changeWebUserPassword($o, $n);
+    } // deprecated
+
+    function mergeDocumentMETATags($template) {
+        if ($this->documentObject['haskeywords'] == 1) {
+            // insert keywords
+            $keywords = $this->getKeywords();
+            if (is_array($keywords) && count($keywords) > 0) {
+	            $keywords = implode(", ", $keywords);
+	            $metas= "\t<meta name=\"keywords\" content=\"$keywords\" />\n";
+            }
+
+	    // Don't process when cached
+	    $this->documentObject['haskeywords'] = '0';
+        }
+        if ($this->documentObject['hasmetatags'] == 1) {
+            // insert meta tags
+            $tags= $this->getMETATags();
+            foreach ($tags as $n => $col) {
+                $tag= strtolower($col['tag']);
+                $tagvalue= $col['tagvalue'];
+                $tagstyle= $col['http_equiv'] ? 'http-equiv' : 'name';
+                $metas .= "\t<meta $tagstyle=\"$tag\" content=\"$tagvalue\" />\n";
+            }
+
+	    // Don't process when cached
+	    $this->documentObject['hasmetatags'] = '0';
+        }
+	if (isset($metas) && $metas) $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
+        return $template;
+    }
+
     function parseChunk($chunkName, $chunkArr, $prefix= "{", $suffix= "}",$mode='chunk') {
         if (!is_array($chunkArr)) {
             return false;
@@ -2746,10 +2750,6 @@ class DocumentParser {
             }
         }
     }
-    function changePassword($o, $n) {
-        return changeWebUserPassword($o, $n);
-    } // deprecated
-
     # returns true if the current web user is a member the specified groups
     function isMemberOfWebGroup($groupNames= array ()) {
         if (!is_array($groupNames))
