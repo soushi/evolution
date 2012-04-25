@@ -2419,54 +2419,59 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
 
-    function getDocumentChildrenTVars($parentid= 0, $tvidnames= array (), $published= 1, $docsort= "menuindex", $docsortdir= "ASC", $tvfields= "*", $tvsort= "rank", $tvsortdir= "ASC") {
+	function getDocumentChildrenTVars($parentid= 0, $tvidnames= array (), $published= 1, $docsort= 'menuindex', $docsortdir= 'ASC', $tvfields= '*', $tvsort= 'rank', $tvsortdir= 'ASC')
+	{
         $docs= $this->getDocumentChildren($parentid, $published, 0, '*', '', $docsort, $docsortdir);
-        if (!$docs)
-            return false;
-        else {
+		if (!$docs) return false;
+		else
+		{
             $result= array ();
             // get user defined template variables
-            $fields= ($tvfields == "") ? "tv.*" : 'tv.' . implode(',tv.', preg_replace("/^\s/i", "", explode(',', $tvfields)));
-            $tvsort= ($tvsort == "") ? "" : 'tv.' . implode(',tv.', preg_replace("/^\s/i", "", explode(',', $tvsort)));
-            if ($tvidnames == "*")
-                $query= "tv.id<>0";
+			$fields= ($tvfields == '') ? 'tv.*' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $tvfields)));
+			$tvsort= ($tvsort == '') ? '' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $tvsort)));
+			if ($tvidnames == '*') $query= 'tv.id<>0';
             else
-                $query= (is_numeric($tvidnames[0]) ? "tv.id" : "tv.name") . " IN ('" . implode("','", $tvidnames) . "')";
+			{
+				$join_tvidnames = implode("','", $tvidnames);
+				$query  = is_numeric($tvidnames[0]) ? 'tv.id' : 'tv.name';
+				$query .= " IN ('{$join_tvidnames}')";
+			}
             if ($docgrp= $this->getUserDocGroups())
-                $docgrp= implode(",", $docgrp);
-
+			{
+				$docgrp= implode(',', $docgrp);
+			}
+			$tbl_site_tmplvars              = $this->getFullTableName('site_tmplvars');
+			$tbl_site_tmplvar_templates     = $this->getFullTableName('site_tmplvar_templates');
+			$tbl_site_tmplvar_contentvalues = $this->getFullTableName('site_tmplvar_contentvalues');
             $docCount= count($docs);
-            for ($i= 0; $i < $docCount; $i++) {
-
+			for ($i= 0; $i < $docCount; $i++)
+			{
                 $tvs= array ();
                 $docRow= $docs[$i];
                 $docid= $docRow['id'];
 
-                $sql= "SELECT $fields, IF(tvc.value!='',tvc.value,tv.default_text) as value ";
-                $sql .= "FROM " . $this->getFullTableName('site_tmplvars') . " tv ";
-                $sql .= "INNER JOIN " . $this->getFullTableName('site_tmplvar_templates')." tvtpl ON tvtpl.tmplvarid = tv.id ";
-                $sql .= "LEFT JOIN " . $this->getFullTableName('site_tmplvar_contentvalues')." tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '" . $docid . "' ";
-                $sql .= "WHERE " . $query . " AND tvtpl.templateid = " . $docRow['template'];
-                if ($tvsort)
-                    $sql .= " ORDER BY $tvsort $tvsortdir ";
-                $rs= $this->db->query($sql);
-                $limit= @ $this->db->getRecordCount($rs);
-                for ($x= 0; $x < $limit; $x++) {
+				$fields  = "{$fields}, IF(tvc.value!='',tvc.value,tv.default_text) as value";
+				$from    = "{$tbl_site_tmplvars} tv INNER JOIN {$tbl_site_tmplvar_templates} tvtpl ON tvtpl.tmplvarid = tv.id";
+				$from   .= " LEFT JOIN {$tbl_site_tmplvar_contentvalues} tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '{$docid}'";
+				$where   = "{$query} AND tvtpl.templateid = {$docRow['template']}";
+				$orderby = ($tvsort) ? "{$tvsort} {$tvsortdir}" : '';
+				$rs= $this->db->select($fields,$from,$where,$orderby);
+				$total= $this->db->getRecordCount($rs);
+				for ($x= 0; $x < $total; $x++)
+				{
                     $tvs[] = @ $this->db->getRow($rs);
                 }
 
                 // get default/built-in template variables
                 ksort($docRow);
-                foreach ($docRow as $key => $value) {
-                    if ($tvidnames == "*" || in_array($key, $tvidnames))
-                        $tvs[] = array (
-                            "name" => $key,
-                            "value" => $value
-                        );
+				foreach ($docRow as $key => $value)
+				{
+					if ($tvidnames == '*' || in_array($key, $tvidnames))
+					{
+						$tvs[] = array ('name'=>$key, 'value'=>$value);
+					}
                 }
-
-                if (count($tvs))
-                    $result[] = $tvs;
+				if (count($tvs)) $result[] = $tvs;
             }
             return $result;
         }
