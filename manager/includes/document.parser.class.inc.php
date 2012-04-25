@@ -2640,16 +2640,12 @@ class DocumentParser {
 
     # returns the virtual relative path to the manager folder
     function getManagerPath() {
-        global $base_url;
-        $pth= $base_url . 'manager/';
-        return $pth;
+        return $this->config['base_url'] . 'manager/';
     }
 
     # returns the virtual relative path to the cache folder
     function getCachePath() {
-        global $base_url;
-        $pth= $base_url . 'assets/cache/';
-        return $pth;
+        return $this->config['base_url'] . 'assets/cache/';
     }
 
     # sends a message to a user's message box
