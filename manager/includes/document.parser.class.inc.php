@@ -3358,7 +3358,7 @@ class DocumentParser {
             $source= file($file);
             $source= htmlspecialchars($source[$line -1]);
         } else {
-            $source= "";
+            $source= '';
         } //Error $nr in $file at $line: <div><code>$source</code></div>
         $this->messageQuit("PHP Parse Error", '', true, $nr, $file, $source, $text, $line);
     }
