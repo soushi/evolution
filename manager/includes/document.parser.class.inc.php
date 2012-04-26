@@ -979,6 +979,7 @@ class DocumentParser {
 	function checkPublishStatus()
 	{
 		$tbl_site_content = $this->getFullTableName('site_content');
+		$tbl_site_htmlsnippets = $this->getFullTableName('site_htmlsnippets');
 		$cacheRefreshTime = 0;
 		$cache_path= "{$this->config['base_path']}assets/cache/sitePublishing.idx.php";
 		include_once($cache_path);
@@ -996,6 +997,18 @@ class DocumentParser {
 		$where = "unpub_date <= {$timeNow} AND unpub_date!=0 AND published=1";
 		$rs = $this->db->update($fields,$tbl_site_content,$where);
 
+		// now, check for chunks that need publishing
+		$fields = "published='1'";
+		$where = "pub_date <= {$timeNow} AND pub_date!=0 AND published=0";
+		$rs = $this->db->update($fields,$tbl_site_htmlsnippets,$where);
+		
+		// now, check for chunks that need un-publishing
+		$fields = "published='0'";
+		$where = "unpub_date <= {$timeNow} AND unpub_date!=0 AND published=1";
+		$rs = $this->db->update($fields,$tbl_site_htmlsnippets,$where);
+	
+		unset($this->chunkCache);
+	
             // clear the cache
 		$this->clearCache();
 
@@ -1015,6 +1028,20 @@ class DocumentParser {
                 $timesArr[]= $minunpub;
             }
 
+		$rs = $this->db->select('MIN(pub_date) AS minpub',$tbl_site_htmlsnippets,"{$timeNow} < pub_date");
+		$minpub= $this->db->getValue($rs);
+		if ($minpub != NULL)
+		{
+			$timesArr[]= $minpub;
+		}
+		
+		$rs = $this->db->select('MIN(unpub_date) AS minunpub',$tbl_site_htmlsnippets,"{$timeNow} < unpub_date");
+		$minunpub= $this->db->getValue($rs);
+		if ($minunpub != NULL)
+		{
+			$timesArr[]= $minunpub;
+		}
+		
 		if (count($timesArr) > 0) $nextevent = min($timesArr);
 		else                      $nextevent = 0;
 
@@ -1083,7 +1110,7 @@ class DocumentParser {
 				else
 				{
 					$escaped_name = $this->db->escape($name);
-					$where = "`name`='{$escaped_name}'";
+					$where = "`name`='{$escaped_name}' AND `published`='1'";
 					$result= $this->db->select('snippet',$this->getFullTableName('site_htmlsnippets'),$where);
                     $limit= $this->db->getRecordCount($result);
 					if ($limit < 1)
