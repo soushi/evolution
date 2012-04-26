@@ -213,11 +213,6 @@ class DocumentParser {
         // invoke OnWebPageInit event
 		$this->invokeEvent('OnWebPageInit');
 
-        // invoke OnLogPageView event
-		if ($this->config['track_visitors'] == 1)
-		{
-			$this->invokeEvent('OnLogPageHit');
-        }
         $this->prepareResponse();
     }
 
@@ -479,6 +474,12 @@ class DocumentParser {
             file_put_contents($page_cache_path, $cacheContent);
         }
 
+		// invoke OnLogPageView event
+		if ($this->config['track_visitors'] == 1)
+		{
+			$this->invokeEvent('OnLogPageHit');
+		}
+		
         // Useful for example to external page counters/stats packages
         $this->invokeEvent('OnWebPageComplete');
 
