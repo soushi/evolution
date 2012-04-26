@@ -3,16 +3,6 @@
 # Each sql command is separated by double lines
 
 
-#
-# Dumping data for table `keyword_xref`
-#
-
-
-REPLACE INTO `{PREFIX}keyword_xref` VALUES ('3','1');
-
-
-REPLACE INTO `{PREFIX}keyword_xref` VALUES ('4','1');
-
 
 #
 # Dumping data for table `documentgroup_names`
