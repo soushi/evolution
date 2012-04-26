@@ -3498,14 +3498,8 @@ class DocumentParser {
 
         $totalTime= ($this->getMicroTime() - $this->tstart);
 
-		if(function_exists('memory_get_peak_usage'))
-		{
 			$total_mem = $this->nicesize(memory_get_peak_usage() - $this->mstart);
-		}
-		else
-		{
-			$total_mem = $this->nicesize(memory_get_usage() - $this->mstart);
-		}
+		
         $queryTime= $this->queryTime;
         $phpTime= $totalTime - $queryTime;
         $queries= isset ($this->executedQueries) ? $this->executedQueries : 0;
