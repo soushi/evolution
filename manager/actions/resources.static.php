@@ -29,11 +29,9 @@ if(IN_MANAGER_MODE!="true") die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please
     	<h2 class="tab"><?php echo $_lang["manage_templates"] ?></h2>
     	<script type="text/javascript">tpResources.addTabPage( document.getElementById( "tabTemplates" ) );</script>
 		<p><?php echo $_lang['template_management_msg']; ?></p>
-
-		<ul>
-			<li><a href="index.php?a=19"><?php echo $_lang['new_template']; ?></a></li>
+		<ul class="actionButtons">
+			<li><a href="index.php?a=19"><img src="<?php echo $_style["icons_add"] ?>" /> <?php echo $_lang['new_template']; ?></a></li>
 		</ul>
-		<br />
 		<?php echo createResourceList('site_templates',16,'templatename'); ?>
 	</div>
 <?php } ?>
@@ -48,10 +46,9 @@ if(IN_MANAGER_MODE!="true") die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please
 			Added by Apodigm 09-06-2004- DocVars - web@apodigm.com
 		-->
 		<p><?php echo $_lang['tmplvars_management_msg']; ?></p>
-			<ul>
-				<li><a href="index.php?a=300"><?php echo $_lang['new_tmplvars']; ?></a></li>
+			<ul class="actionButtons">
+				<li><a href="index.php?a=300"><img src="<?php echo $_style["icons_add"] ?>" /> <?php echo $_lang['new_tmplvars']; ?></a></li>
             </ul>
-            <br />
             <?php echo createResourceList('site_tmplvars',301); ?>
 	</div>
 <?php } ?>
@@ -63,10 +60,9 @@ if(IN_MANAGER_MODE!="true") die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please
     	<script type="text/javascript">tpResources.addTabPage( document.getElementById( "tabChunks" ) );</script>
 		<p><?php echo $_lang['htmlsnippet_management_msg']; ?></p>
 
-		<ul>
-			<li><a href="index.php?a=77"><?php echo $_lang['new_htmlsnippet']; ?></a></li>
+		<ul class="actionButtons">
+			<li><a href="index.php?a=77"><img src="<?php echo $_style["icons_add"] ?>" /> <?php echo $_lang['new_htmlsnippet']; ?></a></li>
 		</ul>
-		<br />
 		<?php echo createResourceList('site_htmlsnippets',78); ?>
 	</div>
 <?php } ?>
@@ -78,10 +74,9 @@ if(IN_MANAGER_MODE!="true") die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please
     	<script type="text/javascript">tpResources.addTabPage( document.getElementById( "tabSnippets" ) );</script>
 		<p><?php echo $_lang['snippet_management_msg']; ?></p>
 
-		<ul>
-			<li><a href="index.php?a=23"><?php echo $_lang['new_snippet']; ?></a></li>
+		<ul class="actionButtons">
+			<li><a href="index.php?a=23"><img src="<?php echo $_style["icons_add"] ?>" /> <?php echo $_lang['new_snippet']; ?></a></li>
 		</ul>
-		<br />
 		<?php echo createResourceList('site_snippets',22); ?>
 	</div>
 <?php } ?>
@@ -93,11 +88,10 @@ if(IN_MANAGER_MODE!="true") die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please
     	<script type="text/javascript">tpResources.addTabPage( document.getElementById( "tabPlugins" ) );</script>
 		<p><?php echo $_lang['plugin_management_msg']; ?></p>
 
-		<ul>
-			<li><a href="index.php?a=101"><?php echo $_lang['new_plugin']; ?></a></li>
-			<?php if($modx->hasPermission('save_plugin')) { ?><li><a href="index.php?a=100"><?php echo $_lang['plugin_priority']; ?></a></li><?php } ?>
+		<ul class="actionButtons">
+			<li><a href="index.php?a=101"><img src="<?php echo $_style["icons_add"] ?>" /> <?php echo $_lang['new_plugin']; ?></a></li>
+			<?php if($modx->hasPermission('save_plugin')) { ?><li><a href="index.php?a=100"><img src="<?php echo $_style["icons_edit_document"] ?>" /> <?php echo $_lang['plugin_priority']; ?></a></li><?php } ?>
 		</ul>
-		<br />
 		<?php echo createResourceList('site_plugins',102); ?>
 	</div>
 <?php } ?>
@@ -123,11 +117,21 @@ function createResourceList($resourceTable,$action,$nameField = 'name')
 	$tbl_elm = $modx->getFullTableName($resourceTable);
 	$tbl_categories = $modx->getFullTableName('categories');
 	
-	$pluginsql = ($resourceTable == 'site_plugins') ? "{$tbl_elm}.disabled," : '';
+	switch($resourceTable)
+	{
+		case 'site_plugins':
+			$add_field = "{$tbl_elm}.disabled,";
+			break;
+		case 'site_htmlsnippets':
+			$add_field = "{$tbl_elm}.published,";
+			break;
+		default:
+			$add_field = '';
+	}
 	
-	$fields = "{$pluginsql} {$tbl_elm}.{$nameField} as name, {$tbl_elm}.id, {$tbl_elm}.description, {$tbl_elm}.locked, if(isnull({$tbl_categories}.category),'{$_lang['no_category']}',{$tbl_categories}.category) as category";
+	$fields = "{$add_field} {$tbl_elm}.{$nameField} as name, {$tbl_elm}.id, {$tbl_elm}.description, {$tbl_elm}.locked, if(isnull({$tbl_categories}.category),'{$_lang['no_category']}',{$tbl_categories}.category) as category";
 	$from   ="{$tbl_elm} left join {$tbl_categories} on {$tbl_elm}.category = {$tbl_categories}.id";
-	$orderby = ($resourceTable == 'site_plugins') ? "{$tbl_elm}.disabled ASC,6,2" : '5,1';
+	$orderby = 'category,name';
 
 	$rs = $modx->db->select($fields,$from,'',$orderby);
 	$limit = $modx->db->getRecordCount($rs);
@@ -147,9 +151,13 @@ function createResourceList($resourceTable,$action,$nameField = 'name')
 			$output .= '<li><strong>'.$row['category'].'</strong><ul>';
 			$insideUl = 1;
 		}
-		if ($resourceTable == 'site_plugins')
+		if ($resourceTable === 'site_plugins')
 		{
 			$class = $row['disabled'] ? 'class="disabledPlugin"' : '';
+		}
+		elseif ($resourceTable === 'site_htmlsnippets')
+		{
+			$class = ($row['published']==='0') ? 'class="unpublished"' : '';
 		}
 		$tpl  = '<li><span [+class+]><a href="index.php?id=[+id+]&amp;a=[+action+]">[+name+]<small>([+id+])</small></a>[+rlm+]</span>';
 		$tpl .= ' [+description+][+locked+]</li>';
@@ -228,6 +236,7 @@ function createCategoryList()
 			$tbl_categories = $modx->getFullTableName('categories');
 			if($v['table'] == 'site_templates')   $fields = 'templatename as name, ';
 			elseif($v['table'] == 'site_plugins') $fields = "{$tbl_elm}.disabled, name, ";
+			elseif($v['table'] == 'site_htmlsnippets') $fields = "{$tbl_elm}.published, name, ";
 			else                                  $fields = 'name, ';
 			$fields .= "{$tbl_elm}.id, description, locked, {$tbl_categories}.category, {$tbl_categories}.id as catid";
 			
@@ -271,12 +280,20 @@ function createCategoryList()
 				}
 				else
 				{
-					echo '<li><strong>'.$v['category'].'</strong> (<a href="javascript:deleteCategory(\'' . $v['catid'] . '\');">'.$_lang['delete'].'</a>)<ul>';
+					echo '<li><strong>'.$v['category'].'</strong> (<a href="javascript:deleteCategory(\'' . $v['catid'] . '\');">'.$_lang['delete_category'].'</a>)<ul>';
                     }
                     $insideUl = 1;
                 }
 			$ph = array();
-			$ph['class'] = array_key_exists('disabled',$v) && $v['disabled'] ? ' class="disabledPlugin"' : '';
+			if(array_key_exists('disabled',$v) && $v['disabled'])
+			{
+				$ph['class'] = ' class="disabledPlugin"';
+			}
+			if(array_key_exists('published',$v) && $v['published']==='0')
+			{
+				$ph['class'] = ' class="unpublished"';
+			}
+			else $ph['class'] = '';
 			$ph['id'] = $v['id'];
 			$ph['action'] = $v['action'];
 			$ph['name'] = $v['name'];
