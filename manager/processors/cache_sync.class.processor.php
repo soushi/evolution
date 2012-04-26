@@ -134,10 +134,15 @@ class synccache {
 	/****************************************************************************/
 	function publish_time_file($modx)
 	{
+		global $site_sessionname;
+		
         // update publish time file
 		$tbl_site_content = $modx->getFullTableName('site_content');
+		$tbl_site_htmlsnippets = $modx->getFullTableName('site_htmlsnippets');
+		$tbl_system_settings    = $modx->getFullTableName('system_settings');
         $timesArr = array();
 		$current_time = time();
+		
 		$result = $modx->db->select('MIN(pub_date) AS minpub',$tbl_site_content, "{$current_time} < pub_date");
 		if(!$result)
 		{
@@ -161,12 +166,40 @@ class synccache {
             $timesArr[] = $minunpub;
         }
 
+		$result = $modx->db->select('MIN(pub_date) AS minpub',$tbl_site_htmlsnippets, "{$current_time} < pub_date");
+		if(!$result)
+		{
+			echo "Couldn't determine next publish event!";
+		}
+		
+		$minpub = $modx->db->getValue($result);
+		if($minpub!=NULL)
+		{
+			$timesArr[] = $minpub;
+		}
+		
+		$result = $modx->db->select('MIN(unpub_date) AS minunpub',$tbl_site_htmlsnippets, "{$current_time} < unpub_date");
+		if(!$result)
+		{
+			echo "Couldn't determine next unpublish event!";
+		}
+		$minunpub = $modx->db->getValue($result);
+		if($minunpub!=NULL)
+		{
+			$timesArr[] = $minunpub;
+		}
+		
 		if(count($timesArr)>0) $nextevent = min($timesArr);
 		else                   $nextevent = 0;
 
+		$rs = $modx->db->select('setting_value',$tbl_system_settings,"setting_name='cache_type'");
+		$cache_type = $modx->db->getValue($rs);
+		
         // write the file
-		$cache_path = $this->cachePath.'sitePublishing.idx.php';
-		$content = '<?php $cacheRefreshTime='.$nextevent.';';
+		$cache_path = $this->cachePath . 'sitePublishing.idx.php';
+		$content  = "<?php\n\$cacheRefreshTime = {$nextevent};\n";
+		$content .= '$cache_type = ' . "{$cache_type};\n";
+		$content .= '$site_sessionname = ' . "'{$site_sessionname}';\n";
 
 		$rs = file_put_contents($cache_path, $content);
 
@@ -203,7 +236,7 @@ class synccache {
 		// invoke OnBeforeCacheUpdate event
 		if ($modx) $modx->invokeEvent('OnBeforeCacheUpdate');
 		
-		if(!file_put_contents($this->cachePath.'siteCache.idx.php', $content))
+		if(!file_put_contents($this->cachePath .'siteCache.idx.php', $content))
 		{
 			echo 'Cannot write main MODX cache file! Make sure the "' . $this->cachePath . '" directory is writable!';
 			exit;
@@ -247,9 +280,8 @@ class synccache {
 		{
 			$use_alias_path = $modx->db->getValue($modx->db->select('setting_value',$tbl_system_settings,"setting_name='use_alias_path'"));
 		}
-		$fields = "IF(alias='', id, alias) AS alias, id, contentType, parent";
-		$where  = 'deleted=0 ORDER BY parent, menuindex';
-		$rs = $modx->db->select($fields,$tbl_site_content,$where);
+		$fields = "IF(alias='', id, alias) AS alias, id, parent";
+		$rs = $modx->db->select($fields,$tbl_site_content,'deleted=0','parent, menuindex');
 		$row = array();
 		$path = '';
 		while ($row = $modx->db->getRow($rs))
@@ -296,7 +328,7 @@ class synccache {
 	{
 		$tbl_site_htmlsnippets  = $modx->getFullTableName('site_htmlsnippets');
 		
-		$rs = $modx->db->select('name,snippet',$tbl_site_htmlsnippets);
+		$rs = $modx->db->select('name,snippet',$tbl_site_htmlsnippets, "`published`='1'");
 		$tmpPHP = '$c = &$this->chunkCache;' . "\n";
 		$row = array();
 		while ($row = $modx->db->getRow($rs))

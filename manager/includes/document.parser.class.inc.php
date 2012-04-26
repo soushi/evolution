@@ -50,6 +50,7 @@ class DocumentParser {
     var $referenceListing;
     var $documentMap_cache;
     var $safeMode;
+    var $qs_hash;
 
     // constructor
 	function DocumentParser()
@@ -121,11 +122,20 @@ class DocumentParser {
 			set_error_handler(array(& $this,'phpError'));
 		}
 
-        $this->db->connect();
+		if(!empty($_SERVER['QUERY_STRING']))
+		{
+			$qs = $_GET;
+			if($qs['id']) unset($qs['id']);
+			if(0 < count($qs)) $this->qs_hash = '_' . md5(join('&',$qs));
+			else $this->qs_hash = '';
+		}
 
         // get the settings
+		$this->db->connect();
             $this->getSettings();
 
+		if(0 < count($_POST)) $this->config['cache_type'] = 0;
+		
 		$this->documentOutput = $this->get_static_pages();
 		if(!empty($this->documentOutput))
 		{
@@ -408,7 +418,10 @@ class DocumentParser {
                 header($header);
             }
         }
+		if($this->config['cache_type'] !=2)
+		{
 			$this->documentOutput = $this->mergeBenchmarkContent($this->documentOutput);
+		}
 
 		if ($this->dumpSQL)
 		{
@@ -452,11 +465,22 @@ class DocumentParser {
 				$this->documentObject['__MODxDocGroups__'] = implode(',', $docGroups);
 			}
 
+			$base_path = $this->config['base_path'];
+			
+			switch($this->config['cache_type'])
+			{
+				case '1':
 			$cacheContent  = "<?php die('Unauthorized access.'); ?>\n";
 			$cacheContent .= serialize($this->documentObject);
 			$cacheContent .= "<!--__MODxCacheSpliter__-->{$this->documentContent}";
-			$base_path = $this->config['base_path'];
-			$page_cache_path = "{$base_path}assets/cache/docid_{$docid}.pageCache.php";
+					$filename = "docid_{$docid}{$this->qs_hash}";
+					break;
+				case '2':
+					$cacheContent  = $this->documentOutput;
+					$filename = md5($_SERVER['REQUEST_URI']);
+					break;
+			}
+			$page_cache_path = "{$base_path}assets/cache/{$filename}.pageCache.php";
             file_put_contents($page_cache_path, $cacheContent);
         }
 
@@ -887,9 +911,17 @@ class DocumentParser {
 
 	function checkCache($id)
 	{
-		if(isset($this->config['cache_enabled']) && $this->config['cache_enabled'] == 0) return ''; // jp-edition only
-		$cacheFile = "{$this->config['base_path']}assets/cache/docid_{$id}.pageCache.php";
-		if(file_exists($cacheFile))
+		
+		if(isset($this->config['cache_type']) && $this->config['cache_type'] == 0) return ''; // jp-edition only
+		$cacheFile = "{$this->config['base_path']}assets/cache/docid_{$id}{$this->qs_hash}.pageCache.php";
+		
+		if(isset($_SESSION['mgrValidated']) || 0 < count($_POST)) $this->config['cache_type'] = '1';
+		
+		if($this->config['cache_type'] == 2)
+		{
+			$flContent = '';
+		}
+		elseif(file_exists($cacheFile))
 		{
 			$flContent = file_get_contents($cacheFile, false);
 		}
