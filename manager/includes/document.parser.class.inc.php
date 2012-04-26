@@ -430,11 +430,11 @@ class DocumentParser {
         $out =& $this->documentOutput;
 		if ($this->dumpSQL)
 		{
-            $out .= $this->queryCode;
+			$this->documentOutput = preg_replace("/(<\/body>)/i", $this->queryCode . "\n\\1", $this->documentOutput);
         }
 		if ($this->dumpSnippets)
 		{
-			$out .= $this->snipCode;
+			$this->documentOutput = preg_replace("/(<\/body>)/i", $this->snipCode . "\n\\1", $this->documentOutput);
 		}
 		$out= str_replace('[^q^]', $queries, $out);
 		$out= str_replace('[^qt^]', $queryTime, $out);
