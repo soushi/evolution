@@ -793,7 +793,7 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('auto_template_logic','{AUTOTEMPLATELOGIC}'),
 ('default_template','3'),
 ('old_template',''),
-('publish_default','0'),
+('publish_default','1'),
 ('cache_default','1'),
 ('cache_type','1'),
 ('search_default','1'),
