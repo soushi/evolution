@@ -408,26 +408,8 @@ class DocumentParser {
                 header($header);
             }
         }
+			$this->documentOutput = $this->mergeBenchmarkContent($this->documentOutput);
 
-        $totalTime= ($this->getMicroTime() - $this->tstart);
-        $queryTime= $this->queryTime;
-        $phpTime= $totalTime - $queryTime;
-
-        $queryTime= sprintf("%2.4f s", $queryTime);
-        $totalTime= sprintf("%2.4f s", $totalTime);
-        $phpTime= sprintf("%2.4f s", $phpTime);
-		$source= $this->documentGenerated == 1 ? 'database' : 'cache';
-        $queries= isset ($this->executedQueries) ? $this->executedQueries : 0;
-		if(function_exists('memory_get_peak_usage'))
-		{
-			$total_mem = $this->nicesize(memory_get_peak_usage() - $this->mstart);
-		}
-		else
-		{
-			$total_mem = $this->nicesize(memory_get_usage() - $this->mstart);
-		}
-
-        $out =& $this->documentOutput;
 		if ($this->dumpSQL)
 		{
 			$this->documentOutput = preg_replace("/(<\/body>)/i", $this->queryCode . "\n\\1", $this->documentOutput);
@@ -436,20 +418,14 @@ class DocumentParser {
 		{
 			$this->documentOutput = preg_replace("/(<\/body>)/i", $this->snipCode . "\n\\1", $this->documentOutput);
 		}
-		$out= str_replace('[^q^]', $queries, $out);
-		$out= str_replace('[^qt^]', $queryTime, $out);
-		$out= str_replace('[^p^]', $phpTime, $out);
-		$out= str_replace('[^t^]', $totalTime, $out);
-		$out= str_replace('[^s^]', $source, $out);
-		$out= str_replace('[^m^]', $total_mem, $out);
-        //$this->documentOutput= $out;
 
         // invoke OnWebPagePrerender event
 		if (!$noEvent)
 		{
 			$this->invokeEvent('OnWebPagePrerender');
         }
-        echo $this->documentOutput;
+		if(strpos($this->documentOutput,'[^')) echo $this->mergeBenchmarkContent($this->documentOutput);
+		else                                   echo $this->documentOutput;
         ob_end_flush();
     }
 
