@@ -436,7 +436,7 @@ input.submit {
 	background: #fff url(images/misc/tabareabg.gif) repeat-x top;
 }
 .tab-page .sectionBody {
-	margin: 0 10px 0;
+	margin: 0 10px 10px;
 }
 .rtl .sectionBody, .layerVisible {
 	direction: rtl;
@@ -582,7 +582,8 @@ a img {
 	border: 1px solid #c8c8d4;
 	padding: 1px;
 }
-.unpublishedNode {
+.unpublishedNode,
+.unpublished a {
 	color: #b68282;
 }
 .deletedNode {
@@ -1513,6 +1514,7 @@ input.DatePicker, #mutate input.DatePicker, #userPane input.DatePicker, #webUser
 	padding: 3px 3px 3px 24px;
 	border: 1px solid #b4cde4;
 	background: #fff url(images/icons/datenofocus.gif) no-repeat top left;
+	ime-mode:disabled;
 }
 input:focus.DatePicker, #mutate input:focus.DatePicker, #userPane input:focus.DatePicker, #webUserPane input:focus.DatePicker, input#datefrom:focus.DatePicker, input#dateto:focus.DatePicker {
 	background: #fffce9 url(images/icons/datefocus.gif) no-repeat top left;
@@ -1639,3 +1641,5 @@ form#mutate div.tmplvars label {display:block;}
 
 .phptextarea {font-family: 'Courier New','Courier', monospace;}
 optgroup {font-style:normal;}
+
+#mainpane table th {vertical-align:top;}
