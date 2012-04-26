@@ -126,6 +126,16 @@ class DocumentParser {
         // get the settings
             $this->getSettings();
 
+		$this->documentOutput = $this->get_static_pages();
+		if(!empty($this->documentOutput))
+		{
+			$this->documentOutput = $this->parseDocumentSource($this->documentOutput);
+			$this->invokeEvent('OnWebPagePrerender');
+			echo $this->documentOutput;
+			$this->invokeEvent('OnWebPageComplete');
+			exit;
+		}
+		
         // IIS friendly url fix
 		if ($this->config['friendly_urls'] == 1 && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false)
 		{
