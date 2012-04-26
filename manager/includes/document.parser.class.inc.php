@@ -958,13 +958,11 @@ class DocumentParser {
 				{
                             // match found but not publicly accessible, send the visitor to the unauthorized_page
                             $this->sendUnauthorizedPage();
-                            exit; // stop here
 				}
 				else
 				{
                             // no match found, send the visitor to the error_page
                             $this->sendErrorPage();
-                            exit; // stop here
                         }
                     }
 				// Grab the Scripts
@@ -994,9 +992,7 @@ class DocumentParser {
 		$rs = $this->db->update($fields,$tbl_site_content,$where);
 
             // now, check for documents that need un-publishing
-		$fields = array();
-		$fields['published']   = '0';
-		$fields['publishedon'] = '0';
+		$fields = "published='0', publishedon='0'";
 		$where = "unpub_date <= {$timeNow} AND unpub_date!=0 AND published=1";
 		$rs = $this->db->update($fields,$tbl_site_content,$where);
 
@@ -1179,7 +1175,7 @@ class DocumentParser {
 			if (!strpos($php_errormsg, 'Deprecated'))
 			{   // ignore php5 strict errors
                 // log error
-				$request_uri = getenv('REQUEST_URI');
+				$request_uri = $_SERVER['REQUEST_URI'];
 				$request_uri = 'REQUEST_URI = ' . htmlspecialchars($request_uri, ENT_QUOTES) . '<br />';
 				if(isset($this->documentIdentifier))
 				{
@@ -1228,7 +1224,7 @@ class DocumentParser {
 			{
 				// ignore php5 strict errors
                 // log error
-				$request_uri = getenv('REQUEST_URI');
+				$request_uri = $_SERVER['REQUEST_URI'];
 				$request_uri = 'REQUEST_URI = ' . htmlspecialchars($request_uri, ENT_QUOTES) . '<br />';
 				$docid = "ID = {$this->documentIdentifier}<br />";
 //				$bt = $this->get_backtrace(debug_backtrace()) . '<br />';
@@ -1607,12 +1603,10 @@ class DocumentParser {
 			{
                 // match found but not publicly accessible, send the visitor to the unauthorized_page
                 $this->sendUnauthorizedPage();
-                exit; // stop here
 			}
 			else
 			{
                 $this->sendErrorPage();
-                exit;
             }
         }
 
@@ -1694,7 +1688,7 @@ class DocumentParser {
                     $passes++; // if content change then increase passes because
 				}
             } // we have not yet reached maxParserPasses
-            if(strpos($source,'[~')!==false) $source = $this->rewriteUrls($source);//yama
+			if(strpos($source,'[~')!==false) $source = $this->rewriteUrls($source);
         }
         return $source;
     }
