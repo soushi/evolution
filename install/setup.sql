@@ -802,7 +802,7 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('friendly_url_suffix','.html'),
 ('friendly_alias_urls','1'),
 ('use_alias_path','1'),
-('use_udperms','1'),
+('use_udperms','0'),
 ('udperms_allowroot','0'),
 ('failed_login_attempts','3'),
 ('blocked_minutes','60'),
@@ -853,7 +853,7 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('allow_duplicate_alias','0'),
 ('automatic_alias','0'),
 ('datetime_format','dd-mm-YYYY'),
-('warning_visibility', '1'),
+('warning_visibility', '0'),
 ('remember_last_tab', '1'),
 ('send_errormail', '3'),
 ('tree_page_click', 'auto');
