@@ -888,6 +888,8 @@ $_lang["site"] = 'Site';
 $_lang["site_schedule"] = 'Schedule';
 $_lang["sitename_message"] = 'Enter the name of your site here.';
 $_lang["sitename_title"] = 'Site name';
+$_lang["site_slogan_message"] = 'Please input slogan of a site. [(site_slogan)]';
+$_lang["site_slogan_title"] = 'Site slogan';
 $_lang["sitestart_message"] = 'Enter the ID of the Resource you want to use as homepage here. <b>NOTE: make sure this ID you enter belongs to an existing Resource, and that it has been published!</b>';
 $_lang["sitestart_title"] = 'Site start';
 $_lang["sitestatus_message"] = 'Select \'Online\' to publish your site on the web. If you select \'Offline\', your visitors will see the \'Site unavailable message\', and won\'t be able to browse the site.';
@@ -1094,7 +1096,7 @@ $_lang['setting_cache_type_desc'] = 'Selection of "no" will repeal all the cache
 $_lang['duplicate_title_string'] = '[+title+] duplicated';
 $_lang["confirm_delete_category"] = 'May delete this category name?';
 $_lang["site_url_title"] = 'Site URL';
-$_lang["site_url_message"] = 'Example¡§<b>' . MODX_SITE_URL . '</b><br />If it is made blank, it will process automatically (it changes dynamically by the difference between the existence and http/https of www, etc.)';
+$_lang["site_url_message"] = 'Example: <b>' . MODX_SITE_URL . '</b><br />If it is made blank, it will process automatically (it changes dynamically by the difference between the existence and http/https of www, etc.)';
 $_lang["chunk_opt_published"] = 'Published';
 $_lang["delete_category"] = 'Are you sure you want to delete this category name?';
 
