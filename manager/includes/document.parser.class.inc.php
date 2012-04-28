@@ -1069,10 +1069,10 @@ class DocumentParser {
         }
 
     // mod by Raymond
-	function mergeDocumentContent($template)
+	function mergeDocumentContent($content)
 	{
         $replace= array ();
-        preg_match_all('~\[\*(.*?)\*\]~', $template, $matches);
+		preg_match_all('~\[\*(.*?)\*\]~', $content, $matches);
         $variableCount= count($matches[1]);
 		$basepath= $this->config['base_path'] . 'manager/includes/';
 		include_once("{$basepath}tmplvars.format.inc.php");
@@ -1088,15 +1088,15 @@ class DocumentParser {
             }
             $replace[$i]= $value;
         }
-        $template= str_replace($matches[0], $replace, $template);
-        return $template;
+		$content= str_replace($matches[0], $replace, $content);
+		return $content;
     }
 
-	function mergeSettingsContent($template)
+	function mergeSettingsContent($content)
 	{
         $replace= array ();
         $matches= array ();
-		if(preg_match_all('~\[\(([a-z\_]*?)\)\]~', $template, $matches))
+		if(preg_match_all('~\[\(([a-z\_]*?)\)\]~', $content, $matches))
 		{
 			$total= count($matches[1]);
 			for($i= 0; $i < $total; $i++)
@@ -1107,9 +1107,9 @@ class DocumentParser {
             }
 			}
 
-            $template= str_replace($matches[0], $replace, $template);
+			$content= str_replace($matches[0], $replace, $content);
         }
-        return $template;
+		return $content;
     }
 
 	function mergeChunkContent($content)
@@ -1413,31 +1413,32 @@ class DocumentParser {
 		list($call,$snip['except_snip_call']) = explode(']]', $src, 2);
 		if(strpos($call, '?') !== false && strpos($call, "\n")!==false && strpos($call, '?') < strpos($call, "\n"))
 		{
-			list($snip['name'],$snip['params']) = explode('?',$call,2);
+			list($name,$params) = explode('?',$call,2);
 		}
 		elseif(strpos($call, '?') !== false && strpos($call, "\n")!==false && strpos($call, "\n") < strpos($call, '?'))
 		{
-			list($snip['name'],$snip['params']) = explode("\n",$call,2);
+			list($name,$params) = explode("\n",$call,2);
 		}
 		elseif(strpos($call, '?') !== false)
 		{
-			list($snip['name'],$snip['params']) = explode('?',$call,2);
+			list($name,$params) = explode('?',$call,2);
 		}
 		elseif((strpos($call, '&') !== false) && (strpos($call, '=') !== false) && (strpos($call, '?') === false))
 		{
-			list($snip['name'],$snip['params']) = explode("&",$call,2);
-			$snip['params'] = '&' . $snip['params'];
+			list($name,$params) = explode('&',$call,2);
+			$params = "&{$params}";
 		}
 		elseif(strpos($call, "\n") !== false)
 				{
-			list($snip['name'],$snip['params']) = explode("\n",$call,2);
+			list($name,$params) = explode("\n",$call,2);
 				}
 				else
 				{
-			$snip['name'] = $call;
-			$snip['params'] = '';
+			$name   = $call;
+			$params = '';
 		}
-		$snip['name'] = trim($snip['name']);
+		$snip['name']   = trim($name);
+		$snip['params'] = $params;
 		return $snip;
 				}
 
