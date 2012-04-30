@@ -3,7 +3,7 @@
  *
  * MODxMailer Class extends PHPMailer
  * Created by ZeRo (http://www.petit-power.com/)
- * updated by yama (http://kyms.ne.jp/)
+ * updated by yama (http://kyms.jp/)
  *
  * -----------------------------------------------------
  * [History]
