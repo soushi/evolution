@@ -38,7 +38,7 @@ elseif ($mode=='restore2')
 	if(file_exists($path))
 	{
 		$source = file_get_contents($path);
-	import_sql($source);
+		import_sql($source);
 	}
 	exit;
 }
@@ -182,11 +182,11 @@ else $ph['result_msg'] = '';
 <script type="text/javascript" src="media/script/tabpane.js"></script>
 <h1><?php echo $_lang['bk_manager']?></h1>
 <div class="sectionBody" id="lyr4">
-	<div class="tab-pane" id="dbmPane"> 
-	<script type="text/javascript"> 
-	    tpDBM = new WebFXTabPane(document.getElementById('dbmPane')); 
+	<div class="tab-pane" id="dbmPane">
+	<script type="text/javascript">
+	    tpDBM = new WebFXTabPane(document.getElementById('dbmPane'));
 	</script>
-	<div class="tab-page" id="tabBackup">  
+	<div class="tab-page" id="tabBackup">
 	    <h2 class="tab"><?php echo $_lang['backup']?></h2>
 	    <script type="text/javascript">tpDBM.addTabPage(document.getElementById('tabBackup'));</script>
 	<form name="frmdb" method="post">
@@ -274,7 +274,7 @@ if ($totaloverhead > 0) {
 </div>
 <!-- This iframe is used when downloading file backup file -->
 <iframe name="fileDownloader" width="1" height="1" style="display:none; width:1px; height:1px;"></iframe>
-<div class="tab-page" id="tabRestore">  
+<div class="tab-page" id="tabRestore">
 	<h2 class="tab"><?php echo $_lang["bkmgr_restore_title"];?></h2>
 	<?php echo $ph['result_msg']; ?>
 	<script type="text/javascript">tpDBM.addTabPage(document.getElementById('tabRestore'));</script>
