@@ -60,23 +60,23 @@ function compare_check($params)
 	else     
 	{
 		$row = mysql_fetch_assoc($rs);
-	$count = mysql_num_rows($rs);
-	if($count===1)
-	{
-		$new_version_str = ($new_version) ? '<strong>' . $new_version . '</strong> ':'';
-		$new_desc    = $new_version_str . $params['description'];
-		$old_desc    = $row['description'];
-		$old_version = substr($old_desc,0,strpos($old_desc,'</strong>'));
-		$old_version = strip_tags($old_version);
-		if($mode == 'version_compare' && $old_version === $new_version)
+		$count = mysql_num_rows($rs);
+		if($count===1)
 		{
-			                            $result = 'same';
+			$new_version_str = ($new_version) ? '<strong>' . $new_version . '</strong> ':'';
+			$new_desc    = $new_version_str . $params['description'];
+			$old_desc    = $row['description'];
+			$old_version = substr($old_desc,0,strpos($old_desc,'</strong>'));
+			$old_version = strip_tags($old_version);
+			if($mode == 'version_compare' && $old_version === $new_version)
+			{
+				                            $result = 'same';
+			}
+			elseif($mode == 'name_compare') $result = 'same';
+			elseif($old_desc === $new_desc) $result = 'same';
+			else                            $result = 'diff';
 		}
-		elseif($mode == 'name_compare') $result = 'same';
-		elseif($old_desc === $new_desc) $result = 'same';
-		else                            $result = 'diff';
-	}
-	elseif($count < 1)                  $result = 'no exists';
+		elseif($count < 1)                  $result = 'no exists';
 	}
 if($params['category']=='chunk')
 {
@@ -222,7 +222,7 @@ function clean_up($sqlParser) {
 			if(count($ids)>0) {
 				mysql_query("UPDATE `".$sqlParser->prefix."site_content` SET privatemgr = 1 WHERE id IN (".implode(", ",$ids).")");	
 				unset($ids);
-			}		
+			}
 		}
 }
 

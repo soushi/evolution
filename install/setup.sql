@@ -318,7 +318,7 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}site_tmplvars` (
 	`display_params` text COMMENT 'Display Control Properties',
 	`default_text` text,
 	PRIMARY KEY  (id),
-	KEY `indx_rank`(`rank`)	
+	KEY `indx_rank`(`rank`)
 ) ENGINE=MyISAM COMMENT='Site Template Variables';
 
 CREATE TABLE IF NOT EXISTS `{PREFIX}user_attributes` (
@@ -423,7 +423,7 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}user_roles` (
   `exec_module` int(1) NOT NULL DEFAULT 0,
   `view_eventlog` int(1) NOT NULL DEFAULT 0,
   `delete_eventlog` int(1) NOT NULL DEFAULT 0,
-  `manage_metatags` int(1) NOT NULL DEFAULT 0 COMMENT 'manage site meta tags and keywords',	
+  `manage_metatags` int(1) NOT NULL DEFAULT 0 COMMENT 'manage site meta tags and keywords',
   `edit_doc_metatags` int(1) NOT NULL DEFAULT 0 COMMENT 'edit document meta tags and keywords' ,
   `new_web_user` int(1) NOT NULL default '0',
   `edit_web_user` int(1) NOT NULL default '0',
@@ -673,7 +673,7 @@ ALTER TABLE `{PREFIX}site_tmplvar_templates`
  DROP INDEX `idx_templateid`,
  ADD PRIMARY KEY ( `tmplvarid` , `templateid` );
 
-ALTER TABLE `{PREFIX}site_content`
+ALTER TABLE `{PREFIX}site_content` 
   MODIFY COLUMN `pagetitle` varchar(255) NOT NULL default '',
   MODIFY COLUMN `alias` varchar(255) default '',
   MODIFY COLUMN `menutitle` varchar(255) NOT NULL DEFAULT '' COMMENT 'Menu title';
@@ -704,7 +704,7 @@ ALTER TABLE `{PREFIX}web_user_attributes`
   MODIFY COLUMN `state` varchar(25) NOT NULL default '',
   MODIFY COLUMN `zip` varchar(25) NOT NULL default '',
   MODIFY COLUMN `comment` text;
-  
+
 ALTER TABLE `{PREFIX}user_roles` ADD COLUMN `remove_locks` int(1) NOT NULL DEFAULT '0';
 
 ALTER TABLE `{PREFIX}member_groups` ADD UNIQUE INDEX `ix_group_member` (`user_group`,`member`);

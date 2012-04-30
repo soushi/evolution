@@ -33,7 +33,7 @@ if (!$_SESSION['test']) {
         $installBaseUrl = str_replace(':' . $_SERVER['SERVER_PORT'], '', $installBaseUrl); // remove port from HTTP_HOST
     $installBaseUrl .= ($_SERVER['SERVER_PORT'] == 80 || isset ($_SERVER['HTTPS']) || strtolower($_SERVER['HTTPS']) == 'on') ? '' : ':' . $_SERVER['SERVER_PORT'];
 	$retryURL = $installBaseUrl . $_SERVER['PHP_SELF'] . "?action=language";
-    echo "
+	echo "
 <html>
 <head>
 	<title>Install Problem</title>
@@ -52,7 +52,7 @@ if (!$_SESSION['test']) {
 	</div>
 </body>
 </html>";
-	    exit;
+	exit;
 
 }
 
@@ -62,11 +62,11 @@ $moduleRelease = $modx_release_date;
 $moduleSQLBaseFile = 'setup.sql';
 $moduleSQLDataFile = 'setup.data.sql';
 
-$moduleChunks = array (); // chunks - array : name, description, type - 0:file or 1:content, file or content
+$moduleChunks    = array (); // chunks    - array : name, description, type - 0:file or 1:content, file or content
 $moduleTemplates = array (); // templates - array : name, description, type - 0:file or 1:content, file or content
-$moduleSnippets = array (); // snippets - array : name, description, type - 0:file or 1:content, file or content,properties
-$modulePlugins = array (); // plugins - array : name, description, type - 0:file or 1:content, file or content,properties, events,guid
-$moduleModules = array (); // modules - array : name, description, type - 0:file or 1:content, file or content,properties, guid
+$moduleSnippets  = array (); // snippets  - array : name, description, type - 0:file or 1:content, file or content,properties
+$modulePlugins   = array (); // plugins   - array : name, description, type - 0:file or 1:content, file or content,properties, events,guid
+$moduleModules   = array (); // modules   - array : name, description, type - 0:file or 1:content, file or content,properties, guid
 $moduleTemplates = array (); // templates - array : name, description, type - 0:file or 1:content, file or content,properties
 $moduleTVs       = array (); // TVs       - array : name, description, type - 0:file or 1:content, file or content,properties
 
