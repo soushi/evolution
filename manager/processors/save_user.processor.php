@@ -60,9 +60,9 @@ if ($_SESSION['mgrRole'] != 1) {
 		    || !$modx->hasPermission('new_role')
 		    )
 			{
-		webAlert("Illegal attempt to create/modify administrator by non-administrator!");
-		exit;
-	}
+				webAlert("Illegal attempt to create/modify administrator by non-administrator!");
+				exit;
+			}
 	}
 	// Verify that the user being edited wasn't an admin and the user ID got spoofed
 	if ($rs = $modx->db->select('role',$tbl_user_attributes,"internalKey={$id}")) {
@@ -172,7 +172,7 @@ switch ($_POST['mode']) {
 			"mode" => "new",
 			"id" => $key
 		));
-
+		
 		/*******************************************************************************/
 		// put the user in the user_groups he/ she should be in
 		// first, check that up_perms are switched on!
@@ -198,7 +198,7 @@ switch ($_POST['mode']) {
 			} else {
 				$header = "Location: index.php?a=75";
 			}
-				header($header);
+			header($header);
 			exit;
 		} else {
 			if ($_POST['stay'] != '') {
@@ -440,7 +440,7 @@ switch ($_POST['mode']) {
 			} else {
 				$header = "Location: index.php?a=75";
 			}
-				header($header);
+			header($header);
 			exit;
 		}
 		break;
