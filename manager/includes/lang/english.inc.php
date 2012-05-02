@@ -1117,6 +1117,7 @@ $_lang["bkmgr_snapshot_list_title"] = 'List of snapshot';
 $_lang["bkmgr_restore_submit"] = 'Revert this data';
 $_lang["bkmgr_snapshot_nothing"] = 'No snapshot';
 $_lang["settings_friendlyurls_alert"] = 'It is necessary to rename the sample.htaccess file of a MODX installation directory at .htaccess to use the Friendly URL function.';
+$_lang["settings_friendlyurls_alert2"] = 'Since it has installed in a subdirectory, it is necessary to change the contents of .htaccess. ';
 
 $_lang["configcheck_rb_base_dir"] = 'The path setting of a file browser directory is not right.';
 $_lang["configcheck_filemanager_path"] = 'The path setting of the object directory of a file management function is not right.';
