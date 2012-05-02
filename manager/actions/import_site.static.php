@@ -51,19 +51,19 @@ if(!isset($_POST['import'])) {
     </td>
   </tr>
   <tr>
-	<td nowrap="nowrap" valign="top"><b>Reset resource tree</b></td>
+	<td nowrap="nowrap" valign="top"><b><?php echo $_lang["import_site.static.php1"]; ?></b></td>
     <td>&nbsp;</td>
     <td><input type="checkbox" id="reset" name="reset" value="on" />
         <br />
-		Reset resource tree,IDs are initialized.
+		<?php echo $_lang["import_site.static.php2"]; ?>
     </td>
   </tr>
   <tr>
-    <td nowrap="nowrap" valign="top"><b>Target</b></td>
+    <td nowrap="nowrap" valign="top"><b><?php echo $_lang["import_site.static.php3"]; ?></b></td>
     <td>&nbsp;</td>
     <td>
-    <label><input type="radio" name="object" value="body" checked="checked" /> &lt;body&gt;&lt;/body&gt; only</label>
-    <label><input type="radio" name="object" value="all" /> File contain all</label>
+    <label><input type="radio" name="object" value="body" checked="checked" /> <?php echo $_lang["import_site.static.php4"]; ?></label>
+    <label><input type="radio" name="object" value="all" /> <?php echo $_lang["import_site.static.php5"]; ?></label>
         <br />
     </td>
   </tr>

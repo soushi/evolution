@@ -228,7 +228,7 @@ function duplicatedocument(){
 
 function resetpubdate() {
 	if(document.mutate.pub_date.value!=''||document.mutate.unpub_date.value!='') {
-		if (confirm("pub_date and unpub_date are reset.")==true) {
+		if (confirm("<?php echo $_lang['mutate_content.dynamic.php1'];?>")==true) {
 			document.mutate.pub_date.value='';
 			document.mutate.unpub_date.value='';
 		}

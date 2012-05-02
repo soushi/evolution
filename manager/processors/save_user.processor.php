@@ -400,7 +400,7 @@ switch ($_POST['mode']) {
 		{
 			include_once "header.inc.php";
 			$_SESSION['mgrRole'] = $roleid;
-			$modx->webAlert('In order to read an authority setup of the changed role, please relogin.','index.php?a=75');
+			$modx->webAlert($_lang['save_user.processor.php1'],'index.php?a=75');
 			include_once "footer.inc.php";
 			exit;
 		}

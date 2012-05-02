@@ -432,9 +432,9 @@ function confirmLangChange(el, lkey, elupd)
 <tr>
 	<th><?php echo $_lang['setting_cache_type'] ?></th>
 	<td>
-		<?php echo wrap_label('Standard mode',form_radio('cache_type','1',$cache_type=='1'));?><br />
-		<?php echo wrap_label('Bypass mode',form_radio('cache_type','2',$cache_type=='2'));?><br />
-		<?php echo wrap_label('Cache disabled',form_radio('cache_type','0',$cache_type=='0'));?><br />
+		<?php echo wrap_label($_lang['mutate_settings.dynamic.php1'],form_radio('cache_type','1',$cache_type=='1'));?><br />
+		<?php echo wrap_label($_lang['mutate_settings.dynamic.php2'],form_radio('cache_type','2',$cache_type=='2'));?><br />
+		<?php echo wrap_label($_lang['mutate_settings.dynamic.php3'],form_radio('cache_type','0',$cache_type=='0'));?><br />
 		<?php echo $_lang["setting_cache_type_desc"] ?>
 	</td>
 </tr>
@@ -571,11 +571,11 @@ function confirmLangChange(el, lkey, elupd)
 		<?php echo $_lang["friendlyurlsuffix_message"] ?></td>
 </tr>
 <tr id='furlRow5' class="row1" style="display: <?php echo $friendly_urls==1 ? $displayStyle : 'none' ; ?>">
-	<th><?php echo 'Individual extension expression';?></th>
+	<th><?php echo $_lang['mutate_settings.dynamic.php4'];?></th>
 	<td>
 		<?php echo wrap_label($_lang["yes"],form_radio('suffix_mode','1', $suffix_mode=='1'));?><br />
 		<?php echo wrap_label($_lang["no"],form_radio('suffix_mode','0', $suffix_mode=='0'));?><br />
-		<?php echo 'The addition of a prefix can be omitted when "." (dot) is included in an alias name. ';?></td>
+		<?php echo $_lang['mutate_settings.dynamic.php5'];?></td>
 </tr>
 <tr id='furlRow7' class="row1" style="display: <?php echo $friendly_urls==1 ? $displayStyle : 'none' ; ?>">
 <th><?php echo $_lang["friendly_alias_title"] ?></th>
@@ -653,13 +653,13 @@ if(is_array($evtOut)) echo implode("",$evtOut);
 <?php echo $_lang["blocked_minutes_message"] ?></td>
 </tr>
 <tr>
-<th>email notifies system error. </th>
+<th><?php echo $_lang['mutate_settings.dynamic.php6']; ?></th>
 <td>
-	<?php echo wrap_label('not notify',form_radio('send_errormail','0', ($send_errormail=='0' || !isset($send_errormail))));?><br />
+	<?php echo wrap_label($_lang['mutate_settings.dynamic.php7'],form_radio('send_errormail','0', ($send_errormail=='0' || !isset($send_errormail))));?><br />
 	<?php echo wrap_label('error',form_radio('send_errormail','3', $send_errormail=='3'));?><br />
 	<?php echo wrap_label('error + warning',form_radio('send_errormail','2', $send_errormail=='2'));?><br />
 	<?php echo wrap_label('error + warning + information',form_radio('send_errormail','1', $send_errormail=='1'));?><br />
-It notifies to [(emailsender)](<?php echo $emailsender; ?>) at the time of error generating. The details of the contents of the error should check an event log.</td>
+<?php echo $_lang['mutate_settings.dynamic.php8'];?></td>
 </tr>
 <?php
 // Check for GD before allowing captcha to be enabled
