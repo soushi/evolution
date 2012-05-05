@@ -135,6 +135,16 @@ class DocumentParser {
         return $result;
     } // loadExtension
     
+    /**
+     * Returns the current micro time
+     *
+     * @return float
+     */
+    public function getMicroTime() {
+        list ($usec, $sec)= explode(' ', microtime());
+        return ((float) $usec + (float) $sec);
+    } // getMicroTime
+
     function executeParser()
     {
         ob_start();
@@ -521,13 +531,7 @@ class DocumentParser {
         
         // end post processing
     }
-    
-    function getMicroTime()
-    {
-        list ($usec, $sec)= explode(' ', microtime());
-        return ((float) $usec + (float) $sec);
-    }
-    
+        
     function sendRedirect($url, $count_attempts= 0, $type= '', $responseCode= '')
     {
         if (empty($url))
