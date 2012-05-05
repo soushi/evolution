@@ -439,6 +439,21 @@ class DocumentParser {
         return $docIdentifier;
     } // getDocumentIdentifier
 
+    /**
+     * Check for manager login session
+     *
+     * @return boolean
+     */
+    public function checkSession() {
+        if (isset ($_SESSION['mgrValidated'])) {
+            $result = true;
+        } else {
+            $result = false;
+        }
+
+        return $result;
+    } // checkSession
+
     function executeParser()
     {
         ob_start();
@@ -897,16 +912,6 @@ class DocumentParser {
         return $src;
     }
     
-    // check for manager login session
-    function checkSession()
-    {
-        if(isset($_SESSION['mgrValidated']) && !empty($_SESSION['mgrValidated']))
-        {
-            return true;
-        }
-        else return false;
-    }
-
     function checkPreview()
     {
         if ($this->checkSession() == true)
