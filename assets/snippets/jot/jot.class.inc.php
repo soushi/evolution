@@ -11,6 +11,7 @@
 # Documentation: http://wiki.modxcms.com/index.php/Jot (wiki)
 #
 ####*/
+include_once dirname(__FILE__)."/../../../manager/includes/controls/modxmailer.inc.php";
 
 class CJot {
 	var $name;
@@ -32,7 +33,6 @@ class CJot {
 		$this->name = $this->config["snippet"]["name"] = "Jot";
 		$this->version = $this->config["snippet"]["version"] = "1.1.4"; //
 		$this->config["snippet"]["versioncheck"] = "Unknown";
-		$this->client = $modx->getUserData();
 		$this->_ctime = time();
 		$this->_check = 0;
 		$this->provider = new CJotDataDb;
@@ -107,9 +107,9 @@ class CJot {
 		$this->config["user"]["usrid"] = intval($_SESSION['webInternalKey']);
 		$this->config["user"]["id"] = (	$this->config["user"]["usrid"] > 0 ) ? (-$this->config["user"]["usrid"]) : $this->config["user"]["mgrid"];
 
-		$this->config["user"]["host"] = $this->client['ip'];
-		$this->config["user"]["ip"] = $this->client['ip'];
-		$this->config["user"]["agent"] = $this->client['ua'];
+		$this->config["user"]["host"] = $_SERVER['REMOTE_ADDR'];
+		$this->config["user"]["ip"] = $_SERVER['REMOTE_ADDR'];
+		$this->config["user"]["agent"] = $_SERVER['HTTP_USER_AGENT'];
 		$this->config["user"]["sechash"] = md5($this->config["user"]["id"].$this->config["user"]["host"].$this->config["user"]["ip"].$this->config["user"]["agent"]);
 		
 		// Automatic settings
@@ -671,7 +671,17 @@ class CJot {
 							$tpl->AddVar('siteurl',"http://".$_SERVER["SERVER_NAME"]);
 							$tpl->AddVar('recipient',$user);
 							$message = $tpl->Render();
-							mail($user["email"], $this->config["subject"]["subscribe"], $message, "From: ".$modx->config['emailsender']."\r\n"."X-Mailer: Content Manager - PHP/".phpversion());
+							// mail($user["email"], $this->config["subject"]["subscribe"], $message, "From: ".$modx->config['emailsender']."\r\n"."X-Mailer: Content Manager - PHP/".phpversion());
+
+							$mail = new MODxMailer();
+							$mail->IsHTML(false);
+							$mail->From		= $modx->config['emailsender'].
+							$mail->FromName	= $modx->config['site_name'];
+							$mail->Subject	= $this->config["subject"]["subscribe"];
+							$mail->Body		= $message;
+							$mail->AddAddress($user["email"]);
+							$mail->Send() ;         //ignore mail errors in this cas
+							
 						}
 				}
 		}
@@ -697,7 +707,15 @@ class CJot {
 				$tpl->AddVar('siteurl',"http://".$_SERVER["SERVER_NAME"]);
 				$tpl->AddVar('recipient',$user);
 				$message = $tpl->Render();
-				mail($user["email"], $this->config["subject"]["moderate"], $message, "From: ".$modx->config['emailsender']."\r\n"."X-Mailer: Content Manager - PHP/".phpversion());
+				//mail($user["email"], $this->config["subject"]["moderate"], $message, "From: ".$modx->config['emailsender']."\r\n"."X-Mailer: Content Manager - PHP/".phpversion());
+				$mail = new MODxMailer();
+				$mail->IsHTML(false);
+				$mail->From		= $modx->config['emailsender'].
+				$mail->FromName	= $modx->config['site_name'];
+				$mail->Subject	= $this->config["subject"]["moderate"];
+				$mail->Body		= $message;
+				$mail->AddAddress($user["email"]);
+				$mail->Send() ;         //ignore mail errors in this cas
 			}
 		}
 	}
@@ -730,7 +748,15 @@ class CJot {
 			$tpl->AddVar('recipient',$user);
 			$message = $tpl->Render();
 			
-			mail($user["email"], $this->config["subject"]["author"], $message, "From: ".$modx->config['emailsender']."\r\n"."X-Mailer: Content Manager - PHP/".phpversion());
+			//mail($user["email"], $this->config["subject"]["author"], $message, "From: ".$modx->config['emailsender']."\r\n"."X-Mailer: Content Manager - PHP/".phpversion());
+			$mail = new MODxMailer();
+			$mail->IsHTML(false);
+			$mail->From		= $modx->config['emailsender'].
+			$mail->FromName	= $modx->config['site_name'];
+			$mail->Subject	= $this->config["subject"]["author"];
+			$mail->Body		= $message;
+			$mail->AddAddress($user["email"]);
+			$mail->Send() ;         //ignore mail errors in this cas
 			
 		}
 		

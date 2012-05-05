@@ -2,6 +2,12 @@
 /**
  * MODx Installer
  */
+
+$base_path = str_replace('\\','/',realpath(dirname(dirname(__FILE__)))) . '/';
+$installer_path = "{$base_path}install/";
+
+if(@file_exists("{$base_path}autoload.php")) include_once("{$base_path}autoload.php");
+
 // do a little bit of environment cleanup if possible
 if (version_compare(phpversion(), "5.3") < 0) {
     @ ini_set('magic_quotes_runtime', 0);
@@ -15,8 +21,9 @@ $_SESSION['test'] = 1;
 // set error reporting
 error_reporting(E_ALL & ~E_NOTICE);
 
-require_once("lang.php");
-require_once('../manager/includes/version.inc.php');
+require_once("{$installer_path}lang.php");
+require_once("{$base_path}manager/includes/version.inc.php");
+require_once("{$installer_path}functions.php");
 
 // session loop-back tester
 if (!$_SESSION['test']) {
@@ -26,7 +33,7 @@ if (!$_SESSION['test']) {
         $installBaseUrl = str_replace(':' . $_SERVER['SERVER_PORT'], '', $installBaseUrl); // remove port from HTTP_HOST
     $installBaseUrl .= ($_SERVER['SERVER_PORT'] == 80 || isset ($_SERVER['HTTPS']) || strtolower($_SERVER['HTTPS']) == 'on') ? '' : ':' . $_SERVER['SERVER_PORT'];
 	$retryURL = $installBaseUrl . $_SERVER['PHP_SELF'] . "?action=language";
-    echo "
+	echo "
 <html>
 <head>
 	<title>Install Problem</title>
@@ -45,23 +52,23 @@ if (!$_SESSION['test']) {
 	</div>
 </body>
 </html>";
-	    exit;
+	exit;
 
 }
 
-$moduleName = "MODx";
+$moduleName = "MODX";
 $moduleVersion = $modx_branch.' '.$modx_version;
 $moduleRelease = $modx_release_date;
-$moduleSQLBaseFile = "setup.sql";
-$moduleSQLDataFile = "setup.data.sql";
+$moduleSQLBaseFile = 'setup.sql';
+$moduleSQLDataFile = 'setup.data.sql';
 
-$moduleChunks = array (); // chunks - array : name, description, type - 0:file or 1:content, file or content
+$moduleChunks    = array (); // chunks    - array : name, description, type - 0:file or 1:content, file or content
 $moduleTemplates = array (); // templates - array : name, description, type - 0:file or 1:content, file or content
-$moduleSnippets = array (); // snippets - array : name, description, type - 0:file or 1:content, file or content,properties
-$modulePlugins = array (); // plugins - array : name, description, type - 0:file or 1:content, file or content,properties, events,guid
-$moduleModules = array (); // modules - array : name, description, type - 0:file or 1:content, file or content,properties, guid
+$moduleSnippets  = array (); // snippets  - array : name, description, type - 0:file or 1:content, file or content,properties
+$modulePlugins   = array (); // plugins   - array : name, description, type - 0:file or 1:content, file or content,properties, events,guid
+$moduleModules   = array (); // modules   - array : name, description, type - 0:file or 1:content, file or content,properties, guid
 $moduleTemplates = array (); // templates - array : name, description, type - 0:file or 1:content, file or content,properties
-$moduleTVs = array (); // template variables - array : name, description, type - 0:file or 1:content, file or content,properties
+$moduleTVs       = array (); // TVs       - array : name, description, type - 0:file or 1:content, file or content,properties
 
 $errors= 0;
 
@@ -70,18 +77,13 @@ $isPostBack = (count($_POST));
 
 $action= isset ($_GET['action']) ? trim(strip_tags($_GET['action'])) : 'language';
 
-// make sure they agree to the license
-#if (!in_array($action, array ('language', 'welcome', 'connection', 'options', 'license', 'mode', 'summary'))) {
-#    if (!isset ($_POST['chkagree'])) $action= 'license';
-#}
-
 ob_start();
-include ('header.php');
+include ("{$installer_path}header.php");
 
-if (!@include ('action.' . $action . '.php')) {
+if (!@include ("{$installer_path}actions/{$action}.php"))
+{
     die ('Invalid install action attempted. [action=' . $action . ']');
 }
 
-include ('footer.php');
+include ("{$installer_path}footer.php");
 ob_end_flush();
-?>
