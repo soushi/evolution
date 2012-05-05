@@ -95,36 +95,45 @@ class DocumentParser {
         }
     } // __construct
 
-    // loads an extension from the extenders folder
-    function loadExtension($extname)
-    {
+    /**
+     * Loads an extension from the extenders folder. By now it does load the
+     * database classes and the manager API class.
+     *
+     * @global string $database_type
+     * @param string $extname
+     * @return boolean
+     */
+    private function loadExtension($extname) {
         global $database_type;
-        
-        switch ($extname)
-        {
+
+        $result = false;
+
+        switch ($extname) {
             // Database API
             case 'DBAPI' :
-                if(include_once(MODX_BASE_PATH . "manager/includes/extenders/dbapi.{$database_type}.class.inc.php"))
-                {
-                    $this->db= new DBAPI;
-                    $this->dbConfig= & $this->db->config; // alias for backward compatibility
-                    return true;
-                }
-                else return false;
+                if (!include_once MODX_BASE_PATH . 'manager/includes/extenders/dbapi.' . $database_type . '.class.inc.php')
+                    return false;
+                $this->db= new DBAPI;
+                $result = true;
                 break;
-            // Manager API
+
+                // Manager API
             case 'ManagerAPI' :
-                if(include_once(MODX_BASE_PATH . 'manager/includes/extenders/manager.api.class.inc.php'))
-                {
+                if (!include_once MODX_BASE_PATH . 'manager/includes/extenders/manager.api.class.inc.php') {
+                    $result = false;
+                } else {
                     $this->manager= new ManagerAPI;
-                    return true;
+                    $result = true;
                 }
-                else return false;
+
                 break;
+
             default :
-                return false;
+                $result = false;
         }
-    }
+
+        return $result;
+    } // loadExtension
     
     function executeParser()
     {
