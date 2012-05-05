@@ -220,6 +220,26 @@ class DocumentParser {
         $this->sendForward($dist, 'HTTP/1.0 404 Not Found');
     } // sendErrorPage
     
+    /**
+     * Redirect to the unauthorized page, for example on calling a page, without
+     * having the right to see this page.
+     */
+    private function sendUnauthorizedPage() {
+        // invoke OnPageUnauthorized event
+        $_REQUEST['refurl'] = $this->documentIdentifier;
+        $this->invokeEvent('OnPageUnauthorized');
+        
+        if ($this->config['unauthorized_page']) {
+            $dist = $this->config['unauthorized_page'];
+        } elseif ($this->config['error_page']) {
+            $dist = $this->config['error_page'];
+        } else {
+            $dist = $this->config['site_start'];
+        }
+        
+        $this->sendForward($dist , 'HTTP/1.1 401 Unauthorized');
+    } // sendUnauthorizedPage
+
     function executeParser()
     {
         ob_start();
@@ -629,19 +649,6 @@ class DocumentParser {
         exit();
     }
     
-    function sendUnauthorizedPage()
-    {
-        // invoke OnPageUnauthorized event
-        $_REQUEST['refurl'] = $this->documentIdentifier;
-        $this->invokeEvent('OnPageUnauthorized');
-        
-        if($this->config['unauthorized_page']) $dist = $this->config['unauthorized_page'];
-        elseif($this->config['error_page'])    $dist = $this->config['error_page'];
-        else                                   $dist = $this->config['site_start'];
-        
-        $this->sendForward($dist , 'HTTP/1.1 401 Unauthorized');
-    }
-
     function get_static_pages()
     {
         $filepath = $_SERVER['REQUEST_URI'];
