@@ -454,23 +454,6 @@ class DocumentParser {
         return $result;
     } // checkSession
 
-    /**
-     * Checks, if a the result is a preview
-     *
-     * @return boolean
-     */
-    private function checkPreview() {
-        if ($this->checkSession() == true) {
-            if (isset ($_REQUEST['z']) && $_REQUEST['z'] == 'manprev') {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    } // checkPreview
-
     function executeParser()
     {
         ob_start();
@@ -927,6 +910,25 @@ class DocumentParser {
         else $src = false;
         
         return $src;
+    }
+    
+    function checkPreview()
+    {
+        if ($this->checkSession() == true)
+        {
+            if (isset ($_REQUEST['z']) && $_REQUEST['z'] == 'manprev')
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
     }
     
     // check if site is offline
