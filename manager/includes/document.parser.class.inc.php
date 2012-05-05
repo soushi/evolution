@@ -203,6 +203,23 @@ class DocumentParser {
         }
     } // sendRedirect
 
+    /**
+     * Redirect to the error page, by calling sendForward. This is called for
+     * example when the page was not found.
+     */
+    private function sendErrorPage() {
+        // invoke OnPageNotFound event
+        $this->invokeEvent('OnPageNotFound');
+        
+        if($this->config['error_page']) {
+            $dist = $this->config['error_page'];
+        } else {
+            $dist = $this->config['site_start'];
+        }
+        
+        $this->sendForward($dist, 'HTTP/1.0 404 Not Found');
+    } // sendErrorPage
+    
     function executeParser()
     {
         ob_start();
@@ -610,17 +627,6 @@ class DocumentParser {
             die('<h1>ERROR: Too many forward attempts!</h1><p>The request could not be completed due to too many unsuccessful forward attempts.</p>');
         }
         exit();
-    }
-    
-    function sendErrorPage()
-    {
-        // invoke OnPageNotFound event
-        $this->invokeEvent('OnPageNotFound');
-        
-        if($this->config['error_page']) $dist = $this->config['error_page'];
-        else                            $dist = $this->config['site_start'];
-        
-        $this->sendForward($dist, 'HTTP/1.0 404 Not Found');
     }
     
     function sendUnauthorizedPage()
