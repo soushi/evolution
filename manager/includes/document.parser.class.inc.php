@@ -1,12 +1,21 @@
 <?php
 /**
- *    MODX Document Parser
- *    Function: This class contains the main document parsing functions
+ * MODX Document Parser
+ * Function: This class contains the main document parsing functions
+ * At the moment, all variables are public, because there where no get/set
+ * methods. Step by step the get/set methods will be implented.
+ * The advantage is more control over properties and easier development.
  *
+ * @author  The MODX community
+ * @name    DocumentParser
+ * @package MODX
  */
-
 class DocumentParser {
-    var $db; // db object
+    /**
+     * Database object
+     * @var DBAPI
+     */
+    public $db; // db object
     var $event, $Event; // event object
     var $pluginEvent = array();
     var $config= null;
@@ -52,15 +61,21 @@ class DocumentParser {
     var $safeMode;
     var $qs_hash;
 
-    // constructor
-    function DocumentParser()
-    {
-        if(!isset($_REQUEST['id']))
-        {
+    /**
+     * Document constructor
+     *
+     * @return DocumentParser
+     */
+    function DocumentParser() {
+        if (!isset($_REQUEST['id'])) {
             $_REQUEST['q'] = substr($_SERVER['REQUEST_URI'],strlen(MODX_BASE_URL));
-            if(strpos($_REQUEST['q'],'?')) $_REQUEST['q'] = substr($_REQUEST['q'],0,strpos($_REQUEST['q'],'?'));
+            if(strpos($_REQUEST['q'],'?')) {
+                $_REQUEST['q'] = substr($_REQUEST['q'],0,strpos($_REQUEST['q'],'?'));
+            }
         }
-        if($_REQUEST['q']=='index.php') $_REQUEST['q'] = '';
+        if ($_REQUEST['q']=='index.php') {
+            $_REQUEST['q'] = '';
+        }
         
         $this->loadExtension('DBAPI') or die('Could not load DBAPI class.'); // load DBAPI class
         // events
@@ -75,8 +90,10 @@ class DocumentParser {
         // set track_errors ini variable
         @ ini_set('track_errors', '1'); // enable error tracking in $php_errormsg
         // Don't show PHP errors to the public
-        if($this->checkSession()===false) @ini_set('display_errors','0');
-    }
+        if($this->checkSession()===false) {
+            @ini_set('display_errors','0');
+        }
+    } // __construct
 
     // loads an extension from the extenders folder
     function loadExtension($extname)
