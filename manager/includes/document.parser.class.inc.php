@@ -240,6 +240,76 @@ class DocumentParser {
         $this->sendForward($dist , 'HTTP/1.1 401 Unauthorized');
     } // sendUnauthorizedPage
 
+
+    /**
+     * Function to connect to the database
+     *
+     * @deprecated use $modx->db->connect()
+     */
+    public function dbConnect() {
+        $this->db->connect();
+        $this->rs= $this->db->conn; // for compatibility
+    } // dbConnect
+
+    /**
+     * Function to query the database
+     *
+     * @deprecated use $modx->db->query()
+     * @param string $sql The SQL statement to execute
+     * @return array Query result
+     */
+    public function dbQuery($sql) {
+        return $this->db->query($sql);
+    } // dbQuery
+
+    /**
+     * Function to count the number of rows in a record set
+     *
+     * @deprecated use $modx->db->getRecordCount($rs)
+     * @param array $rs
+     * @return int
+     */
+    public function recordCount($rs) {
+        return $this->db->getRecordCount($rs);
+    } // recordCount
+
+    /**
+     * @deprecated use $modx->db->getRow()
+     * @param array $rs
+     * @param string $mode
+     * @return array
+     */
+    public function fetchRow($rs, $mode='assoc') {
+        return $this->db->getRow($rs, $mode);
+    } // fetchRow
+
+    /**
+     * @deprecated use $modx->db->getAffectedRows()
+     * @param array $rs
+     * @return int
+     */
+    public function affectedRows($rs) {
+        return $this->db->getAffectedRows($rs);
+    } // affectedRows
+
+    /**
+     * @deprecated use $modx->db->getInsertId()
+     * @param array $rs
+     * @return int
+     */
+    public function insertId($rs) {
+        return $this->db->getInsertId($rs);
+    } // insertId
+
+    /**
+     * Function to close a database connection
+     *
+     * @deprecated use $modx->db->disconnect()
+     */
+    public function dbClose() {
+        $this->db->disconnect();
+    } // dbClose
+
     function executeParser()
     {
         ob_start();
@@ -3326,15 +3396,6 @@ class DocumentParser {
         return $parameter;
     }
 
-    // - deprecated db functions
-    function dbConnect()                 {$this->db->connect();$this->rs= $this->db->conn;}
-    function dbQuery($sql)               {return $this->db->query($sql);}
-    function recordCount($rs)            {return $this->db->getRecordCount($rs);}
-    function fetchRow($rs,$mode='assoc') {return $this->db->getRow($rs, $mode);}
-    function affectedRows($rs)           {return $this->db->getAffectedRows($rs);}
-    function insertId($rs)               {return $this->db->getInsertId($rs);}
-    function dbClose()                   {$this->db->disconnect();}
-    
     // deprecated
     function insideManager()
     {
