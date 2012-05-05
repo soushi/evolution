@@ -396,6 +396,25 @@ class DocumentParser {
         $this->config= array_merge($this->config, $usrSettings);
     } // getSettings
     
+    /**
+     * Returns the requested document method, whether it was by alias or by id
+     *
+     * @return string
+     */
+    private function getDocumentMethod() {
+        // function to test the query and find the retrieval method
+        if (isset ($_REQUEST['q'])) {
+            $result = "alias";
+        }
+        elseif (isset ($_REQUEST['id'])) {
+            $result = "id";
+        } else {
+            $result = "none";
+        }
+
+        return $result;
+    } // getDocumentMethod
+
     function executeParser()
     {
         ob_start();
@@ -852,14 +871,6 @@ class DocumentParser {
         else $src = false;
         
         return $src;
-    }
-    
-    function getDocumentMethod()
-    {
-        // function to test the query and find the retrieval method
-        if(isset($_REQUEST['q']))        return 'alias';
-        elseif(isset ($_REQUEST['id']))  return 'id';
-        else                             return 'none';
     }
     
     function getDocumentIdentifier($method)
