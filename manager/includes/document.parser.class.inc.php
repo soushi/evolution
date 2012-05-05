@@ -415,6 +415,30 @@ class DocumentParser {
         return $result;
     } // getDocumentMethod
 
+    /**
+     * Returns the document identifier of the current request
+     *
+     * @param string $method id and alias are allowed
+     * @return int
+     */
+    private function getDocumentIdentifier($method) {
+        // function to test the query and find the retrieval method
+        $docIdentifier= $this->config['site_start'];
+        switch ($method) {
+            case 'alias' :
+                $docIdentifier= $this->db->escape($_REQUEST['q']);
+                break;
+            case 'id' :
+                if (!is_numeric($_REQUEST['id'])) {
+                    $this->sendErrorPage();
+                } else {
+                    $docIdentifier= intval($_REQUEST['id']);
+                }
+                break;
+        }
+        return $docIdentifier;
+    } // getDocumentIdentifier
+
     function executeParser()
     {
         ob_start();
@@ -871,29 +895,6 @@ class DocumentParser {
         else $src = false;
         
         return $src;
-    }
-    
-    function getDocumentIdentifier($method)
-    {
-        // function to test the query and find the retrieval method
-        $docIdentifier= $this->config['site_start'];
-        switch ($method)
-        {
-            case 'alias' :
-                $docIdentifier= $this->db->escape($_REQUEST['q']);
-                break;
-            case 'id' :
-                if (!is_numeric($_REQUEST['id']))
-                {
-                    $this->sendErrorPage();
-                }
-                else
-                {
-                    $docIdentifier= intval($_REQUEST['id']);
-                }
-                break;
-        }
-        return $docIdentifier;
     }
     
     // check for manager login session
