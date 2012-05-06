@@ -1844,46 +1844,45 @@ class DocumentParser {
         return $snip;
     } // _split_snip_call
     
-    function _get_snip_properties($snip_call)
-    {
+    /**
+     *
+     * @param array $snip_call
+     * @return string 
+     */
+    private function _get_snip_properties($snip_call) {
         $snip_name  = $snip_call['name'];
+        $snippetObject = array();
         
-        if(isset($this->snippetCache[$snip_name]))
-        {
-            $snippetObject['name']    = $snip_name;
+        if (isset($this->snippetCache[$snip_name])) {
+            $snippetObject['name'] = $snip_name;
             $snippetObject['content'] = $this->snippetCache[$snip_name];
-            if(isset($this->snippetCache[$snip_name . 'Props']))
-            {
+            if (isset($this->snippetCache[$snip_name . 'Props'])) {
                 $snippetObject['properties'] = $this->snippetCache[$snip_name . 'Props'];
             }
-        }
-        else
-        {
+        } else {
             $tbl_snippets  = $this->getFullTableName('site_snippets');
             $esc_snip_name = $this->db->escape($snip_name);
             // get from db and store a copy inside cache
-            $result= $this->db->select('name,snippet,properties',$tbl_snippets,"name='{$esc_snip_name}'");
+            $result= $this->db->select('name,snippet,properties', $tbl_snippets, "name='{$esc_snip_name}'");
             $added = false;
-            if($this->db->getRecordCount($result) == 1)
-            {
+            if ($this->db->getRecordCount($result) == 1) {
                 $row = $this->db->getRow($result);
-                if($row['name'] == $snip_name)
-                {
+                if ($row['name'] == $snip_name) {
                     $snippetObject['name']       = $row['name'];
                     $snippetObject['content']    = $this->snippetCache[$snip_name]           = $row['snippet'];
                     $snippetObject['properties'] = $this->snippetCache[$snip_name . 'Props'] = $row['properties'];
                     $added = true;
                 }
             }
-            if($added === false)
-            {
+            if ($added === false) {
                 $snippetObject['name']       = $snip_name;
                 $snippetObject['content']    = $this->snippetCache[$snip_name] = 'return false;';
                 $snippetObject['properties'] = '';
             }
         }
+
         return $snippetObject;
-    }
+    } // _get_snip_properties
     
     function set_aliases()
     {
