@@ -1884,26 +1884,26 @@ class DocumentParser {
         return $snippetObject;
     } // _get_snip_properties
     
-    function set_aliases()
-    {
+    /**
+     * Sets the aliases array
+     *
+     * @return array
+     */
+    private function set_aliases() {
         $path_aliases = MODX_BASE_PATH . 'assets/cache/aliases.pageCache.php';
-        if(file_exists($path_aliases))
-        {
+        if (file_exists($path_aliases)) {
             $src = file_get_contents($path_aliases);
             $this->aliases = unserialize($src);
-        }
-        else
-        {
-            $aliases= array ();
-            foreach ($this->aliasListing as $doc)
-            {
+        } else {
+            $aliases = array ();
+            foreach ($this->aliasListing as $doc) {
                 $aliases[$doc['id']]= (strlen($doc['path']) > 0 ? $doc['path'] . '/' : '') . $doc['alias'];
             }
-            file_put_contents($path_aliases,serialize($aliases));
+            file_put_contents($path_aliases, serialize($aliases));
             $this->aliases = $aliases;
         }
         return $this->aliases;
-    }
+    } // set_aliases
 
     /***************************************************************************************/
     /* API functions                                                                /
