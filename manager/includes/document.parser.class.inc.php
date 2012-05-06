@@ -2005,29 +2005,30 @@ class DocumentParser {
         return $children;
     } // getChildIds
 
-    # Displays a javascript alert message in the web browser
-    function webAlert($msg, $url= '')
-    {
+    /**
+     * Displays a javascript alert message in the web browser
+     *
+     * @category API-Function
+     * @param string $msg Message to show
+     * @param string $url URL that is linked to
+     *                    Default: Empty string
+     * @example $modx->webAlert("hello world", "http://www.google.com"]);
+     */
+    public function webAlert($msg, $url='') {
         $msg= addslashes($this->db->escape($msg));
-        if (substr(strtolower($url), 0, 11) == 'javascript:')
-        {
-            $act= '__WebAlert();';
-            $fnc= 'function __WebAlert(){' . substr($url, 11) . '};';
+        if (substr(strtolower($url), 0, 11) == "javascript:") {
+            $act= "__WebAlert();";
+            $fnc= "function __WebAlert(){" . substr($url, 11) . "};";
+        } else {
+            $act= ($url ? "window.location.href='" . addslashes($url) . "';" : "");
         }
-        else
-        {
-            $act= $url ? "window.location.href='" . addslashes($url) . "';" : '';
-        }
-        $html= "<script>{$fnc} window.setTimeout(\"alert('{$msg}');{$act}\",100);</script>";
+        $html= "<script>$fnc window.setTimeout(\"alert('$msg');$act\",100);</script>";
         if ($this->isFrontend())
-        {
             $this->regClientScript($html);
-        }
-        else
-        {
+        else {
             echo $html;
         }
-    }
+    } // webAlert
 
     # Returns true if user has the currect permission
     function hasPermission($pm) {
