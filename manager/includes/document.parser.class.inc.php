@@ -862,6 +862,44 @@ class DocumentParser {
         $this->invokeEvent('OnWebPageComplete');
     } // postProcess
     
+    /**
+     * Add meta tags to the document
+     *
+     * @param string $template
+     * @return string
+     */
+    private function mergeDocumentMETATags($template) {
+        $metas = '';
+        if ($this->documentObject['haskeywords'] == 1) {
+            // insert keywords
+            $keywords = $this->getKeywords();
+            if (is_array($keywords) && count($keywords) > 0) {
+                $keywords = implode(", ", $keywords);
+                $metas= "\t<meta name=\"keywords\" content=\"$keywords\" />\n";
+            }
+
+            // Don't process when cached
+            $this->documentObject['haskeywords'] = '0';
+        }
+        if ($this->documentObject['hasmetatags'] == 1) {
+            // insert meta tags
+            $tags= $this->getMETATags();
+            foreach ($tags as $n => $col) {
+                $tag= strtolower($col['tag']);
+                $tagvalue= $col['tagvalue'];
+                $tagstyle= $col['http_equiv'] ? 'http-equiv' : 'name';
+                $metas .= "\t<meta $tagstyle=\"$tag\" content=\"$tagvalue\" />\n";
+            }
+
+            // Don't process when cached
+            $this->documentObject['hasmetatags'] = '0';
+        }
+        if (isset($metas) && $metas) {
+            $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
+        }
+        return $template;
+    } // mergeDocumentMETATags
+
     function executeParser()
     {
         ob_start();
@@ -3395,35 +3433,6 @@ class DocumentParser {
     function putChunk($chunkName) {return $this->getChunk($chunkName);}// deprecated alias name >.<
     function getDocGroups() {return $this->getUserDocGroups();} // deprecated
     function changePassword($o, $n) {return changeWebUserPassword($o, $n);} // deprecated
-
-    function mergeDocumentMETATags($template) {
-        if ($this->documentObject['haskeywords'] == 1) {
-            // insert keywords
-            $keywords = $this->getKeywords();
-            if (is_array($keywords) && count($keywords) > 0) {
-                $keywords = implode(", ", $keywords);
-                $metas= "\t<meta name=\"keywords\" content=\"$keywords\" />\n";
-            }
-
-        // Don't process when cached
-        $this->documentObject['haskeywords'] = '0';
-        }
-        if ($this->documentObject['hasmetatags'] == 1) {
-            // insert meta tags
-            $tags= $this->getMETATags();
-            foreach ($tags as $n => $col) {
-                $tag= strtolower($col['tag']);
-                $tagvalue= $col['tagvalue'];
-                $tagstyle= $col['http_equiv'] ? 'http-equiv' : 'name';
-                $metas .= "\t<meta $tagstyle=\"$tag\" content=\"$tagvalue\" />\n";
-            }
-
-        // Don't process when cached
-        $this->documentObject['hasmetatags'] = '0';
-        }
-    if (isset($metas) && $metas) $template = preg_replace("/(<head>)/i", "\\1\n\t" . trim($metas), $template);
-        return $template;
-    }
 
     function getMETATags($id= 0) {
         if ($id == 0) {
