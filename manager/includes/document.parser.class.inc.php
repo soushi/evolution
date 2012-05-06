@@ -622,6 +622,117 @@ class DocumentParser {
         return $a[1]; // return document content
     } // checkCache
     
+    /**
+     * Returns the content with echo function
+     *
+     * @param boolean $noEvent Default: false
+     */
+    private function outputContent($noEvent=false) {
+        
+        $this->documentOutput= $this->documentContent;
+        
+        if ($this->documentGenerated == 1 && $this->documentObject['cacheable'] == 1
+            && $this->documentObject['type'] == 'document' && $this->documentObject['published'] == 1) {
+            if (!empty($this->sjscripts)) {
+                $this->documentObject['__MODxSJScripts__'] = $this->sjscripts;
+            }
+            if (!empty($this->jscripts)) {
+                $this->documentObject['__MODxJScripts__'] = $this->jscripts;
+            }
+        }
+        
+        // check for non-cached snippet output
+        if (strpos($this->documentOutput, '[!') !== false) {
+            // Parse document source
+            $passes = $this->minParserPasses;
+            
+            for ($i= 0; $i < $passes; $i++) {
+                if ($i == ($passes -1)) {
+                    $st= md5($this->documentOutput);
+                }
+                $this->documentOutput = str_replace(array('[!','!]'), array('[[',']]'), $this->documentOutput);
+                $this->documentOutput = $this->parseDocumentSource($this->documentOutput);
+                
+                if ($i == ($passes -1) && $i < ($this->maxParserPasses - 1)) {
+                    $et = md5($this->documentOutput);
+                    if ($st != $et) {
+                        $passes++;
+                    }
+                }
+            }
+        }
+        
+        // Moved from prepareResponse() by sirlancelot
+        if ($js= $this->getRegisteredClientStartupScripts()) {
+            $this->documentOutput= preg_replace("/(<\/head>)/i", $js . "\n\\1", $this->documentOutput);
+        }
+        
+        // Insert jscripts & html block into template - template must have a </body> tag
+        if ($js= $this->getRegisteredClientScripts()) {
+            $this->documentOutput= preg_replace("/(<\/body>)/i", $js . "\n\\1", $this->documentOutput);
+        }
+        // End fix by sirlancelot
+        
+        // remove all unused placeholders
+        if (strpos($this->documentOutput, '[+') > -1) {
+            $matches= array ();
+            preg_match_all('~\[\+(.*?)\+\]~', $this->documentOutput, $matches);
+            if ($matches[0]) {
+                $this->documentOutput= str_replace($matches[0], '', $this->documentOutput);
+            }
+        }
+        
+        if(strpos($this->documentOutput,'[~')!==false) {
+            $this->documentOutput = $this->rewriteUrls($this->documentOutput);
+        }
+        
+        // send out content-type and content-disposition headers
+        if (IN_PARSER_MODE == 'true') {
+            $type = $this->documentObject['contentType'];
+            if(empty($type)) $type = 'text/html';
+            
+            header("Content-Type: {$type}; charset={$this->config['modx_charset']}");
+            //            if (($this->documentIdentifier == $this->config['error_page']) || $redirect_error)
+            //                header('HTTP/1.0 404 Not Found');
+            if ($this->documentObject['content_dispo'] == 1) {
+                if ($this->documentObject['alias']) {
+                    $name= urldecode($this->documentObject['alias']);
+                } else {
+                    // strip title of special characters
+                    $name= $this->documentObject['pagetitle'];
+                    $name= strip_tags($name);
+                    $name= preg_replace('/&.+?;/', '', $name); // kill entities
+                    $name= preg_replace('/\s+/', '-', $name);
+                    $name= preg_replace('|-+|', '-', $name);
+                    $name= trim($name, '-');
+                }
+                $header= 'Content-Disposition: attachment; filename=' . $name;
+                header($header);
+            }
+        }
+        if ($this->config['cache_type'] !=2) {
+            $this->documentOutput = $this->mergeBenchmarkContent($this->documentOutput);
+        }
+        
+        if ($this->dumpSQL) {
+            $this->documentOutput = preg_replace("/(<\/body>)/i", $this->queryCode . "\n\\1", $this->documentOutput);
+        }
+        if ($this->dumpSnippets) {
+            $this->documentOutput = preg_replace("/(<\/body>)/i", $this->snipCode . "\n\\1", $this->documentOutput);
+        }
+        
+        // invoke OnWebPagePrerender event
+        if (!$noEvent) {
+            $this->invokeEvent('OnWebPagePrerender');
+        }
+        if(strpos($this->documentOutput,'[^')) {
+            echo $this->mergeBenchmarkContent($this->documentOutput);
+        } else { 
+            echo $this->documentOutput;
+        }
+        ob_end_flush();
+    } // outputContent
+    
     function executeParser()
     {
         ob_start();
@@ -841,118 +952,6 @@ class DocumentParser {
         'postProcess'
         )); // tell PHP to call postProcess when it shuts down
         $this->outputContent();
-    }
-    
-    function outputContent($noEvent= false)
-    {
-        
-        $this->documentOutput= $this->documentContent;
-        
-        if ($this->documentGenerated           == 1
-         && $this->documentObject['cacheable'] == 1
-         && $this->documentObject['type']      == 'document'
-         && $this->documentObject['published'] == 1)
-        {
-            if (!empty($this->sjscripts)) $this->documentObject['__MODxSJScripts__'] = $this->sjscripts;
-            if (!empty($this->jscripts))  $this->documentObject['__MODxJScripts__'] = $this->jscripts;
-        }
-        
-        // check for non-cached snippet output
-        if (strpos($this->documentOutput, '[!') !== false)
-        {
-            // Parse document source
-            $passes = $this->minParserPasses;
-            
-            for ($i= 0; $i < $passes; $i++)
-            {
-                if($i == ($passes -1)) $st= md5($this->documentOutput);
-                
-                $this->documentOutput = str_replace(array('[!','!]'), array('[[',']]'), $this->documentOutput);
-                $this->documentOutput = $this->parseDocumentSource($this->documentOutput);
-                
-                if($i == ($passes -1) && $i < ($this->maxParserPasses - 1))
-                {
-                    $et = md5($this->documentOutput);
-                    if($st != $et) $passes++;
-                }
-            }
-        }
-        
-        // Moved from prepareResponse() by sirlancelot
-        if ($js= $this->getRegisteredClientStartupScripts())
-        {
-            $this->documentOutput= preg_replace("/(<\/head>)/i", $js . "\n\\1", $this->documentOutput);
-        }
-        
-        // Insert jscripts & html block into template - template must have a </body> tag
-        if ($js= $this->getRegisteredClientScripts())
-        {
-            $this->documentOutput= preg_replace("/(<\/body>)/i", $js . "\n\\1", $this->documentOutput);
-        }
-        // End fix by sirlancelot
-        
-        // remove all unused placeholders
-        if (strpos($this->documentOutput, '[+') > -1)
-        {
-            $matches= array ();
-            preg_match_all('~\[\+(.*?)\+\]~', $this->documentOutput, $matches);
-            if ($matches[0])
-            $this->documentOutput= str_replace($matches[0], '', $this->documentOutput);
-        }
-        
-        if(strpos($this->documentOutput,'[~')!==false) $this->documentOutput = $this->rewriteUrls($this->documentOutput);
-        
-        // send out content-type and content-disposition headers
-        if (IN_PARSER_MODE == 'true')
-        {
-            $type = $this->documentObject['contentType'];
-            if(empty($type)) $type = 'text/html';
-            
-            header("Content-Type: {$type}; charset={$this->config['modx_charset']}");
-            //            if (($this->documentIdentifier == $this->config['error_page']) || $redirect_error)
-            //                header('HTTP/1.0 404 Not Found');
-            if ($this->documentObject['content_dispo'] == 1)
-            {
-                if ($this->documentObject['alias'])
-                {
-                    $name= urldecode($this->documentObject['alias']);
-                }
-                else
-                {
-                    // strip title of special characters
-                    $name= $this->documentObject['pagetitle'];
-                    $name= strip_tags($name);
-                    $name= preg_replace('/&.+?;/', '', $name); // kill entities
-                    $name= preg_replace('/\s+/', '-', $name);
-                    $name= preg_replace('|-+|', '-', $name);
-                    $name= trim($name, '-');
-                }
-                $header= 'Content-Disposition: attachment; filename=' . $name;
-                header($header);
-            }
-        }
-        if($this->config['cache_type'] !=2)
-        {
-            $this->documentOutput = $this->mergeBenchmarkContent($this->documentOutput);
-        }
-        
-        if ($this->dumpSQL)
-        {
-            $this->documentOutput = preg_replace("/(<\/body>)/i", $this->queryCode . "\n\\1", $this->documentOutput);
-        }
-        if ($this->dumpSnippets)
-        {
-            $this->documentOutput = preg_replace("/(<\/body>)/i", $this->snipCode . "\n\\1", $this->documentOutput);
-        }
-        
-        // invoke OnWebPagePrerender event
-        if (!$noEvent)
-        {
-            $this->invokeEvent('OnWebPagePrerender');
-        }
-        if(strpos($this->documentOutput,'[^')) echo $this->mergeBenchmarkContent($this->documentOutput);
-        else                                   echo $this->documentOutput;
-        ob_end_flush();
     }
     
     function postProcess()
