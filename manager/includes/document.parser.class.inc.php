@@ -2116,6 +2116,18 @@ class DocumentParser {
         return $this->insideManager() ? true : false;
     } // isBackend
 
+    /**
+     * Determines if the page being parsed is from the Web (frontend) or manager
+     * (backend) view. Returns true if accessed from the web interface. false
+     * otherwise.
+     *
+     * @category API-Function
+     * @return boolean
+     */
+    public function isFrontend() {
+        return !$this->insideManager() ? true : false;
+    } // isFrontend
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2183,16 +2195,6 @@ class DocumentParser {
         $action     = intval($action);
         $tbl_active_users = $this->getFullTableName('active_users');
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
-    }
-
-    # Returns true if parser is executed in frontend mode
-    function isFrontend()
-    {
-        if(defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true')
-        {
-            return false;
-        }
-        else return true;
     }
     
     function getAllChildren($id= 0, $sort= 'menuindex', $dir= 'ASC', $fields= 'id, pagetitle, description, parent, alias, menutitle')
