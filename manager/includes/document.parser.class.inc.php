@@ -1320,6 +1320,70 @@ class DocumentParser {
         return $documentObject;
     } // getDocumentObject
 
+    /**
+     * name: parseDocumentSource - used by parser
+     * desc: return document source aftering parsing tvs, snippets, chunks, etc.
+     *
+     * @param string $source
+     * @return string
+     */
+    public function parseDocumentSource($source) {
+        $passes= $this->minParserPasses;
+        for ($i= 0; $i < $passes; $i++) {
+            // get source length if this is the final pass
+            if ($i == ($passes -1)) { 
+                $bt= md5($source);
+            }
+            if ($this->dumpSnippets == 1) {
+                $this->snipCode .= "<fieldset><legend><b style='color: #821517;'>PARSE PASS " . ($i +1) . "</b></legend>The following snippets (if any) were parsed during this pass.<div style='width:100%' align='center'>";
+            }
+            
+            // invoke OnParseDocument event
+            $this->documentOutput= $source; // store source code so plugins can
+            $this->invokeEvent('OnParseDocument'); // work on it via $modx->documentOutput
+            $source= $this->documentOutput;
+            
+            if (strpos($source, '<!-- #modx') !== false) {
+                $source= $this->mergeCommentedTagsContent($source);
+            }
+            // combine template and document variables
+            if (strpos($source, '[*') !== false) {
+                $source= $this->mergeDocumentContent($source);
+            }
+            // replace settings referenced in document
+            if (strpos($source, '[(') !== false) {
+                $source= $this->mergeSettingsContent($source);
+            }
+            // replace HTMLSnippets in document
+            if (strpos($source, '{{') !== false) {
+                $source= $this->mergeChunkContent($source);
+            }
+            // insert META tags & keywords
+            $source= $this->mergeDocumentMETATags($source);
+            // find and merge snippets
+            if (strpos($source, '[[') !== false) {
+                $source= $this->evalSnippets($source);
+            }
+            // find and replace Placeholders (must be parsed last) - Added by Raymond
+            if (strpos($source, '[+') !== false) {
+                $source= $this->mergePlaceholderContent($source);
+            }
+            if ($this->dumpSnippets == 1) {
+                $this->snipCode .= '</div></fieldset>';
+            }
+            if ($i == ($passes -1) && $i < ($this->maxParserPasses - 1)) {
+                // check if source length was changed
+                if ($bt != md5($source)) {
+                    $passes++; // if content change then increase passes because
+                }
+            } // we have not yet reached maxParserPasses
+            if (strpos($source, '[~') !== false) {
+                $source = $this->rewriteUrls($source);
+            }
+        }
+        return $source;
+    } // parseDocumentSource
+    
     function executeParser()
     {
         ob_start();
@@ -1840,57 +1904,6 @@ class DocumentParser {
         return $this->aliases;
     }
 
-    /**
-    * name: parseDocumentSource - used by parser
-    * desc: return document source aftering parsing tvs, snippets, chunks, etc.
-    */
-    function parseDocumentSource($source)
-    {
-        $passes= $this->minParserPasses;
-        for ($i= 0; $i < $passes; $i++)
-        {
-            // get source length if this is the final pass
-            if ($i == ($passes -1)) $bt= md5($source);
-            if ($this->dumpSnippets == 1)
-            {
-                $this->snipCode .= "<fieldset><legend><b style='color: #821517;'>PARSE PASS " . ($i +1) . "</b></legend>The following snippets (if any) were parsed during this pass.<div style='width:100%' align='center'>";
-            }
-            
-            // invoke OnParseDocument event
-            $this->documentOutput= $source; // store source code so plugins can
-            $this->invokeEvent('OnParseDocument'); // work on it via $modx->documentOutput
-            $source= $this->documentOutput;
-            
-            if(strpos($source,'<!-- #modx')!==false) $source= $this->mergeCommentedTagsContent($source);
-            // combine template and document variables
-            if(strpos($source,'[*')!==false) $source= $this->mergeDocumentContent($source);
-            // replace settings referenced in document
-            if(strpos($source,'[(')!==false) $source= $this->mergeSettingsContent($source);
-            // replace HTMLSnippets in document
-            if(strpos($source,'{{')!==false) $source= $this->mergeChunkContent($source);
-            // insert META tags & keywords
-            $source= $this->mergeDocumentMETATags($source);
-            // find and merge snippets
-            if(strpos($source,'[[')!==false) $source= $this->evalSnippets($source);
-            // find and replace Placeholders (must be parsed last) - Added by Raymond
-            if(strpos($source,'[+')!==false) $source= $this->mergePlaceholderContent($source);
-            if ($this->dumpSnippets == 1)
-            {
-                $this->snipCode .= '</div></fieldset>';
-            }
-            if ($i == ($passes -1) && $i < ($this->maxParserPasses - 1))
-            {
-                // check if source length was changed
-                if ($bt != md5($source))
-                {
-                    $passes++; // if content change then increase passes because
-                }
-            } // we have not yet reached maxParserPasses
-            if(strpos($source,'[~')!==false) $source = $this->rewriteUrls($source);
-        }
-        return $source;
-    }
-    
     /***************************************************************************************/
     /* API functions                                                                /
     /***************************************************************************************/
