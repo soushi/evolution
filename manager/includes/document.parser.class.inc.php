@@ -2180,6 +2180,7 @@ class DocumentParser {
      * @param string $fields Default: id, pagetitle, description, parent, alias, menutitle
      * @return array
      * @example $allChildren = $modx->getActiveChildren(10);
+     * @todo Change the row handling
      */
     public function getActiveChildren($id=0, $sort='menuindex', $dir='ASC', $fields='id, pagetitle, description, parent, alias, menutitle') {
         $tbl_site_content    = $this->getFullTableName('site_content');
