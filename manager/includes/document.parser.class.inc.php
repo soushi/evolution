@@ -929,6 +929,26 @@ class DocumentParser {
         return $template;
     } // mergeDocumentContent
 
+    /**
+     *
+     * @param string $template
+     * @return string
+     */
+    public function mergeSettingsContent($template) {
+        $replace= array ();
+        $matches= array ();
+        if (preg_match_all('~\[\(([a-z\_]*?)\)\]~', $template, $matches)) {
+            $settingsCount= count($matches[1]);
+            for ($i= 0; $i < $settingsCount; $i++) {
+                if (array_key_exists($matches[1][$i], $this->config))
+                    $replace[$i]= $this->config[$matches[1][$i]];
+            }
+
+            $template= str_replace($matches[0], $replace, $template);
+        }
+        return $template;
+    } // mergeSettingsContent
+
     function executeParser()
     {
         ob_start();
@@ -1219,26 +1239,6 @@ class DocumentParser {
         else $src = false;
         
         return $src;
-    }
-    
-    function mergeSettingsContent($content)
-    {
-        $replace= array ();
-        $matches= array ();
-        if(preg_match_all('~\[\(([a-z\_]*?)\)\]~', $content, $matches))
-        {
-            $total= count($matches[1]);
-            for($i= 0; $i < $total; $i++)
-            {
-                if(isset($this->config[$matches[1][$i]]))
-                {
-                    $replace[$i]= $this->config[$matches[1][$i]];
-                }
-            }
-            
-            $content= str_replace($matches[0], $replace, $content);
-        }
-        return $content;
     }
     
     function mergeChunkContent($content)
