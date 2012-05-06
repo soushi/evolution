@@ -1687,8 +1687,12 @@ class DocumentParser {
         return $stack;
     } // mergeCommentedTagsContent
     
-    function mergeBenchmarkContent($content)
-    {
+    /**
+     *
+     * @param string $content
+     * @return string
+     */
+    private function mergeBenchmarkContent($content) {
         $totalTime= ($this->getMicroTime() - $this->tstart);
         $queryTime= $this->queryTime;
         $phpTime= $totalTime - $queryTime;
@@ -1708,7 +1712,7 @@ class DocumentParser {
         $content= str_replace('[^m^]', $total_mem, $content);
         
         return $content;
-    }
+    } // mergeBenchmarkContent
     
     function get_backtrace($backtrace)
     {
