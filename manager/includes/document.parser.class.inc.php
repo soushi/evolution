@@ -1384,36 +1384,40 @@ class DocumentParser {
         return $source;
     } // parseDocumentSource
     
-    function executeParser()
-    {
+    /**
+     * Checks the PHP version and starts the output of the document
+     */
+    function executeParser() {
         ob_start();
         //error_reporting(0);
-        if (version_compare(phpversion(), '5.0.0', '>='))
-        {
+        if (version_compare(phpversion(), '5.0.0', '>=')) {
             set_error_handler(array(& $this,'phpError'), E_ALL);
-        }
-        else
-        {
+        } else {
             set_error_handler(array(& $this,'phpError'));
         }
         
-        if(!empty($_SERVER['QUERY_STRING']))
-        {
+        if (!empty($_SERVER['QUERY_STRING'])) {
             $qs = $_GET;
-            if($qs['id']) unset($qs['id']);
-            if(0 < count($qs)) $this->qs_hash = '_' . md5(join('&',$qs));
-            else $this->qs_hash = '';
+            if ($qs['id']) {
+                unset($qs['id']);
+            }
+            if (0 < count($qs)) {
+                $this->qs_hash = '_' . md5(join('&',$qs));
+            } else {
+                $this->qs_hash = '';
+            }
         }
         
         // get the settings
         $this->db->connect();
         $this->getSettings();
         
-        if(0 < count($_POST)) $this->config['cache_type'] = 0;
+        if (0 < count($_POST)) {
+            $this->config['cache_type'] = 0;
+        }
         
         $this->documentOutput = $this->get_static_pages();
-        if(!empty($this->documentOutput))
-        {
+        if (!empty($this->documentOutput)) {
             $this->documentOutput = $this->parseDocumentSource($this->documentOutput);
             $this->invokeEvent('OnWebPagePrerender');
             echo $this->documentOutput;
@@ -1422,22 +1426,19 @@ class DocumentParser {
         }
         
         // IIS friendly url fix
-        if ($this->config['friendly_urls'] == 1 && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false)
-        {
+        if ($this->config['friendly_urls'] == 1 
+            && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false) {
             $url= $_SERVER['QUERY_STRING'];
             $err= substr($url, 0, 3);
-            if ($err == '404' || $err == '405')
-            {
+            if ($err == '404' || $err == '405') {
                 $k= array_keys($_GET);
                 unset ($_GET[$k[0]]);
                 unset ($_REQUEST[$k[0]]); // remove 404,405 entry
                 $_SERVER['QUERY_STRING']= $qp['query'];
                 $qp= parse_url(str_replace($this->config['site_url'], '', substr($url, 4)));
-                if (!empty ($qp['query']))
-                {
+                if (!empty ($qp['query'])) {
                     parse_str($qp['query'], $qv);
-                    foreach ($qv as $n => $v)
-                    {
+                    foreach ($qv as $n => $v) {
                         $_REQUEST[$n]= $_GET[$n]= $v;
                     }
                 }
@@ -1447,59 +1448,43 @@ class DocumentParser {
         }
         
         // check site settings
-        if (!$this->checkSiteStatus())
-        {
+        if (!$this->checkSiteStatus()) {
             header('HTTP/1.0 503 Service Unavailable');
-            if (!$this->config['site_unavailable_page'])
-            {
+            if (!$this->config['site_unavailable_page']) {
                 // display offline message
                 $this->documentContent= $this->config['site_unavailable_message'];
                 $this->outputContent();
                 exit; // stop processing here, as the site's offline
-            }
-            else
-            {
+            } else {
                 // setup offline page document settings
                 $this->documentMethod= 'id';
                 $this->documentIdentifier= $this->config['site_unavailable_page'];
             }
-        }
-        else
-        {
+        } else {
             // make sure the cache doesn't need updating
             $this->checkPublishStatus();
             
             // find out which document we need to display
-            $this->documentMethod= $this->getDocumentMethod();
-            $this->documentIdentifier= $this->getDocumentIdentifier($this->documentMethod);
+            $this->documentMethod = $this->getDocumentMethod();
+            $this->documentIdentifier = $this->getDocumentIdentifier($this->documentMethod);
         }
         
-        if ($this->documentMethod == 'none')
-        {
+        if ($this->documentMethod == 'none') {
             $this->documentMethod= 'id'; // now we know the site_start, change the none method to id
-        }
-        elseif ($this->documentMethod == 'alias')
-        {
-            $this->documentIdentifier= $this->cleanDocumentIdentifier($this->documentIdentifier);
+        } elseif ($this->documentMethod == 'alias') {
+            $this->documentIdentifier = $this->cleanDocumentIdentifier($this->documentIdentifier);
         }
         
-        if ($this->documentMethod == 'alias')
-        {
+        if ($this->documentMethod == 'alias') {
             // Check use_alias_path and check if $this->virtualDir is set to anything, then parse the path
-            if ($this->config['use_alias_path'] == 1)
-            {
+            if ($this->config['use_alias_path'] == 1) {
                 $alias= (strlen($this->virtualDir) > 0 ? $this->virtualDir . '/' : '') . $this->documentIdentifier;
-                if (isset($this->documentListing[$alias]))
-                {
+                if (isset($this->documentListing[$alias])) {
                     $this->documentIdentifier= $this->documentListing[$alias];
-                }
-                else
-                {
+                } else {
                     $this->sendErrorPage();
                 }
-            }
-            else
-            {
+            } else {
                 $this->documentIdentifier= $this->documentListing[$this->documentIdentifier];
             }
             $this->documentMethod= 'id';
@@ -1509,7 +1494,7 @@ class DocumentParser {
         $this->invokeEvent('OnWebPageInit');
         
         $this->prepareResponse();
-    }
+    } // executeParser
     
     function prepareResponse()
     {
