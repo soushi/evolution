@@ -809,6 +809,59 @@ class DocumentParser {
         file_put_contents($cache_path, $content);
     } // checkPublishStatus
 
+    /**
+     * Running post processes
+     */
+    public function postProcess() {
+        // if the current document was generated, cache it!
+        if ($this->documentGenerated == 1 && $this->documentObject['cacheable'] == 1
+            && $this->documentObject['type'] == 'document' && $this->documentObject['published'] == 1) {
+
+            $tbl_document_groups = $this->getFullTableName('document_groups');
+            $docid = $this->documentIdentifier;
+            
+            // invoke OnBeforeSaveWebPageCache event
+            $this->invokeEvent('OnBeforeSaveWebPageCache');
+            // get and store document groups inside document object. Document groups will be used to check security on cache pages
+            $dsq = $this->db->select('document_group', $tbl_document_groups, "document='{$docid}'");
+            $docGroups= $this->db->getColumn('document_group', $dsq);
+            
+            // Attach Document Groups and Scripts
+            if (is_array($docGroups)) {
+                $this->documentObject['__MODxDocGroups__'] = implode(',', $docGroups);
+            }
+            
+            $base_path = $this->config['base_path'];
+            
+            switch($this->config['cache_type'])
+            {
+                case '1':
+                    $cacheContent  = "<?php die('Unauthorized access.'); ?>\n"
+                                   . serialize($this->documentObject)
+                                   . "<!--__MODxCacheSpliter__-->{$this->documentContent}";
+                    $filename = "docid_{$docid}{$this->qs_hash}";
+                    
+                    break;
+                
+                case '2':
+                    $cacheContent  = $this->documentOutput;
+                    $filename = md5($_SERVER['REQUEST_URI']);
+                    
+                    break;
+            }
+            $page_cache_path = "{$base_path}assets/cache/{$filename}.pageCache.php";
+            file_put_contents($page_cache_path, $cacheContent);
+        }
+        
+        // invoke OnLogPageView event
+        if ($this->config['track_visitors'] == 1) {
+            $this->invokeEvent('OnLogPageHit');
+        }
+        
+        // Useful for example to external page counters/stats packages
+        $this->invokeEvent('OnWebPageComplete');
+    } // postProcess
+    
     function executeParser()
     {
         ob_start();
@@ -1028,60 +1081,6 @@ class DocumentParser {
         'postProcess'
         )); // tell PHP to call postProcess when it shuts down
         $this->outputContent();
-    }
-    
-    function postProcess()
-    {
-        // if the current document was generated, cache it!
-        if ($this->documentGenerated           == 1
-         && $this->documentObject['cacheable'] == 1
-         && $this->documentObject['type']      == 'document'
-         && $this->documentObject['published'] == 1)
-        {
-            $tbl_document_groups = $this->getFullTableName('document_groups');
-            $docid = $this->documentIdentifier;
-            
-            // invoke OnBeforeSaveWebPageCache event
-            $this->invokeEvent('OnBeforeSaveWebPageCache');
-            // get and store document groups inside document object. Document groups will be used to check security on cache pages
-            $dsq = $this->db->select('document_group', $tbl_document_groups, "document='{$docid}'");
-            $docGroups= $this->db->getColumn('document_group', $dsq);
-            
-            // Attach Document Groups and Scripts
-            if (is_array($docGroups))
-            {
-                $this->documentObject['__MODxDocGroups__'] = implode(',', $docGroups);
-            }
-            
-            $base_path = $this->config['base_path'];
-            
-            switch($this->config['cache_type'])
-            {
-                case '1':
-                    $cacheContent  = "<?php die('Unauthorized access.'); ?>\n";
-                    $cacheContent .= serialize($this->documentObject);
-                    $cacheContent .= "<!--__MODxCacheSpliter__-->{$this->documentContent}";
-                    $filename = "docid_{$docid}{$this->qs_hash}";
-                    break;
-                case '2':
-                    $cacheContent  = $this->documentOutput;
-                    $filename = md5($_SERVER['REQUEST_URI']);
-                    break;
-            }
-            $page_cache_path = "{$base_path}assets/cache/{$filename}.pageCache.php";
-            file_put_contents($page_cache_path, $cacheContent);
-        }
-        
-        // invoke OnLogPageView event
-        if ($this->config['track_visitors'] == 1)
-        {
-            $this->invokeEvent('OnLogPageHit');
-        }
-        
-        // Useful for example to external page counters/stats packages
-        $this->invokeEvent('OnWebPageComplete');
-        
-        // end post processing
     }
     
     function sendForward($id, $responseCode= '')
