@@ -1714,22 +1714,28 @@ class DocumentParser {
         return $content;
     } // mergeBenchmarkContent
     
-    function get_backtrace($backtrace)
-    {
-        $str  = '<table>';
-        $str .= '<tr align="center"><td>#</td><td>call</td><td>path</td></tr>';
-        foreach ($backtrace as $key => $val)
-        {
+    /**
+     *
+     * @param type $backtrace
+     * @return string 
+     */
+    private function get_backtrace($backtrace) {
+        $result  = '<table>'
+              . '<tr align="center"><td>#</td><td>call</td><td>path</td></tr>';
+        foreach ($backtrace as $key => $val) {
             $key++;
-            $path = str_replace('\\','/',$val['file']);
-            if(strpos($path,MODX_BASE_PATH)===0) $path = substr($path,strlen(MODX_BASE_PATH));
-            $str .= "<tr><td>{$key}</td>";
-            $str .= "<td>{$val['function']}()</td>";
-            $str .= "<td>{$path} on line {$val['line']}</td></tr>";
+            $path = str_replace('\\', '/', $val['file']);
+            if (strpos($path, MODX_BASE_PATH) === 0) {
+                $path = substr($path, strlen(MODX_BASE_PATH));
+            }
+            $result .= "<tr><td>{$key}</td>"
+                    . "<td>{$val['function']}()</td>"
+                    . "<td>{$path} on line {$val['line']}</td></tr>";
         }
-        $str .= '</table>';
-        return $str;
-    }
+        $result .= '</table>';
+
+        return $result;
+    } // get_backtrace
 
     function _get_snip_result($piece)
     {
