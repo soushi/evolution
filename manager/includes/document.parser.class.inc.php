@@ -471,6 +471,25 @@ class DocumentParser {
         }
     } // checkPreview
 
+    /**
+     * check if site is offline
+     *
+     * @return boolean
+     */
+    private function checkSiteStatus() {
+        $siteStatus= $this->config['site_status'];
+        if ($siteStatus == 1) {
+            // site online
+            return true;
+        } elseif ($siteStatus == 0 && $this->checkSession()) {
+            // site offline but launched via the manager
+            return true;
+        } else {
+            // site is offline
+            return false;
+        }
+    } // checkSiteStatus
+
     function executeParser()
     {
         ob_start();
