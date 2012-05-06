@@ -949,6 +949,41 @@ class DocumentParser {
         return $template;
     } // mergeSettingsContent
 
+    /**
+     * Insert chunk content
+     *
+     * @param string $content
+     * @return string
+     */
+    public function mergeChunkContent($content) {
+        $replace= array ();
+        $matches= array ();
+        if (preg_match_all('~{{(.*?)}}~', $content, $matches)) {
+            $total= count($matches[1]);
+            for ($i= 0; $i < $total; $i++) {
+                $name = $matches[1][$i];
+                if (isset ($this->chunkCache[$name])) {
+                    $replace[$i]= $this->chunkCache[$name];
+                } else {
+                    $escaped_name = $this->db->escape($name);
+                    $where = "`name`='{$escaped_name}' AND `published`='1'";
+                    $result= $this->db->select('snippet',$this->getFullTableName('site_htmlsnippets'),$where);
+                    $limit= $this->db->getRecordCount($result);
+                    if ($limit < 1) {
+                        $this->chunkCache[$name]= '';
+                        $replace[$i]= '';
+                    } else {
+                        $row= $this->db->getRow($result);
+                        $this->chunkCache[$name]= $row['snippet'];
+                        $replace[$i]= $row['snippet'];
+                    }
+                }
+            }
+            $content= str_replace($matches[0], $replace, $content);
+        }
+        return $content;
+    } // mergeChunkContent
+    
     function executeParser()
     {
         ob_start();
@@ -1239,44 +1274,6 @@ class DocumentParser {
         else $src = false;
         
         return $src;
-    }
-    
-    function mergeChunkContent($content)
-    {
-        $replace= array ();
-        $matches= array ();
-        if (preg_match_all('~{{(.*?)}}~', $content, $matches))
-        {
-            $total= count($matches[1]);
-            for ($i= 0; $i < $total; $i++)
-            {
-                $name = $matches[1][$i];
-                if (isset ($this->chunkCache[$name]))
-                {
-                    $replace[$i]= $this->chunkCache[$name];
-                }
-                else
-                {
-                    $escaped_name = $this->db->escape($name);
-                    $where = "`name`='{$escaped_name}' AND `published`='1'";
-                    $result= $this->db->select('snippet',$this->getFullTableName('site_htmlsnippets'),$where);
-                    $limit= $this->db->getRecordCount($result);
-                    if ($limit < 1)
-                    {
-                        $this->chunkCache[$name]= '';
-                        $replace[$i]= '';
-                    }
-                    else
-                    {
-                        $row= $this->db->getRow($result);
-                        $this->chunkCache[$name]= $row['snippet'];
-                        $replace[$i]= $row['snippet'];
-                    }
-                }
-            }
-            $content= str_replace($matches[0], $replace, $content);
-        }
-        return $content;
     }
     
     // Added by Raymond
