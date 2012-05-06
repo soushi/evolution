@@ -1596,54 +1596,73 @@ class DocumentParser {
         $this->outputContent();
     } // evalSnippets
     
-    function get_static_pages()
-    {
+    /**
+     * Returns false when the file does not exist, otherwise it writes the file
+     * content into the output buffer
+     *
+     * @return boolean 
+     */
+    private function get_static_pages() {
         $filepath = $_SERVER['REQUEST_URI'];
-        if(strpos($filepath,'?')!==false) $filepath = substr($filepath,0,strpos($filepath,'?'));
-        $filepath = substr($filepath,strlen($this->config['base_url']));
-        if(substr($filepath,-1)==='/' || empty($filepath)) $filepath .= 'index.html';
+        if (strpos($filepath,'?')!==false) {
+            $filepath = substr($filepath, 0, strpos($filepath, '?'));
+        }
+        $filepath = substr($filepath, strlen($this->config['base_url']));
+        if (substr($filepath, -1) === '/' || empty($filepath)) {
+            $filepath .= 'index.html';
+        }
         $filepath = $this->config['base_path'] . 'assets/public_html/' . $filepath;
-        if(file_exists($filepath)!==false)
-        {
+        if (file_exists($filepath) !== false) {
             $ext = strtolower(substr($filepath,strrpos($filepath,'.')));
-            switch($ext)
-            {
+            switch($ext) {
                 case '.html':
                 case '.htm':
-                    $mime_type = 'text/html'; break;
+                    $mime_type = 'text/html';
+                    
+                    break;
                 case '.xml':
                 case '.rdf':
-                    $mime_type = 'text/xml'; break;
+                    $mime_type ='text/xml'; 
+                    
+                    break;
                 case '.css':
-                    $mime_type = 'text/css'; break;
+                    $mime_type = 'text/css'; 
+                    
+                    break;
                 case '.js':
-                    $mime_type = 'text/javascript'; break;
+                    $mime_type = 'text/javascript'; 
+                    
+                    break;
                 case '.txt':
-                    $mime_type = 'text/plain'; break;
+                    $mime_type = 'text/plain'; 
+                    
+                    break;
                 case '.ico':
                 case '.jpg':
                 case '.jpeg':
                 case '.png':
                 case '.gif':
-                    if($ext==='.ico') $mime_type = 'image/x-icon';
-                    else
-                    {
+                    if ($ext==='.ico') {
+                        $mime_type = 'image/x-icon';
+                    } else {
                         $info = getImageSize($filepath);
                         $mime_type = $info['mime'];
                     }
                     header("Content-type: {$mime_type}");
                     readfile($filepath);
                     exit;
+
                 default:
                     exit;
             }
             header("Content-type: {$mime_type}");
             $src = file_get_contents($filepath);
+        } else {
+            $src = false;
         }
-        else $src = false;
         
         return $src;
-    }
+    } // get_static_pages
     
     function mergeCommentedTagsContent($content)
     {
