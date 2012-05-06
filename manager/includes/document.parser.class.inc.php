@@ -1126,6 +1126,34 @@ class DocumentParser {
         return $stack;
     } // evalSnippets
     
+    /**
+     * Create a friendly URL
+     *
+     * @param string $pre
+     * @param string $suff
+     * @param string $alias
+     * @return string
+     */
+    public function makeFriendlyURL($pre, $suff, $path) {
+        $elements = explode('/', $path);
+        $alias = array_pop($elements);
+        $dir = implode('/', $elements);
+        unset($elements);
+        if ((strpos($alias, '.') !== false)) {
+            if(isset($this->config['suffix_mode']) && $this->config['suffix_mode']==1) {
+                $suff = ''; // jp-edition only
+            }
+        }
+        //container_suffix
+        if (substr($alias, 0, 1) === '[' && substr($alias, -1) === ']') {
+            $result = '[~' . $alias . '~]';
+        } else {
+            $result ($dir !== '' ? $dir . '/' : '') . $pre . $alias . $suff;
+        }
+        
+        return $result;
+    } // makeFriendlyURL
+
     function executeParser()
     {
         ob_start();
@@ -1625,20 +1653,6 @@ class DocumentParser {
         return $snippetObject;
     }
     
-    function makeFriendlyURL($pre, $suff, $path) {
-        $elements = explode('/',$path);
-        $alias    = array_pop($elements);
-        $dir      = implode('/', $elements);
-        unset($elements);
-        if((strpos($alias, '.') !== false))
-        {
-            if(isset($this->config['suffix_mode']) && $this->config['suffix_mode']==1) $suff = ''; // jp-edition only
-        }
-        //container_suffix
-        if(substr($alias,0,1) === '[' && substr($alias,-1) === ']') return '[~' . $alias . '~]';
-        return ($dir !== '' ? $dir . '/' : '') . $pre . $alias . $suff;
-    }
-
     function set_aliases()
     {
         $path_aliases = MODX_BASE_PATH . 'assets/cache/aliases.pageCache.php';
