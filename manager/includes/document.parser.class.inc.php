@@ -984,6 +984,32 @@ class DocumentParser {
         return $content;
     } // mergeChunkContent
     
+    /**
+     * Added by Raymond
+     *
+     * @param string $content
+     * @return string
+     */
+    public function mergePlaceholderContent($content) {
+        $replace= array ();
+        $matches= array ();
+        if (preg_match_all('~\[\+(.*?)\+\]~', $content, $matches)) {
+            $cnt= count($matches[1]);
+            for ($i= 0; $i < $cnt; $i++) {
+                $v= '';
+                $key= $matches[1][$i];
+                if (is_array($this->placeholders) && array_key_exists($key, $this->placeholders))
+                    $v= $this->placeholders[$key];
+                if ($v === '')
+                    unset ($matches[0][$i]); // here we'll leave empty placeholders for last.
+                else
+                    $replace[$i]= $v;
+            }
+            $content= str_replace($matches[0], $replace, $content);
+        }
+        return $content;
+    } // mergePlaceholderContent
+
     function executeParser()
     {
         ob_start();
@@ -1274,36 +1300,6 @@ class DocumentParser {
         else $src = false;
         
         return $src;
-    }
-    
-    // Added by Raymond
-    function mergePlaceholderContent($content)
-    {
-        $replace= array ();
-        $matches= array ();
-        if(preg_match_all('~\[\+(.*?)\+\]~', $content, $matches))
-        {
-            $cnt= count($matches[1]);
-            for ($i= 0; $i < $cnt; $i++)
-            {
-                $v= '';
-                $key= $matches[1][$i];
-                if (is_array($this->placeholders) && isset($this->placeholders[$key]))
-                {
-                    $v= $this->placeholders[$key];
-                }
-                if ($v === '')
-                {
-                    unset ($matches[0][$i]); // here we'll leave empty placeholders for last.
-                }
-                else
-                {
-                    $replace[$i]= $v;
-                }
-            }
-            $content= str_replace($matches[0], $replace, $content);
-        }
-        return $content;
     }
     
     function mergeCommentedTagsContent($content)
