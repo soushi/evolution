@@ -103,7 +103,7 @@ class DocumentParser {
      * @param string $extname
      * @return boolean
      */
-    private function loadExtension($extname) {
+    public function loadExtension($extname) {
         global $database_type;
 
         $result = false;
