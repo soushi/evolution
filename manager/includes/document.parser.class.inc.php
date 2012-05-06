@@ -1083,6 +1083,49 @@ class DocumentParser {
         return $msg . $result;
     } // evalSnippet
     
+    /**
+     *
+     * @param string $documentSource
+     * @return string
+     */
+    public function evalSnippets($documentSource) {
+        $etomite= & $this;
+        
+        $stack = $documentSource;
+        unset($documentSource);
+        
+        $passes = $this->minParserPasses;
+        
+        for ($i= 0; $i < $passes; $i++) {
+            if ($i == ($passes -1)) {
+                $bt = md5($stack);
+            }
+            $pieces = array();
+            $pieces = explode('[[', $stack);
+            $stack = '';
+            $loop_count = 0;
+            foreach ($pieces as $piece) {
+                if ($loop_count < 1) {
+                    $result = $piece;
+                } elseif (strpos($piece,']]') === false) {
+                    $result = '[[' . $piece;
+                } else {
+                    $result = $this->_get_snip_result($piece);
+                }
+                
+                $stack .= $result;
+                $loop_count++; // End of foreach loop
+            }
+            if ($i == ($passes -1) && $i < ($this->maxParserPasses - 1)) {
+                if($bt != md5($stack)) { 
+                    $passes++;
+                }
+            }
+        }
+
+        return $stack;
+    } // evalSnippets
+    
     function executeParser()
     {
         ob_start();
@@ -1436,39 +1479,6 @@ class DocumentParser {
         return $str;
     }
 
-    function evalSnippets($documentSource)
-    {
-        $etomite= & $this;
-        
-        $stack = $documentSource;
-        unset($documentSource);
-        
-        $passes = $this->minParserPasses;
-        
-        for($i= 0; $i < $passes; $i++)
-        {
-            if($i == ($passes -1)) $bt = md5($stack);
-            $pieces = array();
-            $pieces = explode('[[', $stack);
-            $stack = '';
-            $loop_count = 0;
-            foreach($pieces as $piece)
-            {
-                if($loop_count < 1)                 $result = $piece;
-                elseif(strpos($piece,']]')===false) $result = '[[' . $piece;
-                else                                $result = $this->_get_snip_result($piece);
-                
-                $stack .= $result;
-                $loop_count++; // End of foreach loop
-            }
-            if($i == ($passes -1) && $i < ($this->maxParserPasses - 1))
-            {
-                if($bt != md5($stack)) $passes++;
-            }
-        }
-        return $stack;
-    }
-    
     function _get_snip_result($piece)
     {
         $snip_call        = $this->_split_snip_call($piece);
