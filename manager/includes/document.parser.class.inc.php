@@ -1935,29 +1935,32 @@ class DocumentParser {
         return $parents;
     } // getParentIds
 
-    function set_documentMap_cache()
-    {
+    /**
+     * Loads the content of the documentmap.pageCache.php into the class 
+     * variable documentMap_cache
+     *
+     * @category API-Function
+     * @return string
+     * @example $modx->set_documentMap_cache();
+     */
+    public function set_documentMap_cache() {
         $path_documentmapcache = MODX_BASE_PATH . 'assets/cache/documentmap.pageCache.php';
-        if(file_exists($path_documentmapcache))
-        {
+        if (file_exists($path_documentmapcache)) {
             $src = file_get_contents($path_documentmapcache);
             $this->documentMap_cache = unserialize($src);
-        }
-        else
-        {
+        } else {
             $documentMap_cache= array ();
-            foreach ($this->documentMap as $document)
-            {
-                foreach ($document as $p => $c)
-                {
+            foreach ($this->documentMap as $document) {
+                foreach ($document as $p => $c) {
                     $documentMap_cache[$p][] = $c;
                 }
             }
-            file_put_contents($path_documentmapcache,serialize($documentMap_cache));
+            file_put_contents($path_documentmapcache, serialize($documentMap_cache));
             $this->documentMap_cache = $documentMap_cache;
         }
+
         return $this->documentMap_cache;
-    }
+    } // set_documentMap_cache
 
     function getChildIds($id, $depth= 10, $children= array ())
     {
