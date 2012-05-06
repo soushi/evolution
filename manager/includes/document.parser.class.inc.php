@@ -929,43 +929,6 @@ class DocumentParser {
         return $src;
     }
     
-    function checkPreview()
-    {
-        if ($this->checkSession() == true)
-        {
-            if (isset ($_REQUEST['z']) && $_REQUEST['z'] == 'manprev')
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-    
-    // check if site is offline
-    function checkSiteStatus()
-    {
-        $siteStatus= $this->config['site_status'];
-        if($siteStatus == 1)
-        {
-            return true; // site online
-        }
-        elseif($siteStatus == 0 && $this->checkSession())
-        {
-            return true; // site offline but launched via the manager
-        }
-        else
-        {
-            return false; // site is offline
-        }
-    }
-    
     function cleanDocumentIdentifier($qOrig)
     {
         if(empty($qOrig)) $qOrig = $this->config['site_start'];
