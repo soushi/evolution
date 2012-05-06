@@ -1813,39 +1813,36 @@ class DocumentParser {
         return $executedSnippets . $except_snip_call;
     } // _get_snip_result
     
-    function _split_snip_call($src)
-    {
-        list($call,$snip['except_snip_call']) = explode(']]', $src, 2);
-        if(strpos($call, '?') !== false && strpos($call, "\n")!==false && strpos($call, '?') < strpos($call, "\n"))
-        {
-            list($name,$params) = explode('?',$call,2);
-        }
-        elseif(strpos($call, '?') !== false && strpos($call, "\n")!==false && strpos($call, "\n") < strpos($call, '?'))
-        {
-            list($name,$params) = explode("\n",$call,2);
-        }
-        elseif(strpos($call, '?') !== false)
-        {
-            list($name,$params) = explode('?',$call,2);
-        }
-        elseif((strpos($call, '&') !== false) && (strpos($call, '=') !== false) && (strpos($call, '?') === false))
-        {
-            list($name,$params) = explode('&',$call,2);
+    /**
+     *
+     * @param string $src
+     * @return string 
+     */
+    private function _split_snip_call($src) {
+        list($call, $snip['except_snip_call']) = explode(']]', $src, 2);
+        if (strpos($call, '?') !== false && strpos($call, "\n") !== false 
+                && strpos($call, '?') < strpos($call, "\n")) {
+            list($name, $params) = explode('?', $call, 2);
+        } elseif (strpos($call, '?') !== false && strpos($call, "\n") !== false 
+                && strpos($call, "\n") < strpos($call, '?')) {
+            list($name, $params) = explode("\n", $call, 2);
+        } elseif(strpos($call, '?') !== false) {
+            list($name, $params) = explode('?', $call, 2);
+        } elseif((strpos($call, '&') !== false) && (strpos($call, '=') !== false) 
+                && (strpos($call, '?') === false)) {
+            list($name, $params) = explode('&', $call, 2);
             $params = "&{$params}";
-        }
-        elseif(strpos($call, "\n") !== false)
-        {
-            list($name,$params) = explode("\n",$call,2);
-        }
-        else
-        {
-            $name   = $call;
+        } elseif(strpos($call, "\n") !== false) {
+            list($name, $params) = explode("\n", $call, 2);
+        } else {
+            $name = $call;
             $params = '';
         }
-        $snip['name']   = trim($name);
+        $snip['name'] = trim($name);
         $snip['params'] = $params;
+
         return $snip;
-    }
+    } // _split_snip_call
     
     function _get_snip_properties($snip_call)
     {
