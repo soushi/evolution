@@ -539,6 +539,89 @@ class DocumentParser {
         }
     } // cleanDocumentIdentifier
 
+    /**
+     * Check the cache for a given document identifier
+     *
+     * @param int $id
+     * @return string
+     */
+    private function checkCache($id) {
+        if (isset($this->config['cache_type']) && $this->config['cache_type'] == 0) {
+            return ''; // jp-edition only
+        }
+        $cacheFile = "{$this->config['base_path']}assets/cache/docid_{$id}{$this->qs_hash}.pageCache.php";
+        
+        if (isset($_SESSION['mgrValidated']) || 0 < count($_POST)) {
+            $this->config['cache_type'] = '1';
+        }
+        
+        if ($this->config['cache_type'] == 2) {
+            $flContent = '';
+        } elseif (file_exists($cacheFile)) {
+            $flContent = file_get_contents($cacheFile, false);
+        }
+        if (!file_exists($cacheFile) || empty($flContent)) {
+            $this->documentGenerated = 1;
+            return '';
+        }
+        
+        $this->documentGenerated = 0;
+        
+        $flContent = substr($flContent, 37); // remove php header
+        $a = explode('<!--__MODxCacheSpliter__-->', $flContent, 2);
+        if(count($a) == 1) {
+            return $a[0]; // return only document content
+        }
+        
+        $docObj = unserialize(trim($a[0])); // rebuild document object
+        // add so - check page security(admin(mgrRole=1) is pass)
+        if (!(isset($_SESSION['mgrRole']) && $_SESSION['mgrRole'] == 1) 
+            && $docObj['privateweb'] && isset ($docObj['__MODxDocGroups__'])) {
+            $pass = false;
+            $usrGrps = $this->getUserDocGroups();
+            $docGrps = explode(',', $docObj['__MODxDocGroups__']);
+            // check is user has access to doc groups
+            if (is_array($usrGrps)) {
+                foreach ($usrGrps as $k => $v) {
+                    if (in_array($v, $docGrps)) {
+                        $pass = true;
+                        break;
+                    }
+                }
+            }
+            // diplay error pages if user has no access to cached doc
+            if (!$pass) {
+                if($this->config['unauthorized_page']) {
+                    // check if file is not public
+                    $tbl_document_groups = $this->getFullTableName('document_groups');
+                    $secrs = $this->db->select('id', $tbl_document_groups, "document='{$id}'",'',1);
+                    if ($secrs) {
+                        $seclimit = $this->db->getRecordCount($secrs);
+                    }
+                }
+                if ($seclimit > 0) {
+                    // match found but not publicly accessible, send the visitor to the unauthorized_page
+                    $this->sendUnauthorizedPage();
+                } else {
+                    // no match found, send the visitor to the error_page
+                    $this->sendErrorPage();
+                }
+            }
+            // Grab the Scripts
+            if (isset($docObj['__MODxSJScripts__'])) {
+                $this->sjscripts = $docObj['__MODxSJScripts__'];
+            }
+            if (isset($docObj['__MODxJScripts__'])) {
+                $this->jscripts  = $docObj['__MODxJScripts__'];
+            }
+            
+            // Remove intermediate variables
+            unset($docObj['__MODxDocGroups__'], $docObj['__MODxSJScripts__'], $docObj['__MODxJScripts__']);
+        }
+        $this->documentObject = $docObj;
+        return $a[1]; // return document content
+    } // checkCache
+    
     function executeParser()
     {
         ob_start();
@@ -995,92 +1078,6 @@ class DocumentParser {
         else $src = false;
         
         return $src;
-    }
-    
-    function checkCache($id)
-    {
-        
-        if(isset($this->config['cache_type']) && $this->config['cache_type'] == 0) return ''; // jp-edition only
-        $cacheFile = "{$this->config['base_path']}assets/cache/docid_{$id}{$this->qs_hash}.pageCache.php";
-        
-        if(isset($_SESSION['mgrValidated']) || 0 < count($_POST)) $this->config['cache_type'] = '1';
-        
-        if($this->config['cache_type'] == 2)
-        {
-            $flContent = '';
-        }
-        elseif(file_exists($cacheFile))
-        {
-            $flContent = file_get_contents($cacheFile, false);
-        }
-        if(!file_exists($cacheFile) || empty($flContent))
-        {
-            $this->documentGenerated = 1;
-            return '';
-        }
-        
-        $this->documentGenerated = 0;
-        
-        $flContent = substr($flContent, 37); // remove php header
-        $a = explode('<!--__MODxCacheSpliter__-->', $flContent, 2);
-        if(count($a) == 1)
-        {
-            return $a[0]; // return only document content
-        }
-        
-        $docObj = unserialize(trim($a[0])); // rebuild document object
-        // add so - check page security(admin(mgrRole=1) is pass)
-        if(!(isset($_SESSION['mgrRole']) && $_SESSION['mgrRole'] == 1) 
-            && $docObj['privateweb'] && isset ($docObj['__MODxDocGroups__']))
-        {
-            $pass = false;
-            $usrGrps = $this->getUserDocGroups();
-            $docGrps = explode(',', $docObj['__MODxDocGroups__']);
-            // check is user has access to doc groups
-            if(is_array($usrGrps))
-            {
-                foreach ($usrGrps as $k => $v)
-                {
-                    if(in_array($v, $docGrps))
-                    {
-                        $pass = true;
-                        break;
-                    }
-                }
-            }
-            // diplay error pages if user has no access to cached doc
-            if(!$pass)
-            {
-                if($this->config['unauthorized_page'])
-                {
-                    // check if file is not public
-                    $tbl_document_groups = $this->getFullTableName('document_groups');
-                    $secrs = $this->db->select('id', $tbl_document_groups, "document='{$id}'",'',1);
-                    if($secrs)
-                    {
-                        $seclimit = $this->db->getRecordCount($secrs);
-                    }
-                }
-                if($seclimit > 0)
-                {
-                    // match found but not publicly accessible, send the visitor to the unauthorized_page
-                    $this->sendUnauthorizedPage();
-                }
-                else
-                {
-                    // no match found, send the visitor to the error_page
-                    $this->sendErrorPage();
-                }
-            }
-            // Grab the Scripts
-            if(isset($docObj['__MODxSJScripts__'])) $this->sjscripts = $docObj['__MODxSJScripts__'];
-            if(isset($docObj['__MODxJScripts__']))  $this->jscripts  = $docObj['__MODxJScripts__'];
-            
-            // Remove intermediate variables
-            unset($docObj['__MODxDocGroups__'], $docObj['__MODxSJScripts__'], $docObj['__MODxJScripts__']);
-        }
-        $this->documentObject = $docObj;
-        return $a[1]; // return document content
     }
     
     function checkPublishStatus()
