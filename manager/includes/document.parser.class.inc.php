@@ -900,6 +900,35 @@ class DocumentParser {
         return $template;
     } // mergeDocumentMETATags
 
+    /**
+     * mod by Raymond
+     *
+     * @param string $template
+     * @return string
+     */
+    public function mergeDocumentContent($template) {
+        $replace= array ();
+        preg_match_all('~\[\*(.*?)\*\]~', $template, $matches);
+        $variableCount= count($matches[1]);
+        $basepath= $this->config["base_path"] . "manager/includes";
+        for ($i= 0; $i < $variableCount; $i++) {
+            $key= $matches[1][$i];
+            $key= substr($key, 0, 1) == '#' ? substr($key, 1) : $key; // remove # for QuickEdit format
+            $value= $this->documentObject[$key];
+            if (is_array($value)) {
+                include_once $basepath . "/tmplvars.format.inc.php";
+                include_once $basepath . "/tmplvars.commands.inc.php";
+                $w= "100%";
+                $h= "300";
+                $value= getTVDisplayFormat($value[0], $value[1], $value[2], $value[3], $value[4]);
+            }
+            $replace[$i]= $value;
+        }
+        $template= str_replace($matches[0], $replace, $template);
+
+        return $template;
+    } // mergeDocumentContent
+
     function executeParser()
     {
         ob_start();
@@ -1192,30 +1221,6 @@ class DocumentParser {
         return $src;
     }
     
-    // mod by Raymond
-    function mergeDocumentContent($content)
-    {
-        $replace= array ();
-        preg_match_all('~\[\*(.*?)\*\]~', $content, $matches);
-        $variableCount= count($matches[1]);
-        $basepath= $this->config['base_path'] . 'manager/includes/';
-        include_once("{$basepath}tmplvars.format.inc.php");
-        include_once("{$basepath}tmplvars.commands.inc.php");
-        for ($i= 0; $i < $variableCount; $i++)
-        {
-            $key= $matches[1][$i];
-            $key= substr($key, 0, 1) == '#' ? substr($key, 1) : $key; // remove # for QuickEdit format
-            $value= $this->documentObject[$key];
-            if (is_array($value))
-            {
-                $value= getTVDisplayFormat($value[0], $value[1], $value[2], $value[3], $value[4]);
-            }
-            $replace[$i]= $value;
-        }
-        $content= str_replace($matches[0], $replace, $content);
-        return $content;
-    }
-        
     function mergeSettingsContent($content)
     {
         $replace= array ();
