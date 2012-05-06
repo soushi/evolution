@@ -2046,24 +2046,37 @@ class DocumentParser {
         return $state;
     } // hasPermission
 
-    # Add an a alert message to the system event log
-    function logEvent($evtid, $type, $msg, $source= 'Parser')
-    {
+    /**
+     * Add an a alert message to the system event log
+     *
+     * @category API-Function
+     * @param int $evtid Event ID
+     * @param int $type Types: 1 = information, 2 = warning, 3 = error
+     * @param string $msg Message to be logged
+     * @param string $source source of the event (module, snippet name, etc.)
+     *                       Default: Parser
+     * @example $modx->logEvent($my_msg_cnt, 3, 'There was an error!', 'MySnippet');
+     */
+    public function logEvent($evtid, $type, $msg, $source='Parser') {
         $evtid= intval($evtid);
-        if ($type < 1) $type= 1; // Types: 1 = information, 2 = warning, 3 = error
-        if (3 < $type) $type= 3;
+        if ($type < 1) {
+            // Types: 1 = information, 2 = warning, 3 = error
+            $type= 1; 
+        }
+        if (3 < $type) {
+            $type= 3;
+        }
         $msg= $this->db->escape($msg);
         $source= $this->db->escape($source);
-        if (function_exists('mb_substr'))
-        {
+        if (function_exists('mb_substr')) {
             $source = mb_substr($source, 0, 50 , $this->config['modx_charset']);
-        }
-        else
-        {
+        } else {
             $source = substr($source, 0, 50);
         }
         $LoginUserID = $this->getLoginUserID();
-        if ($LoginUserID == '' || $LoginUserID===false) $LoginUserID = '-';
+        if ($LoginUserID == '' || $LoginUserID===false) {
+            $LoginUserID = '-';
+        }
         
         $fields['eventid']     = $evtid;
         $fields['type']        = $type;
@@ -2072,29 +2085,23 @@ class DocumentParser {
         $fields['description'] = $msg;
         $fields['user']        = $LoginUserID;
         $insert_id = $this->db->insert($fields,$this->getFullTableName('event_log'));
-        if(isset($this->config['send_errormail']) && $this->config['send_errormail'] !== '0')
-        {
-            if($this->config['send_errormail'] <= $type)
-            {
+        if (isset($this->config['send_errormail']) && $this->config['send_errormail'] !== '0') {
+            if ($this->config['send_errormail'] <= $type) {
                 $subject = 'Notice of error from ' . $this->config['site_name'];
                 $this->sendmail($subject,$source);
             }
         }
-        if (!$insert_id)
-        {
+        if (!$insert_id) {
             echo 'Error while inserting event log into database.';
             exit();
-        }
-        else
-        {
+        } else {
             $trim  = (isset($this->config['event_log_trim']))  ? intval($this->config['event_log_trim']) : 100;
-            if(($insert_id % $trim) == 0)
-            {
+            if (($insert_id % $trim) == 0) {
                 $limit = (isset($this->config['event_log_limit'])) ? intval($this->config['event_log_limit']) : 2000;
                 $this->purge_log('event_log',$limit,$trim);
             }
         }
-    }
+    } // logEvent
     
     function sendmail($params=array(), $msg='')
     {
