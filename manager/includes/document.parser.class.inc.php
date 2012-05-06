@@ -1909,34 +1909,31 @@ class DocumentParser {
     /* API functions                                                                /
     /***************************************************************************************/
 
-    function getParentIds($id, $height= 10)
-    {
+    /**
+     * Returns an array of all parent record IDs for the id passed.
+     *
+     * @category API-Function
+     * @param int $id Resource ID to get parents for
+     * @param int $height Argument defines the maximum number of levels to go up.
+     *                    Default: 10
+     * @return array
+     * @example $parents = $modx->getParentIds(10);
+     */
+    public function getParentIds($id, $height=10) {
         $parents= array ();
-        while( $id && 0<$height)
-        {
-            $current_id = $id;
+        while ( $id && $height-- ) {
+            $thisid = $id;
             $id = $this->aliasListing[$id]['parent'];
-            if(!$id)
-            {
+            if (!$id) 
                 break;
-            }
-            if(strlen($this->aliasListing[$current_id]['path']))
-            {
-                $pkey = $this->aliasListing[$current_id]['path'];
-            }
-            else
-            {
-                $pkey = $this->aliasListing[$id]['alias'];
-            }
-            if(!strlen($pkey))
-            {
-                $pkey = $id;
+            $pkey = strlen($this->aliasListing[$thisid]['path']) ? $this->aliasListing[$thisid]['path'] : $this->aliasListing[$id]['alias'];
+            if (!strlen($pkey)) {
+                $pkey = "{$id}";
             }
             $parents[$pkey] = $id;
-            $height--;
         }
         return $parents;
-    }
+    } // getParentIds
 
     function set_documentMap_cache()
     {
