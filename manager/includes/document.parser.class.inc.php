@@ -1962,38 +1962,48 @@ class DocumentParser {
         return $this->documentMap_cache;
     } // set_documentMap_cache
 
-    function getChildIds($id, $depth= 10, $children= array ())
-    {
+    /**
+     * @category API-Function
+     * @staticvar array $documentMap_cache
+     * @param int $id The parent page to start from
+     * @param int $depth How many levels deep to search for children
+     *                   Default: 10
+     * @param array $children If you already have an array of child ids, give it
+     *                        to the method, and new values will be added
+     *                        Default: Empty array
+     * @return array Contains the document Listing (tree) like the sitemap
+     */
+    public function getChildIds($id, $depth=10, $children=array()) {
         // Initialise a static array to index parents->children
-        if(!count($this->documentMap_cache))
+        if (!count($this->documentMap_cache)) {
             $documentMap_cache = $this->set_documentMap_cache();
-        else
+        } else {
             $documentMap_cache = $this->documentMap_cache;
+        }
         
         // Get all the children for this parent node
-        if (isset($documentMap_cache[$id]))
-        {
+        if (isset($documentMap_cache[$id])) {
             $depth--;
             
-            foreach ($documentMap_cache[$id] as $childId)
-            {
+            foreach ($documentMap_cache[$id] as $childId) {
                 $pkey = $this->aliasListing[$childId]['alias'];
-                if(strlen($this->aliasListing[$childId]['path']))
-                {
+                if (strlen($this->aliasListing[$childId]['path'])) {
                     $pkey = "{$this->aliasListing[$childId]['path']}/{$pkey}";
                 }
                 
-                if (!strlen($pkey)) $pkey = $childId;
+                if (!strlen($pkey)) {
+                    $pkey = $childId;
+                }
                 $children[$pkey] = $childId;
                 
-                if ($depth)
-                {
+                if ($depth) {
                     $children += $this->getChildIds($childId, $depth);
                 }
             }
         }
+
         return $children;
-    }
+    } // getChildIds
 
     # Displays a javascript alert message in the web browser
     function webAlert($msg, $url= '')
