@@ -1154,6 +1154,88 @@ class DocumentParser {
         return $result;
     } // makeFriendlyURL
 
+    /**
+     * Rewrite URL
+     *
+     * @param string $documentSource
+     * @return string
+     */
+    public function rewriteUrls($documentSource) {
+        // rewrite the urls
+        $pieces = preg_split('/(\[~|~\])/', $documentSource);
+        $maxidx = sizeof($pieces);
+        $documentSource = '';
+        if (empty($this->referenceListing)) {
+            $this->referenceListing = array();
+            $res = $this->db->select('id,content', $this->getFullTableName('site_content'), "type='reference'");
+            $rows = $this->db->makeArray($res);
+            foreach ($rows as $row) {
+                extract($row);
+                $this->referenceListing[$id] = $content;
+            }
+        }
+        
+        if ($this->config['friendly_urls'] == 1) {
+            if (!isset($this->aliases) || empty($this->aliases)) {
+                $aliases = $this->set_aliases();
+            } else {
+                $aliases = $this->aliases;
+            }
+            
+            $use_alias = $this->config['friendly_alias_urls'];
+            $prefix    = $this->config['friendly_url_prefix'];
+            $suffix    = $this->config['friendly_url_suffix'];
+            
+            for ($idx = 0; $idx < $maxidx; $idx++) {
+                $documentSource .= $pieces[$idx];
+                $idx++;
+                if ($idx < $maxidx) {
+                    $target = trim($pieces[$idx]);
+                    if (preg_match("/^[0-9]+$/",$this->referenceListing[$target])) {
+                        $target = $this->referenceListing[$target];
+                    } elseif (preg_match("/^[0-9]+$/",$target)) {
+                        $target = $aliases[$target];
+                    } else { 
+                        $target = $this->parseDocumentSource($target);
+                    }
+                    
+                    if (preg_match('@^https?://@', $this->referenceListing[$target])) {
+                        $path = $this->referenceListing[$target];
+                    }  elseif ($aliases[$target] && $use_alias) { 
+                        $path = $this->makeFriendlyURL($prefix, $suffix, $aliases[$target]);
+                    } else { 
+                        $path = $this->makeFriendlyURL($prefix, $suffix, $target);
+                    }
+                    $documentSource .= $path;
+                }
+            }
+            unset($aliases);
+        } else {
+            for ($idx = 0; $idx < $maxidx; $idx++) {
+                $documentSource .= $pieces[$idx];
+                $idx++;
+                if ($idx < $maxidx) {
+                    $target = trim($pieces[$idx]);
+                    if (isset($this->referenceListing[$target]) 
+                        && preg_match("/^[0-9]+$/",$this->referenceListing[$target])) {
+                        $target = $this->referenceListing[$target];
+                    }
+                    
+                    if ($target === $this->config['site_start']) {
+                        $path = 'index.php';
+                    } elseif(isset($this->referenceListing[$target]) 
+                        && preg_match('@^https?://@', $this->referenceListing[$target])) {
+                        $path = $this->referenceListing[$target];
+                    } else {
+                        $path = 'index.php?id=' . $target;
+                    }
+                    $documentSource .= $path;
+                }
+            }
+        }
+        return $documentSource;
+    } // rewriteUrls
+
     function executeParser()
     {
         ob_start();
@@ -1672,82 +1754,6 @@ class DocumentParser {
             $this->aliases = $aliases;
         }
         return $this->aliases;
-    }
-
-    function rewriteUrls($documentSource)
-    {
-        // rewrite the urls
-        $pieces = preg_split('/(\[~|~\])/',$documentSource);
-        $maxidx = sizeof($pieces);
-        $documentSource = '';
-        if(empty($this->referenceListing))
-        {
-            $this->referenceListing = array();
-            $res = $this->db->select('id,content', $this->getFullTableName('site_content'), "type='reference'");
-            $rows = $this->db->makeArray($res);
-            foreach($rows as $row)
-            {
-                extract($row);
-                $this->referenceListing[$id] = $content;
-            }
-        }
-        
-        if ($this->config['friendly_urls'] == 1)
-        {
-            if(!isset($this->aliases) || empty($this->aliases))
-                $aliases = $this->set_aliases();
-            else
-                $aliases = $this->aliases;
-            
-            $use_alias = $this->config['friendly_alias_urls'];
-            $prefix    = $this->config['friendly_url_prefix'];
-            $suffix    = $this->config['friendly_url_suffix'];
-            
-            for ($idx = 0; $idx < $maxidx; $idx++)
-            {
-                $documentSource .= $pieces[$idx];
-                $idx++;
-                if ($idx < $maxidx)
-                {
-                    $target = trim($pieces[$idx]);
-                    if(preg_match("/^[0-9]+$/",$this->referenceListing[$target]))
-                        $target = $this->referenceListing[$target];
-                    elseif(preg_match("/^[0-9]+$/",$target))
-                        $target = $aliases[$target];
-                    else $target = $this->parseDocumentSource($target);
-                    
-                    if(preg_match('@^https?://@', $this->referenceListing[$target]))
-                                                            $path = $this->referenceListing[$target];
-                    elseif($aliases[$target] && $use_alias) $path = $this->makeFriendlyURL($prefix, $suffix, $aliases[$target]);
-                    else                                    $path = $this->makeFriendlyURL($prefix, $suffix, $target);
-                    $documentSource .= $path;
-                }
-            }
-            unset($aliases);
-        }
-        else
-        {
-            for ($idx = 0; $idx < $maxidx; $idx++)
-            {
-                $documentSource .= $pieces[$idx];
-                $idx++;
-                if ($idx < $maxidx)
-                {
-                    $target = trim($pieces[$idx]);
-                    if(isset($this->referenceListing[$target]) && preg_match("/^[0-9]+$/",$this->referenceListing[$target]))
-                        $target = $this->referenceListing[$target];
-                    
-                    if($target === $this->config['site_start'])
-                        $path = 'index.php';
-                    elseif(isset($this->referenceListing[$target]) && preg_match('@^https?://@', $this->referenceListing[$target]))
-                        $path = $this->referenceListing[$target];
-                    else
-                        $path = 'index.php?id=' . $target;
-                    $documentSource .= $path;
-                }
-            }
-        }
-        return $documentSource;
     }
 
     /**
