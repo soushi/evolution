@@ -2030,14 +2030,21 @@ class DocumentParser {
         }
     } // webAlert
 
-    # Returns true if user has the currect permission
-    function hasPermission($pm) {
+    /**
+     * Returns true if user has the currect permission
+     *
+     * @category API-Function
+     * @param string $pm Name of the permission
+     * @return int
+     * @example $fileAccess = $modx->hasPermission('file_manager');
+     */
+    public function hasPermission($pm) {
         $state= false;
         $pms= $_SESSION['mgrPermissions'];
         if ($pms)
             $state= ($pms[$pm] == 1);
         return $state;
-    }
+    } // hasPermission
 
     # Add an a alert message to the system event log
     function logEvent($evtid, $type, $msg, $source= 'Parser')
