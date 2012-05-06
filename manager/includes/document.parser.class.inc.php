@@ -66,7 +66,7 @@ class DocumentParser {
      *
      * @return DocumentParser
      */
-    function DocumentParser() {
+    public function __construct() {
         if (!isset($_REQUEST['id'])) {
             $_REQUEST['q'] = substr($_SERVER['REQUEST_URI'],strlen(MODX_BASE_URL));
             if(strpos($_REQUEST['q'],'?')) {
