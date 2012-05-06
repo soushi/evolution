@@ -1010,6 +1010,34 @@ class DocumentParser {
         return $content;
     } // mergePlaceholderContent
 
+    /**
+     *
+     * @param string $pluginCode
+     * @param array $params
+     */
+    private function evalPlugin($pluginCode, $params) {
+        $etomite= $modx= & $this;
+        $modx->event->params= & $params; // store params inside event object
+        if (is_array($params)) {
+            extract($params, EXTR_SKIP);
+        }
+        ob_start();
+        eval ($pluginCode);
+        $msg= ob_get_contents();
+        ob_end_clean();
+        if ($msg && isset ($php_errormsg)) {
+            if (!strpos($php_errormsg, 'Deprecated')) { // ignore php5 strict errors
+                // log error
+                $this->logEvent(1, 3, "<b>$php_errormsg</b><br /><br /> $msg", $this->Event->activePlugin . " - Plugin");
+                if ($this->isBackend())
+                    $this->Event->alert("An error occurred while loading. Please see the event log for more information.<p />$msg");
+            }
+        } else {
+            echo $msg;
+        }
+        unset ($modx->event->params);
+    } // evalPlugin
+
     function executeParser()
     {
         ob_start();
@@ -1344,47 +1372,6 @@ class DocumentParser {
         $content= str_replace('[^m^]', $total_mem, $content);
         
         return $content;
-    }
-    
-    // evalPlugin
-    function evalPlugin($pluginCode, $params)
-    {
-        $etomite= $modx= & $this;
-        $modx->event->params = $params; // store params inside event object
-        if (is_array($params))
-        {
-            extract($params, EXTR_SKIP);
-        }
-        ob_start();
-        $result = eval($pluginCode);
-        $msg= ob_get_contents();
-        ob_end_clean();
-        if ($msg && isset ($php_errormsg))
-        {
-            if (!strpos($php_errormsg, 'Deprecated'))
-            {   // ignore php5 strict errors
-                // log error
-                $request_uri = $_SERVER['REQUEST_URI'];
-                $request_uri = 'REQUEST_URI = ' . htmlspecialchars($request_uri, ENT_QUOTES) . '<br />';
-                if(isset($this->documentIdentifier))
-                {
-                    $docid = "ID = {$this->documentIdentifier}<br />";
-                }
-//                $bt = $this->get_backtrace(debug_backtrace()) . '<br />';
-                $log = "<b>{$php_errormsg}</b><br />{$msg}<br />{$request_uri}{$docid}";
-                $plugin = $this->event->activePlugin . ' - Plugin';
-                $this->logEvent(1, 3, $log, $plugin);
-                if ($this->isBackend())
-                {
-                    $this->event->alert("An error occurred while loading. Please see the event log for more information.<p>{$msg}</p>");
-                }
-            }
-        }
-        else
-        {
-            echo $msg . $result;
-        }
-        unset ($modx->event->params);
     }
     
     function evalSnippet($snippet, $params)
