@@ -204,6 +204,29 @@ class DocumentParser {
     } // sendRedirect
 
     /**
+     * Forward to an other page
+     *
+     * @param int $id
+     * @param string $responseCode
+     */
+    private function sendForward($id, $responseCode='') {
+        if ($this->forwards > 0) {
+            $this->forwards= $this->forwards - 1;
+            $this->documentIdentifier= $id;
+            $this->documentMethod= 'id';
+            $this->documentObject= $this->getDocumentObject('id', $id);
+            if ($responseCode) {
+                header($responseCode);
+            }
+            $this->prepareResponse();
+        } else {
+            header('HTTP/1.0 500 Internal Server Error');
+            die('<h1>ERROR: Too many forward attempts!</h1><p>The request could not be completed due to too many unsuccessful forward attempts.</p>');
+        }
+        exit();
+    } // sendForward
+
+    /**
      * Redirect to the error page, by calling sendForward. This is called for
      * example when the page was not found.
      */
@@ -1572,28 +1595,6 @@ class DocumentParser {
         )); // tell PHP to call postProcess when it shuts down
         $this->outputContent();
     } // evalSnippets
-    
-    function sendForward($id, $responseCode= '')
-    {
-        if ($this->forwards > 0)
-        {
-            $this->forwards= $this->forwards - 1;
-            $this->documentIdentifier= $id;
-            $this->documentMethod= 'id';
-            $this->documentObject= $this->getDocumentObject('id', $id);
-            if ($responseCode)
-            {
-                header($responseCode);
-            }
-            $this->prepareResponse();
-        }
-        else
-        {
-            header('HTTP/1.0 500 Internal Server Error');
-            die('<h1>ERROR: Too many forward attempts!</h1><p>The request could not be completed due to too many unsuccessful forward attempts.</p>');
-        }
-        exit();
-    }
     
     function get_static_pages()
     {
