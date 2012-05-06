@@ -2128,6 +2128,45 @@ class DocumentParser {
         return !$this->insideManager() ? true : false;
     } // isFrontend
 
+    /**
+     * Gets all child documents of the specified document, including those which
+     * are unpublished or deleted.
+     *
+     * @category API-Function
+     * @param int $id The Document identifier to start with
+     * @param string $sort Sort field
+     *                     Default: menuindex
+     * @param string $dir Sort direction, ASC and DESC is possible
+     *                    Default: ASC
+     * @param string $fields Default: id, pagetitle, description, parent, alias, menutitle
+     * @return array
+     * @example $allChildren = $modx->getAllChildren(10);
+     * @todo Change the row handling
+     */
+    public function getAllChildren($id=0, $sort='menuindex', $dir='ASC', $fields='id, pagetitle, description, parent, alias, menutitle') {
+        $tbl_site_content= $this->getFullTableName('site_content');
+        $tbl_document_groups= $this->getFullTableName('document_groups');
+        // modify field names to use sc. table reference
+        $fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $fields)));
+        $sort= 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $sort)));
+        // get document groups for current user
+        if ($docgrp= $this->getUserDocGroups()) {
+            $docgrp= implode(',', $docgrp);
+        }
+        // build query
+        $context = ($this->isFrontend() ? 'web' : 'mgr');
+        $cond    = ($docgrp) ? "OR dg.document_group IN ({$docgrp}) OR 1='{$_SESSION['mgrRole']}'" : '';
+        $from = "{$tbl_site_content} sc LEFT JOIN {$tbl_document_groups} dg on dg.document = sc.id";
+        $where = "sc.parent = '{$id}' AND (sc.private{$context}=0 {$cond}) GROUP BY sc.id";
+        $orderby = "{$sort} {$dir}";
+        $result= $this->db->select("DISTINCT {$fields}", $from, $where, $orderby);
+        $resourceArray= array ();
+        for ($i= 0; $i < $this->db->getRecordCount($result); $i++) {
+            $resourceArray[] = $this->db->getRow($result);
+        }
+        return $resourceArray;
+    } // getAllChildren
+    
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2195,33 +2234,6 @@ class DocumentParser {
         $action     = intval($action);
         $tbl_active_users = $this->getFullTableName('active_users');
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
-    }
-    
-    function getAllChildren($id= 0, $sort= 'menuindex', $dir= 'ASC', $fields= 'id, pagetitle, description, parent, alias, menutitle')
-    {
-        $tbl_site_content= $this->getFullTableName('site_content');
-        $tbl_document_groups= $this->getFullTableName('document_groups');
-        // modify field names to use sc. table reference
-        $fields= 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $fields)));
-        $sort= 'sc.' . implode(',sc.', preg_replace("/^\s/i", '', explode(',', $sort)));
-        // get document groups for current user
-        if ($docgrp= $this->getUserDocGroups())
-        {
-            $docgrp= implode(',', $docgrp);
-        }
-        // build query
-        $context = ($this->isFrontend() ? 'web' : 'mgr');
-        $cond    = ($docgrp) ? "OR dg.document_group IN ({$docgrp}) OR 1='{$_SESSION['mgrRole']}'" : '';
-        $from = "{$tbl_site_content} sc LEFT JOIN {$tbl_document_groups} dg on dg.document = sc.id";
-        $where = "sc.parent = '{$id}' AND (sc.private{$context}=0 {$cond}) GROUP BY sc.id";
-        $orderby = "{$sort} {$dir}";
-        $result= $this->db->select("DISTINCT {$fields}",$from,$where,$orderby);
-        $resourceArray= array ();
-        for ($i= 0; $i < $this->db->getRecordCount($result); $i++)
-        {
-            $resourceArray[] = $this->db->getRow($result);
-        }
-        return $resourceArray;
     }
     
     function getActiveChildren($id= 0, $sort= 'menuindex', $dir= 'ASC', $fields= 'id, pagetitle, description, parent, alias, menutitle')
