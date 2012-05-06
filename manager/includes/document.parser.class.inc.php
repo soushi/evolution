@@ -1664,26 +1664,28 @@ class DocumentParser {
         return $src;
     } // get_static_pages
     
-    function mergeCommentedTagsContent($content)
-    {
-        $pieces = explode('<!-- #modx',$content);
+    /**
+     *
+     * @param array $content
+     * @return string 
+     */
+    private function mergeCommentedTagsContent($content) {
+        $pieces = explode('<!-- #modx', $content);
         $stack = '';
         $total = count($pieces);
-        for($i=0;$i<$total;$i++)
-        {
+        for ($i = 0; $i < $total; $i++) {
             $_ = $pieces[$i];
-            if($i!==0)
-            {
-                list($modxelm,$txt) = explode('-->',$_, 2);
+            if ($i !== 0) {
+                list($modxelm, $txt) = explode('-->',$_, 2);
                 $modxelm = trim($modxelm);
-                $txt = substr($txt,strpos($txt,'<!-- /#modx'));
-                $txt = substr($txt,strpos($txt,'-->')+3);
+                $txt = substr($txt, strpos($txt, '<!-- /#modx'));
+                $txt = substr($txt, strpos($txt, '-->')+3);
                 $_ = $modxelm . $txt;
             }
-             $stack .= $_;
+            $stack .= $_;
         }
         return $stack;
-    }
+    } // mergeCommentedTagsContent
     
     function mergeBenchmarkContent($content)
     {
