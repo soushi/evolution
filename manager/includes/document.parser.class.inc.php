@@ -2603,6 +2603,23 @@ class DocumentParser {
         return $result;
     } // getConfig
 
+    /**
+     * Returns the MODX version information as version, branch, release date,
+     * and full application name.
+     *
+     * @category API-Function
+     * @return array
+     */
+    public function getVersionData() {
+        include $this->config["base_path"] . "manager/includes/version.inc.php";
+        $v= array ();
+        $v['version']= $modx_version;
+        $v['branch']= $modx_branch;
+        $v['release_date']= $modx_release_date;
+        $v['full_appname']= $modx_full_appname;
+        return $v;
+    } // getVersionData
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2672,17 +2689,6 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-    function getVersionData()
-    {
-        include_once($this->config["base_path"] . 'manager/includes/version.inc.php');
-        $v= array ();
-        $v['version']= $modx_version;
-        $v['branch']= $modx_branch;
-        $v['release_date']= $modx_release_date;
-        $v['full_appname']= $modx_full_appname;
-        return $v;
-    }
-
     function makeList($array,$ulroot='root',$ulprefix='sub_',$type='',$ordered= false,$tablevel= 0)
     {
         // first find out whether the value passed is an array
