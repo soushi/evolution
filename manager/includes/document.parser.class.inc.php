@@ -2445,6 +2445,26 @@ class DocumentParser {
         return $result;
     } // getParent
 
+    /**
+     * Returns the identifier of the current snippet.
+     *
+     * @category API-Function
+     * @return int
+     * @example $snippetIdentifier = $modx->getSnippetId();
+     */
+    public function getSnippetId() {
+        $result = 0;
+        if ($this->currentSnippet) {
+            $tbl= $this->getFullTableName("site_snippets");
+            $rs= $this->db->query("SELECT id FROM $tbl WHERE name='" . $this->db->escape($this->currentSnippet) . "' LIMIT 1");
+            $row= @ $this->db->getRow($rs);
+            if ($row['id'])
+                $result = $row['id'];
+        }
+
+        return $result;
+    } // getSnippetId
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2514,19 +2534,7 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-    function getSnippetId()
-    {
-        if ($this->currentSnippet)
-        {
-            $tbl_site_snippets = $this->getFullTableName("site_snippets");
-            $snip = $this->db->escape($this->currentSnippet);
-            $rs= $this->db->select('id', $tbl_site_snippets, "name='{$snip}'",'',1);
-            $row= @ $this->db->getRow($rs);
-            if ($row['id']) return $row['id'];
-        }
-        return 0;
-    }
-        
+
     function getSnippetName()
     {
         return $this->currentSnippet;
