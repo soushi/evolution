@@ -2585,6 +2585,24 @@ class DocumentParser {
         return $result;
     } // makeUrl
 
+    /**
+     * Returns the current value of a configuration given by name.
+     *
+     * @category API-Function
+     * @param string $name The configuration name
+     * @return boolean|string
+     * @example $dbUser = $modx->getConfig('user'); // Returns the current database user name
+     */
+    public function getConfig($name='') {
+        if (!empty ($this->config[$name])) {
+            $result = $this->config[$name];
+        } else {
+            $result = false;
+        }
+
+        return $result;
+    } // getConfig
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2654,12 +2672,6 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-    function getConfig($name= '')
-    {
-        if(empty($this->config[$name])) return false;
-        else                            return $this->config[$name];
-    }
-        
     function getVersionData()
     {
         include_once($this->config["base_path"] . 'manager/includes/version.inc.php');
