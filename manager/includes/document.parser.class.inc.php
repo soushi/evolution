@@ -2659,6 +2659,36 @@ class DocumentParser {
         return $result;
     } // makeList
 
+    /**
+     * Returns user loginn information, as logged in, internal key, user name,
+     * and user type. User type is web or manager.
+     *
+     * @category API-Function
+     * @return boolean|array
+     */
+    public function userLoggedIn() {
+        $result = array ();
+        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            // web user
+            $result['loggedIn']= true;
+            $result['id']= $_SESSION['webInternalKey'];
+            $result['username']= $_SESSION['webShortname'];
+            $result['usertype']= 'web'; // added by Raymond
+        } else {
+            if ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+                // manager user
+                $result['loggedIn']= true;
+                $result['id']= $_SESSION['mgrInternalKey'];
+                $result['username']= $_SESSION['mgrShortname'];
+                $result['usertype']= 'manager'; // added by Raymond
+            } else {
+                $result = false;
+            }
+        } // userLoggedIn
+
+        return $result;
+    } // userLoggedIn
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3668,33 +3698,6 @@ class DocumentParser {
             }
         }
         return $metatags;
-    }
-
-    function userLoggedIn()
-    {
-        $userdetails= array ();
-        if ($this->isFrontend() && isset ($_SESSION['webValidated']))
-        {
-            // web user
-            $userdetails['loggedIn']= true;
-            $userdetails['id']= $_SESSION['webInternalKey'];
-            $userdetails['username']= $_SESSION['webShortname'];
-            $userdetails['usertype']= 'web'; // added by Raymond
-            return $userdetails;
-        }
-        elseif($this->isBackend() && isset ($_SESSION['mgrValidated']))
-        {
-            // manager user
-            $userdetails['loggedIn']= true;
-            $userdetails['id']= $_SESSION['mgrInternalKey'];
-            $userdetails['username']= $_SESSION['mgrShortname'];
-            $userdetails['usertype']= 'manager'; // added by Raymond
-            return $userdetails;
-        }
-        else
-        {
-            return false;
-        }
     }
 
     function getKeywords($id= 0) {
