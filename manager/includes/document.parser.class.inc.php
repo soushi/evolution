@@ -2476,6 +2476,33 @@ class DocumentParser {
         return $this->currentSnippet;
     } // getSnippetName
 
+    /**
+     * Clear the cache of MODX.
+     *
+     * @category API-Function
+     * @param array $params Default: Empty array
+     * @return boolean 
+     * @example $cacheCleared = $modx->clearCache();
+     */
+    public function clearCache($params=array()) {
+        if (opendir(MODX_BASE_PATH . 'assets/cache') !== false) {
+            $showReport = ($params['showReport']) ? $params['showReport'] : false;
+            $target = ($params['target']) ? $params['target'] : 'pagecache,sitecache';
+            
+            include_once MODX_MANAGER_PATH . 'processors/cache_sync.class.processor.php';
+            $sync = new synccache();
+            $sync->setCachepath(MODX_BASE_PATH . 'assets/cache/');
+            $sync->setReport($showReport);
+            $sync->setTarget($target);
+            $sync->emptyCache(); // first empty the cache
+            $result = true;
+        } else {
+            $result = false;
+        }
+
+        return $result;
+    } // clearCache
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2545,24 +2572,6 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-
-    function clearCache($params=array()) {
-        if(opendir(MODX_BASE_PATH . 'assets/cache')!==false)
-        {
-            $showReport = ($params['showReport']) ? $params['showReport'] : false;
-            $target = ($params['target']) ? $params['target'] : 'pagecache,sitecache';
-            
-            include_once MODX_MANAGER_PATH . 'processors/cache_sync.class.processor.php';
-            $sync = new synccache();
-            $sync->setCachepath(MODX_BASE_PATH . 'assets/cache/');
-            $sync->setReport($showReport);
-            $sync->setTarget($target);
-            $sync->emptyCache(); // first empty the cache
-            return true;
-        }
-        else return false;
-    }
-
     function makeUrl($id, $alias= '', $args= '', $scheme= '')
     {
         $url= '';
