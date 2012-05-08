@@ -2465,6 +2465,17 @@ class DocumentParser {
         return $result;
     } // getSnippetId
 
+    /**
+     * Returns the name of the current snippet.
+     *
+     * @category API-Function
+     * @return string
+     * @example $snippetName = $modx->getSnippetName();
+     */
+    public function getSnippetName() {
+        return $this->currentSnippet;
+    } // getSnippetName
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2535,11 +2546,6 @@ class DocumentParser {
     }
     
 
-    function getSnippetName()
-    {
-        return $this->currentSnippet;
-    }
-    
     function clearCache($params=array()) {
         if(opendir(MODX_BASE_PATH . 'assets/cache')!==false)
         {
