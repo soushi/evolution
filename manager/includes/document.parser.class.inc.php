@@ -2503,6 +2503,88 @@ class DocumentParser {
         return $result;
     } // clearCache
 
+    /**
+     * Create an URL for the given document identifier. The url prefix and
+     * postfix are used, when friendly_url is active.
+     *
+     * @category API-Function
+     * @param int $id The document identifier
+     * @param string $alias The alias name for the document
+     *                      Default: Empty string
+     * @param string $args The paramaters to add to the URL
+     *                     Default: Empty string
+     * @param string $scheme With full as valus, the site url configuration is
+     *                       used
+     *                       Default: Empty string
+     * @return string
+     * @example $url = $modx->makeUrl(10, 'test-page');
+     */
+    public function makeUrl($id, $alias='', $args='', $scheme='') {
+        $url= '';
+        $virtualDir= '';
+        $f_url_prefix = $this->config['friendly_url_prefix'];
+        $f_url_suffix = $this->config['friendly_url_suffix'];
+        if (!is_numeric($id)) {
+            $this->messageQuit('`' . $id . '` is not numeric and may not be passed to makeUrl()');
+        }
+        if ($args != '' && $this->config['friendly_urls'] == 1) {
+            // add ? to $args if missing
+            $c= substr($args, 0, 1);
+            if (strpos($f_url_prefix, '?') === false) {
+                if ($c == '&')
+                    $args= '?' . substr($args, 1);
+                elseif ($c != '?') $args= '?' . $args;
+            } else {
+                if ($c == '?')
+                    $args= '&' . substr($args, 1);
+                elseif ($c != '&') $args= '&' . $args;
+            }
+        } elseif ($args != '') {
+            // add & to $args if missing
+            $c= substr($args, 0, 1);
+            if ($c == '?') {
+                $args= '&' . substr($args, 1);
+            } elseif ($c != '&') {
+                $args= '&' . $args;
+            }
+        }
+        if ($this->config['friendly_urls'] == 1 && $alias != '') {
+            $url= $f_url_prefix . $alias . $f_url_suffix . $args;
+        } elseif ($this->config['friendly_urls'] == 1 && $alias == '') {
+            $alias= $id;
+            if ($this->config['friendly_alias_urls'] == 1) {
+                $al= $this->aliasListing[$id];
+                $alPath= !empty ($al['path']) ? $al['path'] . '/' : '';
+                if ($al && $al['alias'])
+                    $alias= $al['alias'];
+            }
+            $alias= $alPath . $f_url_prefix . $alias . $f_url_suffix;
+            $url= $alias . $args;
+        } else {
+            $url= 'index.php?id=' . $id . $args;
+        }
+
+        $host= $this->config['base_url'];
+        // check if scheme argument has been set
+        if ($scheme != '') {
+            // for backward compatibility - check if the desired scheme is different than the current scheme
+            if (is_numeric($scheme) && $scheme != $_SERVER['HTTPS']) {
+                $scheme= ($_SERVER['HTTPS'] ? 'http' : 'https');
+            }
+
+            // to-do: check to make sure that $site_url incudes the url :port (e.g. :8080)
+            $host= $scheme == 'full' ? $this->config['site_url'] : $scheme . '://' . $_SERVER['HTTP_HOST'] . $host;
+        }
+
+        if ($this->config['xhtml_urls']) {
+            $result = preg_replace("/&(?!amp;)/","&amp;", $host . $virtualDir . $url);
+        } else {
+            $result = $host . $virtualDir . $url;
+        }
+
+        return $result;
+    } // makeUrl
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2572,104 +2654,6 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-    function makeUrl($id, $alias= '', $args= '', $scheme= '')
-    {
-        $url= '';
-        $virtualDir= '';
-        $f_url_prefix = $this->config['friendly_url_prefix'];
-        $f_url_suffix = $this->config['friendly_url_suffix'];
-        if (!is_numeric($id))
-        {
-            $this->messageQuit("'{$id}' is not numeric and may not be passed to makeUrl()");
-        }
-        if ($args != '' && $this->config['friendly_urls'] == 1)
-        {
-            // add ? to $args if missing
-            $c= substr($args, 0, 1);
-            if (strpos($f_url_prefix, '?') === false)
-            {
-                if ($c == '&')     $args= '?' . ltrim($args, '&');
-                elseif ($c != '?') $args= '?' . $args;
-            }
-            else
-            {
-                if ($c == '?')     $args= '&' . ltrim($args, '?');
-                elseif ($c != '&') $args= '&' . $args;
-            }
-        }
-        elseif ($args != '')
-        {
-            // add & to $args if missing
-            $c= substr($args, 0, 1);
-            if ($c == '?')     $args= '&' . ltrim($args, '?');
-            elseif ($c != '&') $args= '&' . $args;
-        }
-        if ($this->config['friendly_urls'] == 1)
-        {
-            $alPath = '';
-            if(empty($alias))
-            {
-                $alias = $id;
-                if ($this->config['friendly_alias_urls'] == 1)
-                {
-                    $al= $this->aliasListing[$id];
-                    if(!empty ($al['path'])) $alPath = $al['path'] . '/';
-                    if ($al && $al['alias']) $alias  = $al['alias'];
-                }
-            }
-            
-            if((strpos($alias, '.') !== false) && (isset($this->config['suffix_mode']) && $this->config['suffix_mode']==1))
-            {
-                $f_url_suffix = ''; // jp-edition only
-            }
-        }
-        if ($this->config['friendly_urls'] == 1)
-        {
-            $url = $alPath . $f_url_prefix . $alias . $f_url_suffix . $args;
-        }
-        else
-        {
-            $url= "index.php?id={$id}{$args}";
-        }
-        
-        $host= $this->config['base_url'];
-        // check if scheme argument has been set
-        if ($scheme != '')
-        {
-            // for backward compatibility - check if the desired scheme is different than the current scheme
-            if (is_numeric($scheme) && $scheme != $_SERVER['HTTPS'])
-            {
-                $scheme= ($_SERVER['HTTPS'] ? 'http' : 'https');
-            }
-        
-            // to-do: check to make sure that $site_url incudes the url :port (e.g. :8080)
-            $host= ($scheme == 'full') ? $this->config['site_url'] : $scheme . '://' . $_SERVER['HTTP_HOST'] . $host;
-        }
-        
-        if ($this->config['xhtml_urls'])
-        {
-            $url = preg_replace("/&(?!amp;)/",'&amp;', $host . $virtualDir . $url);
-        }
-        else
-        {
-            $url = $host . $virtualDir . $url;
-        }
-        $rs = $this->invokeEvent('OnMakeUrl',
-                array(
-                    "id"    => $id,
-                    "alias" => $alias,
-                    "args"  => $args,
-                    "scheme"=> $scheme,
-                    "url"   => $url
-                )
-            );
-        if (!empty($rs))
-        {
-            $url = end($rs);
-        }
-        return $url;
-    }
-        
     function getConfig($name= '')
     {
         if(empty($this->config[$name])) return false;
