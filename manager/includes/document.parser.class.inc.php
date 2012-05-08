@@ -2412,6 +2412,39 @@ class DocumentParser {
         return $result;
     } // getPageInfo
 
+    /**
+     * Returns the parent document of the given identifier.
+     *
+     * @category API-Function
+     * @param int $pid The parent document identifier
+     *                 Default: -1
+     * @param int $active Whether the document is active, or not,
+     *                     1 = yes, 0 = no
+     *                     Default: 1
+     * @param string $fields List of fields
+     *                       Default: id, pagetitle, description, alias
+     * @return boolean|array|stdClass
+     * @example $parentDoc = $modx->getParent(10);
+     */
+    public function getParent($pid=-1, $active=1, $fields='id, pagetitle, description, alias, parent') {
+        if ($pid == -1) {
+            $pid= $this->documentObject['parent'];
+            $result = ($pid == 0) ? false : $this->getPageInfo($pid, $active, $fields, $rowMode);
+        } else {
+            if ($pid == 0) {
+                $result = false;
+            } else {
+                // first get the child document
+                $child= $this->getPageInfo($pid, $active, "parent");
+                // now return the child's parent
+                $pid= ($child['parent']) ? $child['parent'] : 0;
+                $result = ($pid == 0) ? false : $this->getPageInfo($pid, $active, $fields);
+            }
+        }
+
+        return $result;
+    } // getParent
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2481,29 +2514,6 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-    function getParent($pid= -1, $active= 1, $fields= 'id, pagetitle, description, alias, parent')
-    {
-        if ($pid == -1)
-        {
-            $pid= $this->documentObject['parent'];
-            return ($pid == 0) ? false : $this->getPageInfo($pid, $active, $fields);
-        }
-        elseif ($pid == 0)
-        {
-            return false;
-        }
-        else
-        {
-            // first get the child document
-            $child= $this->getPageInfo($pid, $active, "parent");
-            
-            // now return the child's parent
-            $pid= ($child['parent']) ? $child['parent'] : 0;
-            
-            return ($pid == 0) ? false : $this->getPageInfo($pid, $active, $fields);
-        }
-    }
-        
     function getSnippetId()
     {
         if ($this->currentSnippet)
