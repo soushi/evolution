@@ -2620,6 +2620,45 @@ class DocumentParser {
         return $v;
     } // getVersionData
 
+    /**
+     * Returns an ordered or unordered HTML list.
+     *
+     * @category API-Function
+     * @param array $array
+     * @param string $ulroot Default: root
+     * @param string $ulprefix Default: sub_
+     * @param string $type Default: Empty string
+     * @param boolean $ordered Default: false
+     * @param int $tablevel Default: 0
+     * @return string
+     */
+    public function makeList($array, $ulroot='root', $ulprefix='sub_', $type='', $ordered=false, $tablevel=0) {
+        // first find out whether the value passed is an array
+        if (!is_array($array)) {
+            $result = "<ul><li>Bad list</li></ul>";
+        }
+        if (!empty ($type)) {
+            $typestr= " style='list-style-type: $type'";
+        } else {
+            $typestr= '';
+        }
+        $tabs= '';
+        for ($i= 0; $i < $tablevel; $i++) {
+            $tabs .= "\t";
+        }
+        $result= $ordered == true ? $tabs . "<ol class='$ulroot'$typestr>\n" : $tabs . "<ul class='$ulroot'$typestr>\n";
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $result .= $tabs . "\t<li>" . $key . "\n" . $this->makeList($value, $ulprefix . $ulroot, $ulprefix, $type, $ordered, $tablevel +2) . $tabs . "\t</li>\n";
+            } else {
+                $result .= $tabs . "\t<li>" . $value . "</li>\n";
+            }
+        }
+        $result .= $ordered == true ? $tabs . "</ol>\n" : $tabs . "</ul>\n";
+
+        return $result;
+    } // makeList
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2689,39 +2728,6 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-    function makeList($array,$ulroot='root',$ulprefix='sub_',$type='',$ordered= false,$tablevel= 0)
-    {
-        // first find out whether the value passed is an array
-        if (!is_array($array)) return "<ul><li>Bad list</li></ul>";
-        
-        $tabs= '';
-        for ($i= 0; $i < $tablevel; $i++)
-        {
-            $tabs .= "\t";
-        }
-        
-        $tag = ($ordered == true) ? 'ol' : 'ul';
-        
-        if(!empty($type)) $typestr= " style='list-style-type: {$type}'";
-        else              $typestr= '';
-        
-        $listhtml= "{$tabs}<{$tag} class='{$ulroot}'{$typestr}>\n";
-        foreach ($array as $key => $value)
-        {
-            if (is_array($value))
-            {
-                $line = $this->makeList($value, "{$ulprefix}{$ulroot}", $ulprefix, $type, $ordered, $tablevel +2);
-                $listhtml .= "{$tabs}\t<li>{$key}\n{$line}{$tabs}\t</li>\n";
-            }
-            else
-            {
-                $listhtml .= "{$tabs}\t<li>{$value}</li>\n";
-            }
-        }
-        $listhtml = "{$tabs}</{$tag}>\n";
-        return $listhtml;
-    }
-        
     function runSnippet($snippetName, $params= array ())
     {
         if (isset ($this->snippetCache[$snippetName]))
