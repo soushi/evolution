@@ -2330,6 +2330,40 @@ class DocumentParser {
         }
     } // getDocuments
 
+    /**
+     * Returns the parsed content of the given document identifier.
+     *
+     * @category API-Function
+     * @param int $id The Document identifier to start with
+     *                Default: 0
+     * @param string $fields List of fields
+     *                       Default: * (= all fields)
+     * @param int $published Whether only published documents are in the result,
+     *                       or all documents, 1 = yes, 0 = no
+     *                       Default: 1
+     * @param int $deleted Whether deleted documents are in the result, or not,
+     *                     1 = yes, 0 = no
+     *                     Default: 0
+     * @return boolean|string
+     * @example $doc = $modx->getDocument(10);
+     */
+    public function getDocument($id= 0, $fields= '*', $published= 1, $deleted= 0) {
+        if ($id == 0) {
+            $result = false;
+        } else {
+            $tmpArr[]= $id;
+            $docs= $this->getDocuments($tmpArr, $published, $deleted, $fields, '', '', '', 1);
+            
+            if ($docs != false) {
+                $result = $docs[0];
+            } else {
+                $result = false;
+            }
+        }
+
+        return $result;
+    } // getDocument
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2399,19 +2433,6 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
     }
     
-    function getDocument($id= 0, $fields= '*', $published= 1, $deleted= 0)
-    {
-        if ($id == 0) return false;
-        else
-        {
-            $tmpArr[]= $id;
-            $docs= $this->getDocuments($tmpArr, $published, $deleted, $fields, '', '', '', 1);
-            
-            if ($docs != false) return $docs[0];
-            else                return false;
-        }
-    }
-
     function getPageInfo($docid= 0, $active= 1, $fields= 'id, pagetitle, description, alias')
     {
         if($docid == 0) return false;
