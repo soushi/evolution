@@ -2802,6 +2802,18 @@ class DocumentParser {
         return $result;
     } // getChunk
     
+    /**
+     * Old function that does call getChunk.
+     * 
+     * @category API-Function
+     * @deprecated Use getChunk
+     * @param string $chunkName
+     * @return boolean|string
+     */
+    public function putChunk($chunkName) {
+        return $this->getChunk($chunkName);
+    } // putChunk
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3746,7 +3758,6 @@ class DocumentParser {
         return $m;
     }
 
-    function putChunk($chunkName) {return $this->getChunk($chunkName);}// deprecated alias name >.<
     function getDocGroups() {return $this->getUserDocGroups();} // deprecated
     function changePassword($o, $n) {return changeWebUserPassword($o, $n);} // deprecated
 
