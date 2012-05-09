@@ -2785,6 +2785,23 @@ class DocumentParser {
         return $this->evalSnippet($snippet, $parameters);
     } // runSnippet
 
+    /**
+     * Returns the chunk content for the given chunk name
+     * 
+     * @category API-Function
+     * @param string $chunkName
+     * @return boolean|string
+     */
+    public function getChunk($chunkName) {
+        if (isset($this->chunkCache[$chunkName])) {
+            $result = $this->chunkCache[$chunkName];
+        } else {
+            $result = false;
+        }
+
+        return $result;
+    } // getChunk
+    
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2852,15 +2869,6 @@ class DocumentParser {
         $action     = intval($action);
         $tbl_active_users = $this->getFullTableName('active_users');
         $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
-    }
-    
-    function getChunk($chunkName)
-    {
-        if(isset($this->chunkCache[$chunkName]))
-        {
-            $t= $this->chunkCache[$chunkName];
-            return $t;
-        }
     }
     
     function parseChunk($chunkName, $chunkArr, $prefix= '{', $suffix= '}',$mode='chunk')
