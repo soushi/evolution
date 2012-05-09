@@ -2689,6 +2689,34 @@ class DocumentParser {
         return $result;
     } // userLoggedIn
 
+    /**
+     * Returns an array with keywords for the current document, or a document
+     * with a given identifier.
+     *
+     * @category API-Function
+     * @param int $id The document identifier, 0 means the current document
+     *                Default: 0
+     * @return array
+     */
+    public function getKeywords($id= 0) {
+        if ($id == 0) {
+            $id= $this->documentObject['id'];
+        }
+        $tblKeywords= $this->getFullTableName('site_keywords');
+        $tblKeywordXref= $this->getFullTableName('keyword_xref');
+        $sql= "SELECT keywords.keyword FROM " . $tblKeywords . " AS keywords INNER JOIN " . $tblKeywordXref . " AS xref ON keywords.id=xref.keyword_id WHERE xref.content_id = '$id'";
+        $result= $this->db->query($sql);
+        $limit= $this->db->getRecordCount($result);
+        $keywords= array ();
+        if ($limit > 0) {
+            for ($i= 0; $i < $limit; $i++) {
+                $row= $this->db->getRow($result);
+                $keywords[]= $row['keyword'];
+            }
+        }
+        return $keywords;
+    } // getKeywords
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3698,25 +3726,6 @@ class DocumentParser {
             }
         }
         return $metatags;
-    }
-
-    function getKeywords($id= 0) {
-        if ($id == 0) {
-            $id= $this->documentObject['id'];
-        }
-        $tblKeywords= $this->getFullTableName('site_keywords');
-        $tblKeywordXref= $this->getFullTableName('keyword_xref');
-        $sql= "SELECT keywords.keyword FROM " . $tblKeywords . " AS keywords INNER JOIN " . $tblKeywordXref . " AS xref ON keywords.id=xref.keyword_id WHERE xref.content_id = '$id'";
-        $result= $this->db->query($sql);
-        $limit= $this->db->getRecordCount($result);
-        $keywords= array ();
-        if ($limit > 0) {
-            for ($i= 0; $i < $limit; $i++) {
-                $row= $this->db->getRow($result);
-                $keywords[]= $row['keyword'];
-            }
-        }
-        return $keywords;
     }
 
     /***************************************************************************************/
