@@ -2717,6 +2717,39 @@ class DocumentParser {
         return $keywords;
     } // getKeywords
 
+    /**
+     * Returns an array with meta tags for the current document, or a document
+     * with a given identifier.
+     *
+     * @category API-Function
+     * @param int $id The document identifier, 0 means the current document
+     *                Default: 0
+     * @return array
+     */
+    public function getMETATags($id= 0) {
+        if ($id == 0) {
+            $id= $this->documentObject['id'];
+        }
+        $sql= "SELECT smt.* " .
+        "FROM " . $this->getFullTableName("site_metatags") . " smt " .
+        "INNER JOIN " . $this->getFullTableName("site_content_metatags") . " cmt ON cmt.metatag_id=smt.id " .
+        "WHERE cmt.content_id = '$id'";
+        $ds= $this->db->query($sql);
+        $limit= $this->db->getRecordCount($ds);
+        $metatags= array ();
+        if ($limit > 0) {
+            for ($i= 0; $i < $limit; $i++) {
+                $row= $this->db->getRow($ds);
+                $metatags[$row['name']]= array (
+                    "tag" => $row['tag'],
+                    "tagvalue" => $row['tagvalue'],
+                    "http_equiv" => $row['http_equiv']
+                );
+            }
+        }
+        return $metatags;
+    } // getMETATags
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3703,30 +3736,6 @@ class DocumentParser {
     function putChunk($chunkName) {return $this->getChunk($chunkName);}// deprecated alias name >.<
     function getDocGroups() {return $this->getUserDocGroups();} // deprecated
     function changePassword($o, $n) {return changeWebUserPassword($o, $n);} // deprecated
-
-    function getMETATags($id= 0) {
-        if ($id == 0) {
-            $id= $this->documentObject['id'];
-        }
-        $sql= "SELECT smt.* " .
-        "FROM " . $this->getFullTableName("site_metatags") . " smt " .
-        "INNER JOIN " . $this->getFullTableName("site_content_metatags") . " cmt ON cmt.metatag_id=smt.id " .
-        "WHERE cmt.content_id = '$id'";
-        $ds= $this->db->query($sql);
-        $limit= $this->db->getRecordCount($ds);
-        $metatags= array ();
-        if ($limit > 0) {
-            for ($i= 0; $i < $limit; $i++) {
-                $row= $this->db->getRow($ds);
-                $metatags[$row['name']]= array (
-                    "tag" => $row['tag'],
-                    "tagvalue" => $row['tagvalue'],
-                    "http_equiv" => $row['http_equiv']
-                );
-            }
-        }
-        return $metatags;
-    }
 
     /***************************************************************************************/
     /* End of API functions                                       */
