@@ -2814,6 +2814,18 @@ class DocumentParser {
         return $this->getChunk($chunkName);
     } // putChunk
 
+    /**
+     * Returns the generated user data array
+     *
+     * @todo Replace code injection with a class
+     * @category API-Function
+     * @return array
+     */
+    public function getUserData() {
+        include $this->config["base_path"] . "manager/includes/extenders/getUserData.extender.php";
+        return $tmpArray;
+    } // getUserData
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
