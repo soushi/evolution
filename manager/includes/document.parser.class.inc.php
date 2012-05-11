@@ -2865,6 +2865,47 @@ class DocumentParser {
         return $strTime;
     } // toDateFormat
 
+    /**
+     * Returns a timestamp in the configured format.
+     *
+     * @category API-Function
+     * @param string $str
+     * @return string
+     */
+    public function toTimeStamp($str) {
+        $result = '';
+
+        $str = trim($str);
+        if (!empty($str)) {
+            switch($this->config['datetime_format']) {
+                case 'YYYY/mm/dd':
+                    if (!preg_match('/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}[0-9 :]*$/', $str)) {return '';}
+                    list ($Y, $m, $d, $H, $M, $S) = sscanf($str, '%4d/%2d/%2d %2d:%2d:%2d');
+                    break;
+                case 'dd-mm-YYYY':
+                    if (!preg_match('/^[0-9]{2}-[0-9]{2}-[0-9]{4}[0-9 :]*$/', $str)) {return '';}
+                    list ($d, $m, $Y, $H, $M, $S) = sscanf($str, '%2d-%2d-%4d %2d:%2d:%2d');
+                    break;
+                case 'mm/dd/YYYY':
+                    if (!preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}[0-9 :]*$/', $str)) {return '';}
+                    list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d/%2d/%4d %2d:%2d:%2d');
+                    break;
+                /*
+                case 'dd-mmm-YYYY':
+                    if (!preg_match('/^[0-9]{2}-[0-9a-z]+-[0-9]{4}[0-9 :]*$/i', $str)) {return '';}
+                    list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d-%3s-%4d %2d:%2d:%2d');
+                    break;
+                */
+            }
+            if (!$H && !$M && !$S) {$H = 0; $M = 0; $S = 0;}
+            $timeStamp = mktime($H, $M, $S, $m, $d, $Y);
+            $timeStamp = intval($timeStamp);
+            $result = $timeStamp;
+        }
+
+        return $result;
+    } // toTimeStamp
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2965,46 +3006,6 @@ class DocumentParser {
             }
         }
         return $this->parseChunk($src, $ph, $left, $right, $mode);
-    }
-    
-    function toTimeStamp($str)
-    {
-        $str = trim($str);
-        if (empty($str)) return '';
-        
-        switch($this->config['datetime_format'])
-        {
-            case 'YYYY/mm/dd':
-                if (!preg_match('/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}[0-9 :]*$/', $str))
-                {
-                    return '';
-                }
-                list ($Y, $m, $d, $H, $M, $S) = sscanf($str, '%4d/%2d/%2d %2d:%2d:%2d');
-                break;
-            case 'dd-mm-YYYY':
-                if (!preg_match('/^[0-9]{2}-[0-9]{2}-[0-9]{4}[0-9 :]*$/', $str))
-                {
-                    return '';
-                }
-                list ($d, $m, $Y, $H, $M, $S) = sscanf($str, '%2d-%2d-%4d %2d:%2d:%2d');
-                break;
-            case 'mm/dd/YYYY':
-                if (!preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}[0-9 :]*$/', $str))
-                {
-                    return '';
-                }
-                list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d/%2d/%4d %2d:%2d:%2d');
-                break;
-        }
-        if (!$H && !$M && !$S)
-        {
-            $H = 0;
-            $M = 0;
-            $S = 0;
-        }
-        $timeStamp = mktime($H, $M, $S, $m, $d, $Y);
-        $timeStamp = intval($timeStamp);
-        return $timeStamp;
     }
     
     function mb_strftime($format='%Y/%m/%d', $timestamp='')
