@@ -2906,6 +2906,89 @@ class DocumentParser {
         return $result;
     } // toTimeStamp
 
+    #::::::::::::::::::::::::::::::::::::::::
+    # Added By: Raymond Irving - MODx
+    #
+
+    /**
+     * Returns the template varialble as assosiative array.
+     *
+     * @category API-Function
+     * @param int $parentid The parent document identifier
+     *                 Default: 0
+     * @param array $tvidnames Default: Empty array
+     * @param int $published Whether the document is published, or not,
+     *                       1 = yes, 0 = no
+     *                       Default: 1
+     * @param string $docsort The result of the document children is sorted by
+     *                        the given field
+     *                        Default: menuindex
+     * @param ASC $docsortdir SQL sort direction of the document children
+     *                        Default: ASC
+     * @param string $tvfields Template variables, * means all TVs
+     *                         Default: *
+     * @param string $tvsort The result of the template variables is sorted by
+     *                        the given field
+     *                        Default: rank
+     * @param string  $tvsortdir SQL sort direction of the template variables
+     *                           Default: ASC
+     * @return boolean|array
+     */
+    public function getDocumentChildrenTVars($parentid=0, $tvidnames=array(), $published=1, $docsort="menuindex", $docsortdir="ASC", $tvfields="*", $tvsort="rank", $tvsortdir="ASC") {
+        $docs= $this->getDocumentChildren($parentid, $published, 0, '*', '', $docsort, $docsortdir);
+        if (!$docs) {
+            $result = false;
+        } else {
+            $result= array ();
+            // get user defined template variables
+            $fields= ($tvfields == '') ? 'tv.*' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $tvfields)));
+            $tvsort= ($tvsort == '') ? '' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $tvsort)));
+            if ($tvidnames == '*') {
+                $query= 'tv.id<>0';
+            } else {
+                $join_tvidnames = implode("','", $tvidnames);
+                $query  = is_numeric($tvidnames[0]) ? 'tv.id' : 'tv.name';
+                $query .= " IN ('{$join_tvidnames}')";
+            }
+            if ($docgrp= $this->getUserDocGroups()) {
+                $docgrp= implode(',', $docgrp);
+            }
+            $tbl_site_tmplvars = $this->getFullTableName('site_tmplvars');
+            $tbl_site_tmplvar_templates = $this->getFullTableName('site_tmplvar_templates');
+            $tbl_site_tmplvar_contentvalues = $this->getFullTableName('site_tmplvar_contentvalues');
+            $docCount= count($docs);
+            for ($i= 0; $i < $docCount; $i++) {
+                $tvs= array ();
+                $docRow= $docs[$i];
+                $docid= $docRow['id'];
+                
+                $fields  = "{$fields}, IF(tvc.value!='',tvc.value,tv.default_text) as value";
+                $from    = "{$tbl_site_tmplvars} tv INNER JOIN {$tbl_site_tmplvar_templates} tvtpl ON tvtpl.tmplvarid = tv.id";
+                $from   .= " LEFT JOIN {$tbl_site_tmplvar_contentvalues} tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '{$docid}'";
+                $where   = "{$query} AND tvtpl.templateid = {$docRow['template']}";
+                $orderby = ($tvsort) ? "{$tvsort} {$tvsortdir}" : '';
+                $rs= $this->db->select($fields,$from,$where,$orderby);
+                $total= $this->db->getRecordCount($rs);
+                for ($x= 0; $x < $total; $x++) {
+                    $tvs[] = @ $this->db->getRow($rs);
+                }
+                
+                // get default/built-in template variables
+                ksort($docRow);
+                foreach ($docRow as $key => $value) {
+                    if ($tvidnames == '*' || in_array($key, $tvidnames)) {
+                        $tvs[] = array ('name'=>$key, 'value'=>$value);
+                    }
+                }
+                if (count($tvs)) {
+                    $result[] = $tvs;
+                }
+            }
+        }
+
+        return $result;
+    } // getDocumentChildrenTVars
+        
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3037,64 +3120,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    function getDocumentChildrenTVars($parentid= 0, $tvidnames= array (), $published= 1, $docsort= 'menuindex', $docsortdir= 'ASC', $tvfields= '*', $tvsort= 'rank', $tvsortdir= 'ASC')
-    {
-        $docs= $this->getDocumentChildren($parentid, $published, 0, '*', '', $docsort, $docsortdir);
-        if (!$docs) return false;
-        else
-        {
-            $result= array ();
-            // get user defined template variables
-            $fields= ($tvfields == '') ? 'tv.*' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $tvfields)));
-            $tvsort= ($tvsort == '') ? '' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $tvsort)));
-            if ($tvidnames == '*') $query= 'tv.id<>0';
-            else
-            {
-                $join_tvidnames = implode("','", $tvidnames);
-                $query  = is_numeric($tvidnames[0]) ? 'tv.id' : 'tv.name';
-                $query .= " IN ('{$join_tvidnames}')";
-            }
-            if ($docgrp= $this->getUserDocGroups())
-            {
-                $docgrp= implode(',', $docgrp);
-            }
-            $tbl_site_tmplvars              = $this->getFullTableName('site_tmplvars');
-            $tbl_site_tmplvar_templates     = $this->getFullTableName('site_tmplvar_templates');
-            $tbl_site_tmplvar_contentvalues = $this->getFullTableName('site_tmplvar_contentvalues');
-            $docCount= count($docs);
-            for ($i= 0; $i < $docCount; $i++)
-            {
-                $tvs= array ();
-                $docRow= $docs[$i];
-                $docid= $docRow['id'];
-                
-                $fields  = "{$fields}, IF(tvc.value!='',tvc.value,tv.default_text) as value";
-                $from    = "{$tbl_site_tmplvars} tv INNER JOIN {$tbl_site_tmplvar_templates} tvtpl ON tvtpl.tmplvarid = tv.id";
-                $from   .= " LEFT JOIN {$tbl_site_tmplvar_contentvalues} tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '{$docid}'";
-                $where   = "{$query} AND tvtpl.templateid = {$docRow['template']}";
-                $orderby = ($tvsort) ? "{$tvsort} {$tvsortdir}" : '';
-                $rs= $this->db->select($fields,$from,$where,$orderby);
-                $total= $this->db->getRecordCount($rs);
-                for ($x= 0; $x < $total; $x++)
-                {
-                    $tvs[] = @ $this->db->getRow($rs);
-                }
-                
-                // get default/built-in template variables
-                ksort($docRow);
-                foreach ($docRow as $key => $value)
-                {
-                    if ($tvidnames == '*' || in_array($key, $tvidnames))
-                    {
-                        $tvs[] = array ('name'=>$key, 'value'=>$value);
-                    }
-                }
-                if (count($tvs)) $result[] = $tvs;
-            }
-            return $result;
-        }
-    }
-        
     function getDocumentChildrenTVarOutput($parentid= 0, $tvidnames= array (), $published= 1, $docsort= 'menuindex', $docsortdir= 'ASC')
     {
         $docs= $this->getDocumentChildren($parentid, $published, 0, '*', '', $docsort, $docsortdir);
