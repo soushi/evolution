@@ -2826,6 +2826,45 @@ class DocumentParser {
         return $tmpArray;
     } // getUserData
 
+    /**
+     * Returns the timestamp in the configured format.
+     *
+     * @category API-Function
+     * @param int $timestamp Default: 0
+     * @param string $mode Default: Empty string
+     * @return string
+     */
+    public function toDateFormat($timestamp=0, $mode='') {
+        $timestamp = trim($timestamp);
+        $timestamp = intval($timestamp);
+
+        switch($this->config['datetime_format']) {
+            case 'YYYY/mm/dd':
+                $dateFormat = '%Y/%m/%d';
+                break;
+            case 'dd-mm-YYYY':
+                $dateFormat = '%d-%m-%Y';
+                break;
+            case 'mm/dd/YYYY':
+                $dateFormat = '%m/%d/%Y';
+                break;
+            /*
+            case 'dd-mmm-YYYY':
+                $dateFormat = '%e-%b-%Y';
+                break;
+            */
+        }
+
+        if (empty($mode)) {
+            $strTime = strftime($dateFormat . " %H:%M:%S", $timestamp);
+        } elseif ($mode == 'dateOnly') {
+            $strTime = strftime($dateFormat, $timestamp);
+        } elseif ($mode == 'formatOnly') {
+            $strTime = $dateFormat;
+        }
+        return $strTime;
+    } // toDateFormat
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -2926,39 +2965,6 @@ class DocumentParser {
             }
         }
         return $this->parseChunk($src, $ph, $left, $right, $mode);
-    }
-    
-    function toDateFormat($timestamp = 0, $mode = '')
-    {
-        $timestamp = trim($timestamp);
-        $timestamp = intval($timestamp);
-        
-        switch($this->config['datetime_format'])
-        {
-            case 'YYYY/mm/dd':
-                $dateFormat = '%Y/%m/%d';
-                break;
-            case 'dd-mm-YYYY':
-                $dateFormat = '%d-%m-%Y';
-                break;
-            case 'mm/dd/YYYY':
-                $dateFormat = '%m/%d/%Y';
-                break;
-        }
-        
-        if (empty($mode))
-        {
-            $strTime = $this->mb_strftime($dateFormat . " %H:%M:%S", $timestamp);
-        }
-        elseif ($mode == 'dateOnly')
-        {
-            $strTime = $this->mb_strftime($dateFormat, $timestamp);
-        }
-        elseif ($mode == 'formatOnly')
-        {
-            $strTime = $dateFormat;
-        }
-        return $strTime;
     }
     
     function toTimeStamp($str)
