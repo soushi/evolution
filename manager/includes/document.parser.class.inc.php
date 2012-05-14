@@ -759,7 +759,7 @@ class DocumentParser {
     /**
      * Checks the publish state of page
      */
-    private function checkPublishStatus() {
+    public function checkPublishStatus() {
         $tbl_site_content = $this->getFullTableName('site_content');
         $tbl_site_htmlsnippets = $this->getFullTableName('site_htmlsnippets');
         $cacheRefreshTime = 0;
