@@ -2241,7 +2241,7 @@ class DocumentParser {
      * @example $allDocChilds = $modx->getDocumentChildren(10);
      * @todo Change the row handling
      */
-    public function getDocumentChildren($parentid=0, $published= 1, $deleted=0, $fields= "*", $where='', $sort="menuindex", $dir="ASC", $limit='') {        $limit= ($limit != "") ? "LIMIT $limit" : "";
+    public function getDocumentChildren($parentid=0, $published= 1, $deleted=0, $fields= "*", $where='', $sort="menuindex", $dir="ASC", $limit='') {
         $tbl_site_content= $this->getFullTableName('site_content');
         $tbl_document_groups= $this->getFullTableName('document_groups');
         // modify field names to use sc. table reference
