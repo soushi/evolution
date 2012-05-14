@@ -2989,6 +2989,40 @@ class DocumentParser {
         return $result;
     } // getDocumentChildrenTVars
         
+    /**
+     * Returns the output of the template variables for the document children.
+     *
+     * @category API-Function
+     * @param int $parentid The parent document identifier
+     *                 Default: 0
+     * @param array $tvidnames Default: Empty array
+     * @param int $published Whether the document is published, or not,
+     *                       1 = yes, 0 = no
+     *                       Default: 1
+     * @param string $docsort The result of the document children is sorted by
+     *                        the given field
+     *                        Default: menuindex
+     * @param ASC $docsortdir SQL sort direction of the document children
+     *                        Default: ASC
+     * @return boolean|array
+     */
+    public function getDocumentChildrenTVarOutput($parentid=0, $tvidnames=array (), $published=1, $docsort="menuindex", $docsortdir="ASC") {
+        $docs= $this->getDocumentChildren($parentid, $published, 0, '*', '', $docsort, $docsortdir);
+        if (!$docs) {
+            $result = false;
+        } else {
+            $result = array ();
+            for ($i= 0; $i < count($docs); $i++) {
+                $tvs= $this->getTemplateVarOutput($tvidnames, $docs[$i]["id"], $published);
+                if ($tvs) {
+                    $result[$docs[$i]['id']]= $tvs; // Use docid as key - netnoise 2006/08/14
+                }
+            }
+        }
+
+        return $result;
+    } // getDocumentChildrenTVarOutput
+    
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3119,22 +3153,6 @@ class DocumentParser {
     #::::::::::::::::::::::::::::::::::::::::
     # Added By: Raymond Irving - MODx
     #
-    
-    function getDocumentChildrenTVarOutput($parentid= 0, $tvidnames= array (), $published= 1, $docsort= 'menuindex', $docsortdir= 'ASC')
-    {
-        $docs= $this->getDocumentChildren($parentid, $published, 0, '*', '', $docsort, $docsortdir);
-        if (!$docs) return false;
-        else
-        {
-            $result= array ();
-            for ($i= 0; $i < count($docs); $i++)
-            {
-                $tvs= $this->getTemplateVarOutput($tvidnames, $docs[$i]["id"], $published);
-                if ($tvs) $result[$docs[$i]['id']]= $tvs; // Use docid as key - netnoise 2006/08/14
-            }
-            return $result;
-        }
-    }
     
     // Modified by Raymond for TV - Orig Modified by Apodigm - DocVars
     # returns a single TV record. $idnames - can be an id or name that belongs the template that the current document is using
