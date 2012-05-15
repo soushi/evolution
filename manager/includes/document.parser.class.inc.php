@@ -3210,6 +3210,22 @@ class DocumentParser {
     } // toPlaceholders
 
     /**
+     * Sets an array or object var as placeholder
+     *
+     * @category API-Function
+     * @param string $key
+     * @param object|array $value
+     * @param string $prefix
+     */
+    public function toPlaceholder($key, $value, $prefix='') {
+        if (is_array($value) || is_object($value)) {
+            $this->toPlaceholders($value, "{$prefix}{$key}.");
+        } else {
+            $this->setPlaceholder("{$prefix}{$key}", $value);
+        }
+    } // toPlaceholder
+
+    /**
      * Returns the virtual relative path to the manager folder
      *
      * @category API-Function
@@ -3352,14 +3368,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    function toPlaceholder($key, $value, $prefix= '') {
-        if (is_array($value) || is_object($value)) {
-            $this->toPlaceholders($value, "{$prefix}{$key}.");
-        } else {
-            $this->setPlaceholder("{$prefix}{$key}", $value);
-        }
-    }
-
     # returns the virtual relative path to the cache folder
     function getCachePath() {
         return $this->config['base_url'] . 'assets/cache/';
