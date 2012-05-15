@@ -3170,6 +3170,16 @@ class DocumentParser {
         return $this->db->config['dbase'] . '.' . $this->db->config['table_prefix'] . $tbl;
     } // getFullTableName
 
+    /**
+     * Returns the placeholder value
+     *
+     * @param string $name Placeholder name
+     * @return string Placeholder value
+     */
+    public function getPlaceholder($name) {
+        return $this->placeholders[$name];
+    } // getPlaceholder
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3301,11 +3311,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # return placeholder value
-    function getPlaceholder($name) {
-        return $this->placeholders[$name];
-    }
-
     # sets a value for a placeholder
     function setPlaceholder($name, $value) {
         $this->placeholders[$name]= $value;
