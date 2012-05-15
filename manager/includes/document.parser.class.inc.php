@@ -3191,6 +3191,24 @@ class DocumentParser {
         $this->placeholders[$name]= $value;
     } // setPlaceholder
 
+    /**
+     * Set arrays or object vars as placeholders
+     *
+     * @category API-Function
+     * @param object|array $subject
+     * @param string $prefix
+     */
+    public function toPlaceholders($subject, $prefix='') {
+        if (is_object($subject)) {
+            $subject= get_object_vars($subject);
+        }
+        if (is_array($subject)) {
+            foreach ($subject as $key => $value) {
+                $this->toPlaceholder($key, $value, $prefix);
+            }
+        }
+    } // toPlaceholders
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3322,18 +3340,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # set arrays or object vars as placeholders
-    function toPlaceholders($subject, $prefix= '') {
-        if (is_object($subject)) {
-            $subject= get_object_vars($subject);
-        }
-        if (is_array($subject)) {
-            foreach ($subject as $key => $value) {
-                $this->toPlaceholder($key, $value, $prefix);
-            }
-        }
-    }
-
     function toPlaceholder($key, $value, $prefix= '') {
         if (is_array($value) || is_object($value)) {
             $this->toPlaceholders($value, "{$prefix}{$key}.");
