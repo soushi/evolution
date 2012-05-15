@@ -3180,6 +3180,17 @@ class DocumentParser {
         return $this->placeholders[$name];
     } // getPlaceholder
 
+    /**
+     * Sets a value for a placeholder
+     *
+     * @category API-Function
+     * @param string $name The name of the placeholder
+     * @param string $value The value of the placeholder
+     */
+    public function setPlaceholder($name, $value) {
+        $this->placeholders[$name]= $value;
+    } // setPlaceholder
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3311,11 +3322,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # sets a value for a placeholder
-    function setPlaceholder($name, $value) {
-        $this->placeholders[$name]= $value;
-    }
-
     # set arrays or object vars as placeholders
     function toPlaceholders($subject, $prefix= '') {
         if (is_object($subject)) {
