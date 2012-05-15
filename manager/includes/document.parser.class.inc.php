@@ -3023,6 +3023,30 @@ class DocumentParser {
         return $result;
     } // getDocumentChildrenTVarOutput
     
+    /**
+     * Modified by Raymond for TV - Orig Modified by Apodigm - DocVars
+     * Returns a single TV record. $idnames - can be an id or name that belongs
+     * the template that the current document is using
+     *
+     * @category API-Function
+     * @param string $idname Can be an id or name
+     *                       Default: Empty string
+     * @param string $fields Default: *
+     * @param type $docid
+     * @param type $published
+     * @return boolean
+     */
+    public function getTemplateVar($idname='', $fields="*", $docid='', $published=1) {
+        if ($idname == '') {
+            $result = false;
+        } else {
+            $result= $this->getTemplateVars(array ($idname), $fields, $docid, $published, '', ''); //remove sorting for speed
+            $result = ($result != false) ? $result[0] : false;
+        }
+
+        return $result;
+    } // getTemplateVar
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3155,17 +3179,6 @@ class DocumentParser {
     #
     
     // Modified by Raymond for TV - Orig Modified by Apodigm - DocVars
-    # returns a single TV record. $idnames - can be an id or name that belongs the template that the current document is using
-    function getTemplateVar($idname= '', $fields= '*', $docid= '', $published= 1)
-    {
-        if ($idname == '') return false;
-        else
-        {
-            $result= $this->getTemplateVars(array($idname), $fields, $docid, $published, '', ''); //remove sorting for speed
-            return ($result != false) ? $result[0] : false;
-        }
-    }
-
     # returns an array of TV records. $idnames - can be an id or name that belongs the template that the current document is using
     function getTemplateVars($idnames=array(),$fields='*',$docid= '',$published= 1,$sort='rank',$dir='ASC')
     {
