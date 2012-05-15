@@ -3209,6 +3209,18 @@ class DocumentParser {
         }
     } // toPlaceholders
 
+    /**
+     * Returns the virtual relative path to the manager folder
+     *
+     * @category API-Function
+     * @global string $base_url
+     * @return string The complete URL to the manager folder
+     */
+    public function getManagerPath() {
+        global $base_url;
+        return $base_url . 'manager/';
+    } // getManagerPath
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3346,11 +3358,6 @@ class DocumentParser {
         } else {
             $this->setPlaceholder("{$prefix}{$key}", $value);
         }
-    }
-
-    # returns the virtual relative path to the manager folder
-    function getManagerPath() {
-        return $this->config['base_url'] . 'manager/';
     }
 
     # returns the virtual relative path to the cache folder
