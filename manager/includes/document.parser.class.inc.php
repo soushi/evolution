@@ -3159,6 +3159,17 @@ class DocumentParser {
         return $output;
     } // getTemplateVarOutput
 
+    /**
+     * Returns the full table name based on db settings
+     *
+     * @category API-Function
+     * @param string $tbl Table name
+     * @return string Table name with prefix
+     */
+    public function getFullTableName($tbl) {
+        return $this->db->config['dbase'] . '.' . $this->db->config['table_prefix'] . $tbl;
+    } // getFullTableName
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3290,13 +3301,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-# returns the full table name based on db settings
-    function getFullTableName($tbl)
-    {
-        $dbase = trim($this->db->config['dbase'],'`');
-        return "`{$dbase}`.`{$this->db->config['table_prefix']}{$tbl}`";
-    }
-
     # return placeholder value
     function getPlaceholder($name) {
         return $this->placeholders[$name];
