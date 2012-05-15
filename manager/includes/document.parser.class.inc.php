@@ -3047,6 +3047,78 @@ class DocumentParser {
         return $result;
     } // getTemplateVar
 
+    /**
+     * Returns an array of TV records. $idnames - can be an id or name that
+     * belongs the template that the current document is using
+     *
+     * @category API-Function
+     * @param array $idnames Default: empty array
+     * @param string $fields Default: *
+     * @param string $docid Default: Empty string
+     * @param int $published Default: 1
+     * @param string $sort Default: rank
+     * @param string $dir Default: ASC
+     * @return boolean|array
+     */
+    function getTemplateVars($idnames= array (), $fields='*', $docid='', $published=1, $sort='rank', $dir='ASC') {
+        if (($idnames != '*' && !is_array($idnames)) || count($idnames) == 0) {
+            $result = false;
+        } else {
+            $result= array ();
+
+            // get document record
+            if ($docid == '') {
+                $docid= $this->documentIdentifier;
+                $docRow= $this->documentObject;
+            } else {
+                $docRow= $this->getDocument($docid, '*', $published);
+                if (!$docRow)
+                    return false;
+            }
+            if (!$docRow) {
+                $result = false;
+            } else {
+
+                // get user defined template variables
+                $fields= ($fields == '') ? "tv.*" : 'tv.' . implode(',tv.', preg_replace("/^\s/i", "", explode(',', $fields)));
+                $sort= ($sort == '') ? '' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", "", explode(',', $sort)));
+                if ($idnames == '*') {
+                    $query= 'tv.id<>0';
+                } else {
+                    $query= (is_numeric($idnames[0]) ? 'tv.id' : 'tv.name') . " IN ('" . implode("','", $idnames) . "')";
+                }
+                if ($docgrp= $this->getUserDocGroups()) {
+                    $docgrp= implode(",", $docgrp);
+                }
+                $sql= "SELECT $fields, IF(tvc.value!='',tvc.value,tv.default_text) as value ";
+                $sql .= 'FROM ' . $this->getFullTableName('site_tmplvars')." tv ";
+                $sql .= 'INNER JOIN ' . $this->getFullTableName('site_tmplvar_templates')." tvtpl ON tvtpl.tmplvarid = tv.id ";
+                $sql .= 'LEFT JOIN ' . $this->getFullTableName('site_tmplvar_contentvalues')." tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '" . $docid . "' ";
+                $sql .= 'WHERE ' . $query . ' AND tvtpl.templateid = ' . $docRow['template'];
+                if ($sort) {
+                    $sql .= " ORDER BY $sort $dir ";
+                }
+                $rs= $this->db->query($sql);
+                for ($i= 0; $i < @ $this->db->getRecordCount($rs); $i++) {
+                    array_push($result, @ $this->db->getRow($rs));
+                }
+
+                // get default/built-in template variables
+                ksort($docRow);
+                foreach ($docRow as $key => $value) {
+                    if ($idnames == '*' || in_array($key, $idnames)) {
+                        array_push($result, array (
+                            'name' => $key,
+                            'value' => $value
+                        ));
+                    }
+                }
+            }
+        }
+
+        return $result;
+    } // 
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3178,78 +3250,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    // Modified by Raymond for TV - Orig Modified by Apodigm - DocVars
-    # returns an array of TV records. $idnames - can be an id or name that belongs the template that the current document is using
-    function getTemplateVars($idnames=array(),$fields='*',$docid= '',$published= 1,$sort='rank',$dir='ASC')
-    {
-        if (($idnames!='*' && !is_array($idnames)) || count($idnames) == 0)
-        {
-            return false;
-        }
-        else
-        {
-            $result= array ();
-            
-            // get document record
-            if ($docid == '')
-            {
-                $docid = $this->documentIdentifier;
-                $resource= $this->documentObject;
-            }
-            else
-            {
-                $resource= $this->getDocument($docid, '*', $published);
-                if (!$resource) return false;
-            }
-            // get user defined template variables
-            $fields= ($fields == '') ? 'tv.*' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $fields)));
-            $sort= ($sort == '') ? '' : 'tv.' . implode(',tv.', preg_replace("/^\s/i", '', explode(',', $sort)));
-            if ($idnames == '*')
-            {
-                $where= 'tv.id<>0';
-            }
-            else
-            {
-                $tvnames = $this->db->escape(implode("\t", $idnames));
-                $tvnames = str_replace("\t","','",$tvnames);
-                $where = (is_numeric($idnames[0])) ? 'tv.id' : "tv.name IN ('{$tvnames}')";
-            }
-            if ($docgrp= $this->getUserDocGroups())
-            {
-                $docgrp= implode(',', $docgrp);
-            }
-            $tbl_site_tmplvars              = $this->getFullTableName('site_tmplvars');
-            $tbl_site_tmplvar_templates     = $this->getFullTableName('site_tmplvar_templates');
-            $tbl_site_tmplvar_contentvalues = $this->getFullTableName('site_tmplvar_contentvalues');
-            $fields= "{$fields}, IF(tvc.value!='',tvc.value,tv.default_text) as value";
-            $from  = "{$tbl_site_tmplvars} tv";
-            $from .= " INNER JOIN {$tbl_site_tmplvar_templates} tvtpl  ON tvtpl.tmplvarid = tv.id";
-            $from .= " LEFT JOIN {$tbl_site_tmplvar_contentvalues} tvc ON tvc.tmplvarid=tv.id AND tvc.contentid='{$docid}'";
-            $where = "{$where} AND tvtpl.templateid={$resource['template']}";
-            if ($sort)
-            {
-                 $orderby = "{$sort} {$dir}";
-            }
-            else $orderby = '';
-            $rs= $this->db->select($fields,$from,$where,$orderby);
-            while($row = $this->db->getRow($rs))
-            {
-                $result[] = $row;
-            }
-            
-            // get default/built-in template variables
-            ksort($resource);
-            foreach ($resource as $key => $value)
-            {
-                if ($idnames == '*' || in_array($key, $idnames))
-                {
-                    $result[] = array ('name'=>$key,'value'=>$value);
-                }
-            }
-            return $result;
-        }
-    }
-
     # returns an associative array containing TV rendered output values. $idnames - can be an id or name that belongs the template that the current document is using
     function getTemplateVarOutput($idnames= array (), $docid= '', $published= 1, $sep='') {
         if (count($idnames) == 0) {
