@@ -148,9 +148,8 @@ a{font-size:180%;color:#39b933;text-decoration:underline;margin-top: 30px;paddin
 <body>
 <div class="install">
 <p><img src="install/img/install_begin.png" /></p>
-<p>MODXがインストールされていないか設定ファイルが見つかりません。</p>
-<p>今すぐインストールしますか？</p>
-<p><a href="install/index.php?action=mode">はい</a> / <a href="http://modx.jp/">いいえ</a></p>
+<p>MODX is not currently installed or the configuration file cannot be found.</p>
+<p>Do you want to install now? <a href="install/index.php">Yes</a> / <a href="http://www.modx.com/">No</a></p>
 </div></body></html>
 EOT;
 	exit;
