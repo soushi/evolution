@@ -115,5 +115,12 @@ switch ($_POST['mode']) {
 
 if($rs)
 {
+	$cache_path = "{$modx->config['base_path']}assets/cache/rolePublishing.idx.php";
+	if(file_exists($cache_path))
+	{
+		$role = unserialize(file_get_contents($cache_path));
+	}
+	$role[$id] = time();
+	file_put_contents($cache_path, serialize($role));
 	header("Location: index.php?a=86");
 }
