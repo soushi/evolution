@@ -1171,7 +1171,7 @@ class DocumentParser {
         if (substr($alias, 0, 1) === '[' && substr($alias, -1) === ']') {
             $result = '[~' . $alias . '~]';
         } else {
-            $result ($dir !== '' ? $dir . '/' : '') . $pre . $alias . $suff;
+            $result = ($dir !== '' ? $dir . '/' : '') . $pre . $alias . $suff;
         }
         
         return $result;
