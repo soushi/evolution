@@ -1153,8 +1153,12 @@ $_lang["mutate_settings.dynamic.php7"] = '通知しない';
 $_lang["mutate_settings.dynamic.php8"] = 'エラー発生時に[(emailsender)](' . $modx->config['emailsender'] . ')に通知します。エラーの内容の詳細は<a href="index.php?a=114">イベントログ</a>を確認してください。';
 $_lang["save_user.processor.php1"] = '変更したロールの権限設定を読み込むために、再ログインしてください。';
 
+$_lang["disabled"] = '無効';
+
 $_lang["limit_by_container"] = 'コンテナ内の表示数';
 $_lang["limit_by_container_message"] = 'ツリー上のコンテナ内のリソース数がここで設定した数を超えると表示を抑制します。何も入力しない場合は無制限、0を指定すると常にコンテナのみを表示します。';
+$_lang["allow_mgr2web_title"]   = '認証状態を上書き';
+$_lang["allow_mgr2web_message"] = '管理メンバーとしてログインしている時はウェブユーザとしてもログインしている状態にします。';
 
 $_lang["No errors occured."] = "No errors occured.";
 $_lang["An error occured!"] = "An error occured!";

@@ -170,6 +170,10 @@ if (empty($_REQUEST['id']))
 	{
 		$content['menuindex'] = 0;
 	}
+	if (!$content['alias'] && $modx->config['automatic_alias'] === '2')
+	{
+		$content['alias'] = $modx->manager->get_alias_num_in_folder(0,$pid);
+	}
 }
 
 if($_REQUEST['a'] == '4') $content['richtext'] = $modx->config['use_editor'];
@@ -443,19 +447,19 @@ $_SESSION['itemname'] = to_safestr($content['pagetitle']);
 
 <div id="actions">
 	  <ul class="actionButtons">
-          <?php
+		  <?php
 		echo ab_save();
 		echo ab_cancel();
 		if ($_REQUEST['a'] !== '4' && $_REQUEST['a'] !== '72' && $id != $modx->config['site_start'])
-          {
+					{
 			echo ab_move();
 			echo ab_duplicate();
 			echo ab_delete();
 					}
             if ($_REQUEST['a'] !== '4' && $_REQUEST['a'] !== '72')
-					{
+				{
 			echo ab_preview();
-					}
+				}
 ?>
 	  </ul>
 </div>

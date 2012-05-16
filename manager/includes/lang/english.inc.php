@@ -1151,6 +1151,8 @@ $_lang["mutate_settings.dynamic.php7"] = 'not notify';
 $_lang["mutate_settings.dynamic.php8"] = 'It notifies to [(emailsender)](' . $modx->config['emailsender'] . ') at the time of error generating. The details of the contents of the error should check an event log.';
 $_lang["save_user.processor.php1"] = 'In order to read an authority setup of the changed role, please relogin.';
 
+$_lang["disabled"] = 'disabled';
+
 $_lang["limit_by_container"] = 'The number of displays in a container';
 $_lang["limit_by_container_message"] = 'A display will be controlled if the number of resources in the container on a tree exceeds the number set up here.<br />blank - Unlimited<br />0  - Only Container is Always Displayed';
 $_lang["No errors occured."] = "No errors occured.";

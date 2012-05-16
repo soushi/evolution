@@ -17,7 +17,7 @@ $pagetitle       = $modx->db->escape($_POST['pagetitle']);
 $longtitle       = $modx->db->escape($_POST['longtitle']);
 $menutitle       = $modx->db->escape($_POST['menutitle']);
 $description     = $modx->db->escape($_POST['description']);
-$alias           = $modx->db->escape($_POST['alias']);
+$alias           = $modx->stripAlias($modx->db->escape($_POST['alias']));
 $link_attributes = $modx->db->escape($_POST['link_attributes']);
 $isfolder        = $_POST['isfolder'];
 $richtext        = $_POST['richtext'];
@@ -59,66 +59,7 @@ $tbl_site_tmplvar_templates     = $modx->getFullTableName('site_tmplvar_template
 if($_POST['mode'] == '27') $actionToTake = 'edit';
 else                       $actionToTake = 'new';
 
-// friendly url alias checks
-if ($modx->config['friendly_urls'])
-{	// auto assign alias
-	if (!$alias && $modx->config['automatic_alias'])
-	{
-		$alias = strtolower($modx->stripAlias(trim($pagetitle)));
-		if(!$modx->config['allow_duplicate_alias'])
-		{
-			if(0 != $modx->db->getValue($modx->db->select('COUNT(id)',$tbl_site_content,"id<>'{$id}' AND alias='{$alias}'")))
-			{
-				$cnt = 1;
-				$tempAlias = $alias;
-				while(0 != $modx->db->getValue($modx->db->select('COUNT(id)',$tbl_site_content,"id<>'{$id}' AND alias='{$tempAlias}'")))
-				{
-					$tempAlias = $alias;
-					$tempAlias .= $cnt;
-					$cnt++;
-				}
-				$alias = $tempAlias;
-			}
-		}
-	}
-	// check for duplicate alias name if not allowed
-	elseif ($alias && !$allow_duplicate_alias)
-	{
-		$alias = $modx->stripAlias($alias);
-		if ($use_alias_path) {
-			// only check for duplicates on the same level if alias_path is on
-			$docid = $modx->db->getValue($modx->db->select('id',$tbl_site_content,"id<>'{$id}' AND alias='{$alias}' AND parent={$parent} LIMIT 1"));
-		} else {
-			$docid = $modx->db->getValue($modx->db->select('id',$tbl_site_content,"id<>'{$id}' AND alias='{$alias}' LIMIT 1"));
-		}
-		if ($docid > 0)
-		{
-			if ($actionToTake == 'edit')
-			{
-				$modx->manager->saveFormValues(27);
-				$url = "index.php?a=27&id={$id}";
-			}
-			else
-			{
-				$modx->manager->saveFormValues(4);
-				$url = 'index.php?a=4';
-			}
-			include_once "header.inc.php";
-			$modx->webAlert(sprintf($_lang["duplicate_alias_found"], $docid, $alias), $url);
-			include_once "footer.inc.php";
-			exit;
-		}
-	}
-	// strip alias of special characters
-	elseif ($alias)
-	{
-		$alias = $modx->stripAlias($alias);
-	}
-}
-elseif ($alias)
-{
-	$alias = $modx->stripAlias($alias);
-}
+$alias = get_alias($id,$alias,$parent,$pagetitle);
 
 $currentdate = time();
 
@@ -887,4 +828,77 @@ function fix_tv_nest($target)
 		$r = "[ *{$tv}* ]";
 		$_POST[$name] = str_replace($s,$r,$_POST[$name]);
 	}
+}
+
+function get_alias($id,$alias,$parent,$pagetitle)
+{
+	global $modx;
+	
+	// friendly url alias checks
+	if ($modx->config['friendly_urls'])
+	{
+		if ($alias && !$modx->config['allow_duplicate_alias'])
+		{ // check for duplicate alias name if not allowed
+			$alias = _check_duplicate_alias($id,$alias,$parent);
+		}
+		elseif (!$alias && $modx->config['automatic_alias'] != '0')
+		{ // auto assign alias
+			switch($modx->config['automatic_alias'])
+			{
+				case '1':
+					$alias = $modx->manager->get_alias_from_title($id,$pagetitle);
+					break;
+				case '2':
+					$alias = $modx->manager->get_alias_num_in_folder($id,$parent);
+					break;
+			}
+			
+		}
+	}
+	return $alias;
+}
+
+function _check_duplicate_alias($id,$alias,$parent)
+{
+	global $modx;
+	$tbl_site_content = $modx->getFullTableName('site_content');
+	
+	if ($modx->config['use_alias_path']==1)
+	{ // only check for duplicates on the same level if alias_path is on
+		$rs = $modx->db->select('id',$tbl_site_content,"id<>'{$id}' AND alias='{$alias}' AND parent={$parent} LIMIT 1");
+		$docid = $modx->db->getValue($rs);
+		if($docid < 1)
+		{
+			$rs = $modx->db->select('id',$tbl_site_content,"id='{$alias}' AND alias='' AND parent={$parent}");
+			$docid = $modx->db->getValue($rs);
+		}
+	}
+	else
+	{
+		$rs = $modx->db->select('id',$tbl_site_content,"id<>'{$id}' AND alias='{$alias}' LIMIT 1");
+		$docid = $modx->db->getValue($rs);
+		if($docid < 1)
+		{
+			$rs = $modx->db->select('id',$tbl_site_content,"id='{$alias}' AND alias=''");
+			$docid = $modx->db->getValue($rs);
+		}
+	}
+	if ($docid > 0)
+	{
+		if ($actionToTake == 'edit')
+		{
+			$modx->manager->saveFormValues(27);
+			$url = "index.php?a=27&id={$id}";
+		}
+		else
+		{
+			$modx->manager->saveFormValues(4);
+			$url = 'index.php?a=4';
+		}
+		include_once "header.inc.php";
+		$modx->webAlert(sprintf($_lang["duplicate_alias_found"], $docid, $alias), $url);
+		include_once "footer.inc.php";
+		exit;
+	}
+	return $alias;
 }
