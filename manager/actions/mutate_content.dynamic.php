@@ -230,6 +230,10 @@ function undeletedocument() {
 	}
 }
 
+function movedocument() {
+	document.location.href="index.php?id=<?php echo $_REQUEST['id'];?>&a=51";
+}
+
 function duplicatedocument(){
     if(confirm("<?php echo $_lang['confirm_resource_duplicate']?>")==true) {
         document.location.href="index.php?id=<?php echo $_REQUEST['id']?>&a=94";
@@ -444,6 +448,7 @@ $_SESSION['itemname'] = to_safestr($content['pagetitle']);
 		echo ab_cancel();
 		if ($_REQUEST['a'] !== '4' && $_REQUEST['a'] !== '72' && $id != $modx->config['site_start'])
           {
+			echo ab_move();
 			echo ab_duplicate();
 			echo ab_delete();
 					}
