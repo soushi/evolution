@@ -1492,8 +1492,9 @@ class DocumentParser {
             $this->documentIdentifier = $this->getDocumentIdentifier($this->documentMethod);
         }
         
-        if ($this->documentMethod == 'none') {
+        if ($this->documentMethod == 'none' || $_SERVER['REQUEST_URI']===$this->config['base_url']){
             $this->documentMethod= 'id'; // now we know the site_start, change the none method to id
+            $this->documentIdentifier = $this->config['site_start'];
         } elseif ($this->documentMethod == 'alias') {
             $this->documentIdentifier = $this->cleanDocumentIdentifier($this->documentIdentifier);
         }
