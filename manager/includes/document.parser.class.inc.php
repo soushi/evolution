@@ -4046,34 +4046,75 @@ class DocumentParser {
         return $result;
     } // parsePlaceholder
     
-    function mb_strftime($format='%Y/%m/%d', $timestamp='')
-    {
-        $a = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-        $A = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
-        $w         = strftime('%w', $timestamp);
-        $p = array('am'=>'AM', 'pm'=>'PM');
-        $P = array('am'=>'am', 'pm'=>'pm');
+    /**
+     * Returns a formatted string with weekday information.
+     * 
+     * @category API-Function
+     * @param string $format 
+     * @param string $timestamp
+     * @return string
+     * @todo Check, if this funktion isn't really needed, and if it is needed,
+     *       then it has to be internaionlalized.
+     */
+    public function mb_strftime($format='%Y/%m/%d', $timestamp='') {
+        $a = array(
+            'Sun', 
+            'Mon', 
+            'Tue', 
+            'Wed', 
+            'Thu', 
+            'Fri', 
+            'Sat'
+        );
+        $A = array(
+            'Sunday', 
+            'Monday', 
+            'Tuesday', 
+            'Wednesday', 
+            'Thursday', 
+            'Friday',
+            'Saturday'
+        );
+        $w = strftime('%w', $timestamp);
+        $p = array(
+            'am'=>'AM', 
+            'pm'=>'PM'
+        );
+        $P = array(
+            'am'=>'am', 
+            'pm'=>'pm'
+        );
         $ampm = (strftime('%H', $timestamp) < 12) ? 'am' : 'pm';
-        if($timestamp==='') return '';
-        if(substr(PHP_OS,0,3) == 'WIN') $format = str_replace('%-', '%#', $format);
-        $pieces    = preg_split('@(%[\-#]?[a-zA-Z%])@',$format,null,PREG_SPLIT_DELIM_CAPTURE);
         
-        $str = '';
-        foreach($pieces as $v)
-        {
-        if    ($v == '%a')             $str .= $a[$w];
-        elseif($v == '%A')             $str .= $A[$w];
-        elseif($v == '%p')             $str .= $p[$ampm];
-        elseif($v == '%P')             $str .= $P[$ampm];
-        elseif(strpos($v,'%')!==false) $str .= strftime($v, $timestamp);
-        else                           $str .= $v;
+        if ($timestamp === '') {
+            $result = '';
+        } else {
+            if (substr(PHP_OS, 0, 3) == 'WIN') {
+                $format = str_replace('%-', '%#', $format);
+            }
+            $pieces = preg_split('@(%[\-#]?[a-zA-Z%])@', $format, null, PREG_SPLIT_DELIM_CAPTURE);
+
+            $result = '';
+            foreach ($pieces as $v) {
+                if($v == '%a') {
+                    $result .= $a[$w];
+                } elseif ($v == '%A') { 
+                    $result .= $A[$w];
+                } elseif ($v == '%p') {
+                    $result .= $p[$ampm];
+                } elseif ($v == '%P') {
+                    $result .= $P[$ampm];
+                } elseif (strpos($v,'%') !== false) {
+                    $result .= strftime($v, $timestamp);
+                } else {
+                    $result .= $v;
+                }
+            }
         }
-        return $str;
-    }
-    
-    #::::::::::::::::::::::::::::::::::::::::
-    # Added By: Raymond Irving - MODx
-    #
+
+        return $result;
+    } // mb_strftime
+
 
     /*############################################
       Etomite_dbFunctions.php
