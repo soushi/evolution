@@ -3376,6 +3376,32 @@ class DocumentParser {
         return $result;
     } // getLoginUserType
 
+    /**
+     * Returns a user info record for the given manager user
+     *
+     * @category API-Function
+     * @param int $uid
+     * @return boolean|string
+     */
+    public function getUserInfo($uid) {
+        $result = false;
+        
+        $tbl_manager_users = $this->getFullTableName('manager_users');
+        $tbl_user_attributes = $this->getFullTableName('user_attributes');
+        $field = 'mu.username, mu.password, mua.*';
+        $from  = "{$tbl_manager_users} mu INNER JOIN {$tbl_user_attributes} mua ON mua.internalkey=mu.id";
+        $rs= $this->db->select($field, $from, "mu.id = '$uid'");
+        $limit= $this->db->getRecordCount($rs);
+        if ($limit == 1) {
+            $result= $this->db->getRow($rs);
+            if (!$result['usertype']) {
+                $result['usertype'] = 'manager';
+            }
+        }
+
+        return $result;
+    } // getUserInfo
+    
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3514,24 +3540,6 @@ class DocumentParser {
     #::::::::::::::::::::::::::::::::::::::::
     # Added By: Raymond Irving - MODx
     #
-    
-    # Returns a record for the manager user
-    function getUserInfo($uid)
-    {
-        $tbl_manager_users = $this->getFullTableName('manager_users');
-        $tbl_user_attributes = $this->getFullTableName('user_attributes');
-        $field = 'mu.username, mu.password, mua.*';
-        $from  = "{$tbl_manager_users} mu INNER JOIN {$tbl_user_attributes} mua ON mua.internalkey=mu.id";
-        $rs= $this->db->select($field,$from,"mu.id = '$uid'");
-        $limit= $this->db->getRecordCount($rs);
-        if ($limit == 1)
-        {
-            $row= $this->db->getRow($rs);
-            if (!$row['usertype']) $row['usertype']= 'manager';
-            return $row;
-        }
-        else return false;
-    }
     
     # Returns a record for the web user
     function getWebUserInfo($uid)
