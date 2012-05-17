@@ -3737,6 +3737,27 @@ class DocumentParser {
         return $result;
     } // stripTags
 
+    /**
+     * Add an event listner to a plugin - only for use within the current
+     * execution cycle
+     *
+     * @param string $evtName
+     * @param string $pluginName
+     * @return boolean|int
+     */
+    public function addEventListener($evtName, $pluginName) {
+        if (!$evtName || !$pluginName) {
+            $result = false;
+        } else {
+            if (!array_key_exists($evtName,$this->pluginEvent)) {
+                $this->pluginEvent[$evtName] = array();
+            }
+            $result = array_push($this->pluginEvent[$evtName], $pluginName); // return array count
+        }
+
+        return $result;
+    } // addEventListener
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3876,15 +3897,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # add an event listner to a plugin - only for use within the current execution cycle
-    function addEventListener($evtName, $pluginName) {
-        if (!$evtName || !$pluginName)
-            return false;
-        if (!isset($this->pluginEvent[$evtName]))
-            $this->pluginEvent[$evtName] = array();
-        return $this->pluginEvent[$evtName][] = $pluginName; // return array count
-    }
-
     # remove event listner - only for use within the current execution cycle
     function removeEventListener($evtName, $pluginName='') {
         if (!$evtName)
