@@ -3296,6 +3296,26 @@ class DocumentParser {
         $rs= $this->db->insert($f, $this->getFullTableName('user_messages'));
     } // sendAlert
     
+    /**
+     * Returns true, install or interact when inside manager.
+     *
+     * @deprecated
+     * @category API-Function
+     * @return string
+     */
+    public function insideManager() {
+        $m= false;
+        if (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true') {
+            $m= true;
+            if (defined('SNIPPET_INTERACTIVE_MODE') && SNIPPET_INTERACTIVE_MODE == 'true')
+                $m= "interact";
+            else
+                if (defined('SNIPPET_INSTALL_MODE') && SNIPPET_INSTALL_MODE == 'true')
+                    $m= "install";
+        }
+        return $m;
+    } // insideManager
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3889,25 +3909,6 @@ class DocumentParser {
             $parameter[$k] = $v;
         }
         return $parameter;
-    }
-
-    // deprecated
-    function insideManager()
-    {
-        $m= false;
-        if (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true')
-        {
-            $m= true;
-            if(defined('SNIPPET_INTERACTIVE_MODE') && SNIPPET_INTERACTIVE_MODE == 'true')
-            {
-                $m= "interact";
-            }
-            elseif(defined('SNIPPET_INSTALL_MODE') && SNIPPET_INSTALL_MODE == 'true')
-            {
-                $m= "install";
-            }
-        }
-        return $m;
     }
 
     function getDocGroups() {return $this->getUserDocGroups();} // deprecated
