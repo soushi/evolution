@@ -4610,9 +4610,14 @@ class DocumentParser {
         exit();
     } // messageQuit
 
-    function getRegisteredClientScripts() {
+    /**
+     * Returns all registered JavaScripts
+     *
+     * @return string
+     */
+    public function getRegisteredClientScripts() {
         return implode("\n", $this->jscripts);
-    }
+    } // getRegisteredClientScripts
 
     function getRegisteredClientStartupScripts() {
         return implode("\n", $this->sjscripts);
