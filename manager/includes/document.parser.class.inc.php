@@ -3484,6 +3484,19 @@ class DocumentParser {
         return $result;
     } // getUserDocGroups
     
+    /**
+     * Returns an array of document groups that current user is assigned to.
+     * This function will first return the web user doc groups when running from
+     * frontend otherwise it will return manager user's docgroup.
+     *
+     * @deprecated
+     * @category API-Function
+     * @return string|array
+     */
+    public function getDocGroups() {
+        return $this->getUserDocGroups();
+    } // getDocGroups
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3947,7 +3960,6 @@ class DocumentParser {
         return $parameter;
     }
 
-    function getDocGroups() {return $this->getUserDocGroups();} // deprecated
     function changePassword($o, $n) {return changeWebUserPassword($o, $n);} // deprecated
 
     /***************************************************************************************/
