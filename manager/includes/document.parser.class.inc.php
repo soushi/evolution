@@ -3718,6 +3718,25 @@ class DocumentParser {
         $this->regClientScript($html, true);
     } // regClientHTMLBlock
 
+    /**
+     * Remove unwanted html tags and snippet, settings and tags
+     *
+     * @param string $html
+     * @param string $allowed Default: Empty string
+     * @return string
+     */
+    public function stripTags($html, $allowed='') {
+        $result = strip_tags($html, $allowed);
+        $result = preg_replace('~\[\*(.*?)\*\]~', '', $result); //tv
+        $result = preg_replace('~\[\[(.*?)\]\]~', '', $result); //snippet
+        $result = preg_replace('~\[\!(.*?)\!\]~', '', $result); //snippet
+        $result = preg_replace('~\[\((.*?)\)\]~', '', $result); //settings
+        $result = preg_replace('~\[\+(.*?)\+\]~', '', $result); //placeholders
+        $result = preg_replace('~{{(.*?)}}~', '', $result); //chunks
+
+        return $result;
+    } // stripTags
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3857,19 +3876,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # Remove unwanted html tags and snippet, settings and tags
-    function stripTags($html, $allowed= '')
-    {
-        $t= strip_tags($html, $allowed);
-        $t= preg_replace('~\[\*(.*?)\*\]~', '', $t); //tv
-        $t= preg_replace('~\[\[(.*?)\]\]~', '', $t); //snippet
-        $t= preg_replace('~\[\!(.*?)\!\]~', '', $t); //snippet
-        $t= preg_replace('~\[\((.*?)\)\]~', '', $t); //settings
-        $t= preg_replace('~\[\+(.*?)\+\]~', '', $t); //placeholders
-        $t= preg_replace('~{{(.*?)}}~', '', $t); //chunks
-        return $t;
-    }
-
     # add an event listner to a plugin - only for use within the current execution cycle
     function addEventListener($evtName, $pluginName) {
         if (!$evtName || !$pluginName)
