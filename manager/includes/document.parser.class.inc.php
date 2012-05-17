@@ -3545,6 +3545,20 @@ class DocumentParser {
         return $result;
     } // changeWebUserPassword
     
+    /**
+     * Change current web user's password
+     *
+     * @category API-Function
+     * @deprecated
+     * @param string $oldPwd
+     * @param string $newPwd
+     * @return string|boolean Returns true if successful, oterhwise return error
+     *                        message
+     */
+    public function changePassword($o, $n) {
+        return changeWebUserPassword($o, $n);
+    } // changePassword
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3961,8 +3975,6 @@ class DocumentParser {
         }
         return $parameter;
     }
-
-    function changePassword($o, $n) {return changeWebUserPassword($o, $n);} // deprecated
 
     /***************************************************************************************/
     /* End of API functions                                       */
