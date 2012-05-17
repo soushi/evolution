@@ -882,7 +882,7 @@ INSERT IGNORE INTO `{PREFIX}system_settings`
 ('datepicker_offset','-10'),
 ('xhtml_urls','1'),
 ('allow_duplicate_alias','0'),
-('automatic_alias','0'),
+('automatic_alias','2'),
 ('datetime_format','dd-mm-YYYY'),
 ('warning_visibility', '0'),
 ('remember_last_tab', '1'),
