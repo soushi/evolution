@@ -3337,6 +3337,27 @@ class DocumentParser {
         return $result;
     } // getLoginUserID
 
+    /**
+     * Returns current user name
+     *
+     * @category API-Function
+     * @param string $context
+     * @return string
+     */
+    public function getLoginUserName($context= '') {
+        $result = '';
+
+        if (!empty($context) && isset ($_SESSION[$context . 'Validated'])) {
+            $result = $_SESSION[$context . 'Shortname'];
+        } elseif ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            $result = $_SESSION['webShortname'];
+        } elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+            $result = $_SESSION['mgrShortname'];
+        }
+
+        return $result;
+    } // getLoginUserName
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3476,20 +3497,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # Returns current user name
-    function getLoginUserName($context= '') {
-        if (!empty($context) && isset ($_SESSION[$context . 'Validated'])) {
-            return $_SESSION[$context . 'Shortname'];
-        }
-        elseif ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
-            return $_SESSION['webShortname'];
-        }
-        elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
-            return $_SESSION['mgrShortname'];
-        }
-        else return false;
-    }
-
     # Returns current login user type - web or manager
     function getLoginUserType() {
         if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
