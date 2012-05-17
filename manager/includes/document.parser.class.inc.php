@@ -570,7 +570,7 @@ class DocumentParser {
      */
     private function checkCache($id) {
         if (isset($this->config['cache_type']) && $this->config['cache_type'] == 0) {
-            return ''; // jp-edition only
+            return '';
         }
         $cacheFile = "{$this->config['base_path']}assets/cache/docid_{$id}{$this->qs_hash}.pageCache.php";
         
@@ -1164,7 +1164,7 @@ class DocumentParser {
         unset($elements);
         if ((strpos($alias, '.') !== false)) {
             if(isset($this->config['suffix_mode']) && $this->config['suffix_mode']==1) {
-                $suff = ''; // jp-edition only
+                $suff = '';
             }
         }
         //container_suffix
@@ -4015,7 +4015,7 @@ class DocumentParser {
     } // parseChunk
 
     function parsePlaceholder($src='', $ph=array(), $left= '[+', $right= '+]',$mode='ph')
-    { // jp-edition only
+    {
         if(!$ph) return $src;
         elseif(is_string($ph) && strpos($ph,'='))
         {
