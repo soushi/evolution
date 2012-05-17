@@ -3611,6 +3611,17 @@ class DocumentParser {
         }
     } // regClientCSS
 
+    /**
+     * Registers Startup Client-side JavaScript - these scripts are loaded at
+     * inside the <head> tag
+     *
+     * @param string $src
+     * @param array $options Default: 'name'=>'', 'version'=>'0', 'plaintext'=>false
+     */
+    public function regClientStartupScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false)) {
+        $this->regClientScript($src, $options, true);
+    } // regClientStartupScript
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3833,12 +3844,6 @@ class DocumentParser {
     
     function regClientStartupHTMLBlock($html) {$this->regClientScript($html, true, true);} // Registers Client-side Startup HTML block
     function regClientHTMLBlock($html)        {$this->regClientScript($html, true);} // Registers Client-side HTML block
-    
-    # Registers Startup Client-side JavaScript - these scripts are loaded at inside the <head> tag
-    function regClientStartupScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false))
-    {
-                                               $this->regClientScript($src, $options, true);
-    }
     
     # Remove unwanted html tags and snippet, settings and tags
     function stripTags($html, $allowed= '')
