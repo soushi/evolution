@@ -3590,6 +3590,27 @@ class DocumentParser {
         return $result;
     } // isMemberOfWebGroup
 
+    /**
+     * Registers Client-side CSS scripts - these scripts are loaded at inside
+     * the <head> tag
+     *
+     * @param string $src
+     * @param string $media Default: Empty string
+     */
+    public function regClientCSS($src, $media='') {
+        if (!empty($src) || !isset($this->loadedjscripts[$src])) {
+            $nextpos= max(array_merge(array(0),array_keys($this->sjscripts)))+1;
+            $this->loadedjscripts[$src]['startup']= true;
+            $this->loadedjscripts[$src]['version']= '0';
+            $this->loadedjscripts[$src]['pos']= $nextpos;
+            if (strpos(strtolower($src), "<style") !== false || strpos(strtolower($src), "<link") !== false) {
+                $this->sjscripts[$nextpos]= $src;
+            } else {
+                $this->sjscripts[$nextpos]= "\t" . '<link rel="stylesheet" type="text/css" href="'.$src.'" '.($media ? 'media="'.$media.'" ' : '').'/>';
+            }
+        }
+    } // regClientCSS
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3729,21 +3750,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # Registers Client-side CSS scripts - these scripts are loaded at inside the <head> tag
-    function regClientCSS($src, $media='') {
-        if (empty($src) || isset ($this->loadedjscripts[$src]))
-            return '';
-        $nextpos= max(array_merge(array(0),array_keys($this->sjscripts)))+1;
-        $this->loadedjscripts[$src]['startup']= true;
-        $this->loadedjscripts[$src]['version']= '0';
-        $this->loadedjscripts[$src]['pos']= $nextpos;
-        if (strpos(strtolower($src), "<style") !== false || strpos(strtolower($src), "<link") !== false) {
-            $this->sjscripts[$nextpos]= $src;
-        } else {
-            $this->sjscripts[$nextpos]= "\t" . '<link rel="stylesheet" type="text/css" href="'.$src.'" '.($media ? 'media="'.$media.'" ' : '').'/>';
-        }
-    }
-
     # Registers Client-side JavaScript     - these scripts are loaded at the end of the page unless $startup is true
     function regClientScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false), $startup= false)
     {
