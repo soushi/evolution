@@ -3978,19 +3978,28 @@ class DocumentParser {
         $this->db->delete($tbl_active_users,"{$action} lasthit < {$limit_time}");
     } // remove_locks
     
-    function parseChunk($chunkName, $chunkArr, $prefix= '{', $suffix= '}',$mode='chunk')
-    {
-        if (!is_array($chunkArr)) return false;
-        
-        if($mode==='chunk') $src= $this->getChunk($chunkName);
-        else                $src = $chunkName;
-        
-        foreach ($chunkArr as $key => $value)
-        {
-            $src= str_replace("{$prefix}{$key}{$suffix}", $value, $src);
+    /**
+     * Parse a chunk
+     *
+     * @category API-Function
+     * @param string $chunkName
+     * @param array $chunkArr
+     * @param string $prefix Default: {
+     * @param string $suffix Default: }
+     * @return boolean|string
+     */
+    function parseChunk($chunkName, $chunkArr, $prefix="{", $suffix="}") {
+        $result = false;
+        if (is_array($chunkArr)) {
+            $chunk= $this->getChunk($chunkName);
+            foreach ($chunkArr as $key => $value) {
+                $chunk= str_replace($prefix . $key . $suffix, $value, $chunk);
+            }
+            $result = $chunk;
         }
-        return $src;
-    }
+
+        return $result;
+    } // parseChunk
 
     function parsePlaceholder($src='', $ph=array(), $left= '[+', $right= '+]',$mode='ph')
     { // jp-edition only
