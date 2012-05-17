@@ -3784,6 +3784,74 @@ class DocumentParser {
         $this->pluginEvent= array ();
     } // removeAllEventListener
 
+    /**
+     * Invoke an event. $extParams - hash array: name=>value
+     *
+     * @param string $evtName
+     * @param array $extParams
+     * @return boolean|array
+     */
+    public function invokeEvent($evtName, $extParams=array()) {
+        if ($this->safeMode == true || !$evtName || !isset($this->pluginEvent[$evtName])) {
+            $result = false;
+        } else {
+            $el= $this->pluginEvent[$evtName];
+            $result= array ();
+            $numEvents= count($el);
+            if ($numEvents > 0) {
+                for ($i= 0; $i < $numEvents; $i++) { // start for loop
+                    $pluginName= $el[$i];
+                    $pluginName = stripslashes($pluginName);
+                    // reset event object
+                    $e= & $this->event;
+                    $e->_resetEventObject();
+                    $e->name= $evtName;
+                    $e->activePlugin= $pluginName;
+
+                    // get plugin code
+                    if (isset ($this->pluginCache[$pluginName])) {
+                        $pluginCode= $this->pluginCache[$pluginName];
+                        $pluginProperties= isset($this->pluginCache["{$pluginName}Props"]) ? $this->pluginCache["{$pluginName}Props"] : '';
+                    } else {
+                        $fields = '`name`, plugincode, properties';
+                        $tbl_site_plugins = $this->getFullTableName('site_plugins');
+                        $where = "`name`='{$pluginName}' AND disabled=0";
+                        $result= $this->db->select($fields,$tbl_site_plugins,$where);
+                        if ($this->db->getRecordCount($result) == 1) {
+                            $row= $this->db->getRow($result);
+
+                            $pluginCode = $row['plugincode'];
+                            $this->pluginCache[$row['name']] = $row['plugincode']; 
+                            $pluginProperties= $this->pluginCache["{$row['name']}Props"]= $row['properties'];
+                        } else {
+                            $pluginCode = 'return false;';
+                            $this->pluginCache[$pluginName] = 'return false;';
+                            $pluginProperties= '';
+                        }
+                    }
+
+                    // load default params/properties
+                    $parameter= $this->parseProperties($pluginProperties);
+                    if (!empty($extParams)) {
+                        $parameter= array_merge($parameter, $extParams);
+                    }
+
+                    // eval plugin
+                    $this->evalPlugin($pluginCode, $parameter);
+                    $e->setAllGlobalVariables();
+                    if ($e->_output != '') {
+                        $result[]= $e->_output;
+                    }
+                    if ($e->_propagate != true) {
+                        break;
+                    }
+                }
+            }
+            $e->activePlugin= '';
+        }
+        return $result;
+    } // invokeEvent
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3923,74 +3991,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # invoke an event. $extParams - hash array: name=>value
-    function invokeEvent($evtName, $extParams= array ())
-    {
-        if ($this->safeMode == true)               return false;
-        if (!$evtName)                             return false;
-        if (!isset ($this->pluginEvent[$evtName])) return false;
-        
-        $el= $this->pluginEvent[$evtName];
-        $results= array ();
-        $numEvents= count($el);
-        if ($numEvents > 0)
-        {
-            for ($i= 0; $i < $numEvents; $i++)
-            { // start for loop
-                $pluginName= $el[$i];
-                $pluginName = stripslashes($pluginName);
-                // reset event object
-                $e= & $this->event;
-                $e->_resetEventObject();
-                $e->name= $evtName;
-                $e->activePlugin= $pluginName;
-                
-                // get plugin code
-                if (isset ($this->pluginCache[$pluginName]))
-                {
-                    $pluginCode= $this->pluginCache[$pluginName];
-                    $pluginProperties= isset($this->pluginCache["{$pluginName}Props"]) ? $this->pluginCache["{$pluginName}Props"] : '';
-                }
-                else
-                {
-                    $fields = '`name`, plugincode, properties';
-                    $tbl_site_plugins = $this->getFullTableName('site_plugins');
-                    $where = "`name`='{$pluginName}' AND disabled=0";
-                    $result= $this->db->select($fields,$tbl_site_plugins,$where);
-                    if ($this->db->getRecordCount($result) == 1)
-                    {
-                        $row= $this->db->getRow($result);
-                        
-                        $pluginCode                      = $row['plugincode'];
-                        $this->pluginCache[$row['name']] = $row['plugincode']; 
-                        $pluginProperties= $this->pluginCache["{$row['name']}Props"]= $row['properties'];
-                    }
-                    else
-                    {
-                        $pluginCode                      = 'return false;';
-                        $this->pluginCache[$pluginName]  = 'return false;';
-                        $pluginProperties= '';
-                    }
-                }
-                
-                // load default params/properties
-                $parameter= $this->parseProperties($pluginProperties);
-                if (!empty($extParams))
-                    $parameter= array_merge($parameter, $extParams);
-                
-                // eval plugin
-                $this->evalPlugin($pluginCode, $parameter);
-                $e->setAllGlobalVariables();
-                if ($e->_output != '')
-                    $results[]= $e->_output;
-                if ($e->_propagate != true)
-                    break;
-            }
-        }
-        $e->activePlugin= '';
-        return $results;
-    }
-
     # parses a resource property string and returns the result as an array
     function parseProperties($propertyString)
     {
