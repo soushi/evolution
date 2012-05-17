@@ -3852,6 +3852,35 @@ class DocumentParser {
         return $result;
     } // invokeEvent
 
+    /**
+     * Parses a resource property string and returns the result as an array
+     *
+     * @param string $propertyString
+     * @return type
+     */
+    public function parseProperties($propertyString) {
+        $result = array ();
+
+        if (!empty($propertyString)) {
+            $tmpParams= explode('&', $propertyString);
+            for ($x= 0; $x < count($tmpParams); $x++) {
+                if (strpos($tmpParams[$x], '=', 0)) {
+                    $pTmp= explode('=', $tmpParams[$x]);
+                    $pvTmp= explode(';', trim($pTmp[1]));
+                    if ($pvTmp[1] == 'list' && $pvTmp[3] != '') {
+                        $result[trim($pTmp[0])]= $pvTmp[3]; //list default
+                    } else {
+                        if ($pvTmp[1] != 'list' && $pvTmp[2] != '') {
+                            $result[trim($pTmp[0])]= $pvTmp[2];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $result;
+    } // parseProperties
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3990,38 +4019,6 @@ class DocumentParser {
     #::::::::::::::::::::::::::::::::::::::::
     # Added By: Raymond Irving - MODx
     #
-    
-    # parses a resource property string and returns the result as an array
-    function parseProperties($propertyString)
-    {
-        $parameter= array ();
-        if (empty($propertyString)) return $parameter;
-        
-        $tmpParams= explode('&', $propertyString);
-        foreach ($tmpParams as $tmpParam)
-        {
-            if (strpos($tmpParam, '=') !== false)
-            {
-                $pTmp  = explode('=', $tmpParam);
-                $pvTmp = explode(';', trim($pTmp[1]));
-                if ($pvTmp[1] == 'list' && $pvTmp[3] != '')
-                {
-                    $parameter[trim($pTmp[0])]= $pvTmp[3]; //list default
-                }
-                elseif ($pvTmp[1] != 'list' && $pvTmp[2] != '')
-                {
-                    $parameter[trim($pTmp[0])]= $pvTmp[2];
-                }
-            }
-        }
-        foreach($parameter as $k=>$v)
-        {
-            $v = str_replace('%3D','=',$v);
-            $v = str_replace('%26','&',$v);
-            $parameter[$k] = $v;
-        }
-        return $parameter;
-    }
 
     /***************************************************************************************/
     /* End of API functions                                       */
