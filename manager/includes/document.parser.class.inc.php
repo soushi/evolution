@@ -3316,6 +3316,27 @@ class DocumentParser {
         return $m;
     } // insideManager
 
+    /**
+     * Returns current user id.
+     *
+     * @category API-Function
+     * @param string $context
+     * @return string
+     */
+    public function getLoginUserID($context= '') {
+        $result = '';
+
+        if ($context && isset ($_SESSION[$context . 'Validated'])) {
+            $result = $_SESSION[$context . 'InternalKey'];
+        } elseif ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            $result = $_SESSION['webInternalKey'];
+        } elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+            $result = $_SESSION['mgrInternalKey'];
+        }
+
+        return $result;
+    } // getLoginUserID
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3455,24 +3476,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # Returns current user id
-    function getLoginUserID($context= '')
-    {
-        if ($context && isset ($_SESSION["{$context}Validated"]))
-        {
-            return $_SESSION["{$context}InternalKey"];
-        }
-        elseif ($this->isFrontend() && isset ($_SESSION['webValidated']))
-        {
-            return $_SESSION['webInternalKey'];
-        }
-        elseif ($this->isBackend() && isset ($_SESSION['mgrValidated']))
-        {
-            return $_SESSION['mgrInternalKey'];
-        }
-        else return false;
-    }
-
     # Returns current user name
     function getLoginUserName($context= '') {
         if (!empty($context) && isset ($_SESSION[$context . 'Validated'])) {
