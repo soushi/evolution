@@ -3758,6 +3758,23 @@ class DocumentParser {
         return $result;
     } // addEventListener
 
+    /**
+     * Remove event listner - only for use within the current execution cycle
+     *
+     * @param string $evtName
+     * @return boolean
+     */
+    public function removeEventListener($evtName) {
+        if (!$evtName) {
+            $result = false;
+        } else {
+            unset ($this->pluginEvent[$evtName]);
+            $result = true;
+        }
+
+        return $result;
+    } // removeEventListener
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3897,24 +3914,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # remove event listner - only for use within the current execution cycle
-    function removeEventListener($evtName, $pluginName='') {
-        if (!$evtName)
-            return false;
-        if ( $pluginName == '' ){
-            unset ($this->pluginEvent[$evtName]);
-            return true;
-        }else{
-            foreach($this->pluginEvent[$evtName] as $key => $val){
-                if ($this->pluginEvent[$evtName][$key] == $pluginName){
-                    unset ($this->pluginEvent[$evtName][$key]);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     # remove all event listners - only for use within the current execution cycle
     function removeAllEventListener() {
         unset ($this->pluginEvent);
