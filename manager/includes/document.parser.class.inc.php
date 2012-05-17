@@ -3775,6 +3775,15 @@ class DocumentParser {
         return $result;
     } // removeEventListener
 
+    /**
+     * Remove all event listners - only for use within the current execution
+     * cycle
+     */
+    public function removeAllEventListener() {
+        unset ($this->pluginEvent);
+        $this->pluginEvent= array ();
+    } // removeAllEventListener
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3914,12 +3923,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # remove all event listners - only for use within the current execution cycle
-    function removeAllEventListener() {
-        unset ($this->pluginEvent);
-        $this->pluginEvent= array ();
-    }
-
     # invoke an event. $extParams - hash array: name=>value
     function invokeEvent($evtName, $extParams= array ())
     {
