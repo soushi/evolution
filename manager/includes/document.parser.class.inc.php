@@ -12,6 +12,31 @@
  */
 class DocumentParser {
     /**
+     * Constant string for redirect refresh
+     */
+    const REDIRECT_REFRESH = 'REDIRECT_REFRESH';
+
+    /**
+     * Constant string for redirect meta
+     */
+    const REDIRECT_META = 'REDIRECT_META';
+
+    /**
+     * Constant string for redirect header
+     */
+    const REDIRECT_HEADER = 'REDIRECT_HEADER';
+
+    /**
+     * Constant string for getting the page by alias
+     */
+    const PAGE_BY_ALIAS = 'alias';
+
+    /**
+     * Constant string for getting the page by ID
+     */
+    const PAGE_BY_ID = 'id';
+
+    /**
      * Database object
      * @var DBAPI
      */
@@ -174,15 +199,13 @@ class DocumentParser {
                     }
                 }
             }
-            if ($type == 'REDIRECT_REFRESH') {
+            if ($type == self::REDIRECT_REFRESH) {
                 $header= 'Refresh: 0;URL=' . $url;
-            }
-            elseif ($type == 'REDIRECT_META') {
+            } elseif ($type == self::REDIRECT_META) {
                 $header= '<META HTTP-EQUIV="Refresh" CONTENT="0; URL=' . $url . '" />';
                 echo $header;
                 exit;
-            }
-            elseif ($type == 'REDIRECT_HEADER' || empty ($type)) {
+            } elseif ($type == self::REDIRECT_HEADER || empty ($type)) {
                 // check if url has /$base_url
                 global $base_url, $site_url;
                 if (substr($url, 0, strlen($base_url)) == $base_url) {
@@ -213,8 +236,8 @@ class DocumentParser {
         if ($this->forwards > 0) {
             $this->forwards= $this->forwards - 1;
             $this->documentIdentifier= $id;
-            $this->documentMethod= 'id';
-            $this->documentObject= $this->getDocumentObject('id', $id);
+            $this->documentMethod= self::PAGE_BY_ID;
+            $this->documentObject= $this->getDocumentObject(self::PAGE_BY_ID, $id);
             if ($responseCode) {
                 header($responseCode);
             }
@@ -427,10 +450,9 @@ class DocumentParser {
     private function getDocumentMethod() {
         // function to test the query and find the retrieval method
         if (isset ($_REQUEST['q'])) {
-            $result = "alias";
-        }
-        elseif (isset ($_REQUEST['id'])) {
-            $result = "id";
+            return self::PAGE_BY_ALIAS;
+        } elseif (isset ($_REQUEST[self::PAGE_BY_ID])) {
+            return self::PAGE_BY_ID;
         } else {
             $result = "none";
         }
@@ -448,14 +470,14 @@ class DocumentParser {
         // function to test the query and find the retrieval method
         $docIdentifier= $this->config['site_start'];
         switch ($method) {
-            case 'alias' :
+            case self::PAGE_BY_ALIAS :
                 $docIdentifier= $this->db->escape($_REQUEST['q']);
                 break;
-            case 'id' :
-                if (!is_numeric($_REQUEST['id'])) {
+            case self::PAGE_BY_ID :
+                if (!is_numeric($_REQUEST[self::PAGE_BY_ID])) {
                     $this->sendErrorPage();
                 } else {
-                    $docIdentifier= intval($_REQUEST['id']);
+                    $docIdentifier= intval($_REQUEST[self::PAGE_BY_ID]);
                 }
                 break;
         }
@@ -531,11 +553,11 @@ class DocumentParser {
         /* Save path if any */
         /* FS#476 and FS#308: only return virtualDir if friendly paths are enabled */
         if ($this->config['use_alias_path'] == 1) {
-            $this->virtualDir= dirname($q);
-            $this->virtualDir= ($this->virtualDir == '.' ? '' : $this->virtualDir);
+            $this->virtualDir = dirname($q);
+            $this->virtualDir = ($this->virtualDir == '.' ? '' : $this->virtualDir);
             $q= basename($q);
         } else {
-            $this->virtualDir= '';
+            $this->virtualDir = '';
         }
         $q= str_replace($this->config['friendly_url_prefix'], "", $q);
         $q= str_replace($this->config['friendly_url_suffix'], "", $q);
@@ -543,21 +565,21 @@ class DocumentParser {
             /* FS#476 and FS#308: check that id is valid in terms of virtualDir structure */
             if ($this->config['use_alias_path'] == 1) {
                 if ((($this->virtualDir != '' && !$this->documentListing[$this->virtualDir . '/' . $q]) || ($this->virtualDir == '' && !$this->documentListing[$q])) && (($this->virtualDir != '' && in_array($q, $this->getChildIds($this->documentListing[$this->virtualDir], 1))) || ($this->virtualDir == '' && in_array($q, $this->getChildIds(0, 1))))) {
-                    $this->documentMethod= 'id';
+                    $this->documentMethod = self::PAGE_BY_ID;
                     return $q;
                 } else { /* not a valid id in terms of virtualDir, treat as alias */
-                    $this->documentMethod= 'alias';
+                    $this->documentMethod = self::PAGE_BY_ALIAS;
                     return $q;
                 }
             } else {
-                $this->documentMethod= 'id';
+                $this->documentMethod = self::PAGE_BY_ID;
                 return $q;
             }
         } else { /* we didn't get an ID back, so instead we assume it's an alias */
             if ($this->config['friendly_alias_urls'] != 1) {
                 $q= $qOrig;
             }
-            $this->documentMethod= 'alias';
+            $this->documentMethod= self::PAGE_BY_ALIAS;
             return $q;
         }
     } // cleanDocumentIdentifier
@@ -570,7 +592,7 @@ class DocumentParser {
      */
     private function checkCache($id) {
         if (isset($this->config['cache_type']) && $this->config['cache_type'] == 0) {
-            return ''; // jp-edition only
+            return '';
         }
         $cacheFile = "{$this->config['base_path']}assets/cache/docid_{$id}{$this->qs_hash}.pageCache.php";
         
@@ -705,7 +727,7 @@ class DocumentParser {
             }
         }
         
-        if(strpos($this->documentOutput,'[~')!==false) {
+        if (strpos($this->documentOutput,'[~') !== false) {
             $this->documentOutput = $this->rewriteUrls($this->documentOutput);
         }
         
@@ -799,25 +821,25 @@ class DocumentParser {
         // update publish time file
         $timesArr= array ();
         $rs = $this->db->select('MIN(pub_date) AS minpub', $tbl_site_content, "{$timeNow} < pub_date");
-        $minpub= $this->db->getValue($rs);
+        $minpub = $this->db->getValue($rs);
         if ($minpub != NULL) {
             $timesArr[]= $minpub;
         }
         
         $rs = $this->db->select('MIN(unpub_date) AS minunpub', $tbl_site_content, "{$timeNow} < unpub_date");
-        $minunpub= $this->db->getValue($rs);
+        $minunpub = $this->db->getValue($rs);
         if ($minunpub != NULL) {
             $timesArr[]= $minunpub;
         }
         
         $rs = $this->db->select('MIN(pub_date) AS minpub', $tbl_site_htmlsnippets, "{$timeNow} < pub_date");
-        $minpub= $this->db->getValue($rs);
+        $minpub = $this->db->getValue($rs);
         if ($minpub != NULL) {
             $timesArr[]= $minpub;
         }
         
         $rs = $this->db->select('MIN(unpub_date) AS minunpub', $tbl_site_htmlsnippets, "{$timeNow} < unpub_date");
-        $minunpub= $this->db->getValue($rs);
+        $minunpub = $this->db->getValue($rs);
         if ($minunpub != NULL) {
             $timesArr[]= $minunpub;
         }
@@ -1164,7 +1186,7 @@ class DocumentParser {
         unset($elements);
         if ((strpos($alias, '.') !== false)) {
             if(isset($this->config['suffix_mode']) && $this->config['suffix_mode']==1) {
-                $suff = ''; // jp-edition only
+                $suff = '';
             }
         }
         //container_suffix
@@ -1272,12 +1294,12 @@ class DocumentParser {
         $tbldg= $this->getFullTableName("document_groups");
 
         // allow alias to be full path
-        if($method == 'alias') {
+        if($method == self::PAGE_BY_ALIAS) {
             $identifier = $this->cleanDocumentIdentifier($identifier);
             $method = $this->documentMethod;
         }
-        if($method == 'alias' && $this->config['use_alias_path'] && array_key_exists($identifier, $this->documentListing)) {
-            $method = 'id';
+        if($method == self::PAGE_BY_ALIAS && $this->config['use_alias_path'] && array_key_exists($identifier, $this->documentListing)) {
+            $method = self::PAGE_BY_ID;
             $identifier = $this->documentListing[$identifier];
         }
         // get document groups for current user
@@ -1296,7 +1318,7 @@ class DocumentParser {
         if ($rowCount < 1) {
             if ($this->config['unauthorized_page']) {
                 // method may still be alias, while identifier is not full path alias, e.g. id not found above
-                if ($method === 'alias') {
+                if ($method === self::PAGE_BY_ALIAS) {
                     $q = "SELECT dg.id FROM $tbldg dg, $tblsc sc WHERE dg.document = sc.id AND sc.alias = '{$identifier}' LIMIT 1;";
                 } else {
                     $q = "SELECT id FROM $tbldg WHERE document = '{$identifier}' LIMIT 1;";
@@ -1323,7 +1345,7 @@ class DocumentParser {
         $sql= "SELECT tv.*, IF(tvc.value!='',tvc.value,tv.default_text) as value ";
         $sql .= "FROM " . $this->getFullTableName("site_tmplvars") . " tv ";
         $sql .= "INNER JOIN " . $this->getFullTableName("site_tmplvar_templates")." tvtpl ON tvtpl.tmplvarid = tv.id ";
-        $sql .= "LEFT JOIN " . $this->getFullTableName("site_tmplvar_contentvalues")." tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '" . $documentObject['id'] . "' ";
+        $sql .= "LEFT JOIN " . $this->getFullTableName("site_tmplvar_contentvalues")." tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '" . $documentObject[self::PAGE_BY_ID] . "' ";
         $sql .= "WHERE tvtpl.templateid = '" . $documentObject['template'] . "'";
         $rs= $this->db->query($sql);
         $rowCount= $this->db->getRecordCount($rs);
@@ -1480,7 +1502,7 @@ class DocumentParser {
                 exit; // stop processing here, as the site's offline
             } else {
                 // setup offline page document settings
-                $this->documentMethod= 'id';
+                $this->documentMethod= self::PAGE_BY_ID;
                 $this->documentIdentifier= $this->config['site_unavailable_page'];
             }
         } else {
@@ -1493,9 +1515,9 @@ class DocumentParser {
         }
         
         if ($this->documentMethod == 'none' || $_SERVER['REQUEST_URI']===$this->config['base_url']){
-            $this->documentMethod= 'id'; // now we know the site_start, change the none method to id
+            $this->documentMethod = self::PAGE_BY_ID; // now we know the site_start, change the none method to id
             $this->documentIdentifier = $this->config['site_start'];
-        } elseif ($this->documentMethod == 'alias') {
+        } elseif ($this->documentMethod == self::PAGE_BY_ALIAS) {
             $this->documentIdentifier = $this->cleanDocumentIdentifier($this->documentIdentifier);
         }
         
@@ -2882,36 +2904,52 @@ class DocumentParser {
         if (!empty($str)) {
             switch($this->config['datetime_format']) {
                 case 'YYYY/mm/dd':
-                    if (!preg_match('/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}[0-9 :]*$/', $str)) {return '';}
-                    list ($Y, $m, $d, $H, $M, $S) = sscanf($str, '%4d/%2d/%2d %2d:%2d:%2d');
+                    if (!preg_match('/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}[0-9 :]*$/', $str)) {
+                        $result = '';
+                    } else {
+                        list ($Y, $m, $d, $H, $M, $S) = sscanf($str, '%4d/%2d/%2d %2d:%2d:%2d');
+                    }
                     break;
+
                 case 'dd-mm-YYYY':
-                    if (!preg_match('/^[0-9]{2}-[0-9]{2}-[0-9]{4}[0-9 :]*$/', $str)) {return '';}
-                    list ($d, $m, $Y, $H, $M, $S) = sscanf($str, '%2d-%2d-%4d %2d:%2d:%2d');
+                    if (!preg_match('/^[0-9]{2}-[0-9]{2}-[0-9]{4}[0-9 :]*$/', $str)) {
+                        $result = '';
+                    } else {
+                        list ($d, $m, $Y, $H, $M, $S) = sscanf($str, '%2d-%2d-%4d %2d:%2d:%2d');
+                    }
                     break;
+
                 case 'mm/dd/YYYY':
-                    if (!preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}[0-9 :]*$/', $str)) {return '';}
-                    list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d/%2d/%4d %2d:%2d:%2d');
+                    if (!preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}[0-9 :]*$/', $str)) {
+                        $result = '';
+                    } else {
+                        list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d/%2d/%4d %2d:%2d:%2d');
+                    }
                     break;
                 /*
                 case 'dd-mmm-YYYY':
-                    if (!preg_match('/^[0-9]{2}-[0-9a-z]+-[0-9]{4}[0-9 :]*$/i', $str)) {return '';}
-                    list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d-%3s-%4d %2d:%2d:%2d');
+                    if (!preg_match('/^[0-9]{2}-[0-9a-z]+-[0-9]{4}[0-9 :]*$/i', $str)) {
+                        $result = '';
+                    } else {
+                        list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d-%3s-%4d %2d:%2d:%2d');
+                    }
                     break;
                 */
             }
-            if (!$H && !$M && !$S) {$H = 0; $M = 0; $S = 0;}
-            $timeStamp = mktime($H, $M, $S, $m, $d, $Y);
-            $timeStamp = intval($timeStamp);
-            $result = $timeStamp;
+            if (!empty($result)) {
+                if (!$H && !$M && !$S) {
+                    $H = 0;
+                    $M = 0;
+                    $S = 0;
+                }
+                $timeStamp = mktime($H, $M, $S, $m, $d, $Y);
+                $timeStamp = intval($timeStamp);
+                $result = $timeStamp;
+            }
         }
 
         return $result;
     } // toTimeStamp
-
-    #::::::::::::::::::::::::::::::::::::::::
-    # Added By: Raymond Irving - MODx
-    #
 
     /**
      * Returns the template varialble as assosiative array.
@@ -3240,28 +3278,689 @@ class DocumentParser {
         return $base_url . 'manager/';
     } // getManagerPath
 
-    function sendmail($params=array(), $msg='')
-    {
-        if(isset($params) && is_string($params))
-        {
-            if(strpos($params,'=')===false)
-            {
-                if(strpos($params,'@')!==false) $p['sendto']  = $params;
-                else                            $p['subject'] = $params;
+    /**
+     * Returns the virtual relative path to the cache folder
+     *
+     * @category API-Function
+     * @global string $base_url
+     * @return string The complete URL to the cache folder
+     */
+    public function getCachePath() {
+        global $base_url;
+        return $base_url . 'assets/cache/';
+    } // getCachePath
+
+    /**
+     * Sends a message to a user's message box.
+     *
+     * @category API-Function
+     * @param string $type Type of the message
+     * @param string $to The recipient of the message
+     * @param string $from The sender of the message
+     * @param string $subject The subject of the message
+     * @param string $msg The message body
+     * @param int $private Whether it is a private message, or not
+     *                     Default : 0
+     */
+    public function sendAlert($type, $to, $from, $subject, $msg, $private= 0) {
+        $tbl_manager_users = $this->getFullTableName('manager_users');
+        $private= ($private) ? 1 : 0;
+        if (!is_numeric($to)) {
+            // Query for the To ID
+            $rs= $this->db->select('id', $tbl_manager_users, "username='{$to}'");
+            if ($this->db->getRecordCount($rs)) {
+                $rs= $this->db->getRow($rs);
+                $to= $rs['id'];
             }
+        }
+        if (!is_numeric($from)) {
+            // Query for the From ID
+            $rs= $this->db->select('id', $tbl_manager_users, "username='{$from}'");
+            if ($this->db->getRecordCount($rs)) {
+                $rs= $this->db->getRow($rs);
+                $from= $rs['id'];
+            }
+        }
+        // insert a new message into user_messages
+        $f['id'] = '';
+        $f['type'] = $type;
+        $f['subject'] = $subject;
+        $f['message'] = $msg;
+        $f['sender'] = $from;
+        $f['recipient'] = $to;
+        $f['private'] = $private;
+        $f['postdate'] = time();
+        $f['messageread'] = 0;
+        $rs= $this->db->insert($f, $this->getFullTableName('user_messages'));
+    } // sendAlert
+    
+    /**
+     * Returns true, install or interact when inside manager.
+     *
+     * @deprecated
+     * @category API-Function
+     * @return string
+     */
+    public function insideManager() {
+        $m= false;
+        if (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true') {
+            $m= true;
+            if (defined('SNIPPET_INTERACTIVE_MODE') && SNIPPET_INTERACTIVE_MODE == 'true')
+                $m= "interact";
             else
-            {
+                if (defined('SNIPPET_INSTALL_MODE') && SNIPPET_INSTALL_MODE == 'true')
+                    $m= "install";
+        }
+        return $m;
+    } // insideManager
+
+    /**
+     * Returns current user id.
+     *
+     * @category API-Function
+     * @param string $context
+     * @return string
+     */
+    public function getLoginUserID($context= '') {
+        $result = '';
+
+        if ($context && isset ($_SESSION[$context . 'Validated'])) {
+            $result = $_SESSION[$context . 'InternalKey'];
+        } elseif ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            $result = $_SESSION['webInternalKey'];
+        } elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+            $result = $_SESSION['mgrInternalKey'];
+        }
+
+        return $result;
+    } // getLoginUserID
+
+    /**
+     * Returns current user name
+     *
+     * @category API-Function
+     * @param string $context
+     * @return string
+     */
+    public function getLoginUserName($context= '') {
+        $result = '';
+
+        if (!empty($context) && isset ($_SESSION[$context . 'Validated'])) {
+            $result = $_SESSION[$context . 'Shortname'];
+        } elseif ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            $result = $_SESSION['webShortname'];
+        } elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+            $result = $_SESSION['mgrShortname'];
+        }
+
+        return $result;
+    } // getLoginUserName
+
+    /**
+     * Returns current login user type - web or manager
+     *
+     * @category API-Function
+     * @return string
+     */
+    public function getLoginUserType() {
+        $result = '';
+
+        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            $result = 'web';
+        } elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+            $result = 'manager';
+        }
+
+        return $result;
+    } // getLoginUserType
+
+    /**
+     * Returns a user info record for the given manager user
+     *
+     * @category API-Function
+     * @param int $uid
+     * @return boolean|string
+     */
+    public function getUserInfo($uid) {
+        $result = false;
+        
+        $tbl_manager_users = $this->getFullTableName('manager_users');
+        $tbl_user_attributes = $this->getFullTableName('user_attributes');
+        $field = 'mu.username, mu.password, mua.*';
+        $from  = "{$tbl_manager_users} mu INNER JOIN {$tbl_user_attributes} mua ON mua.internalkey=mu.id";
+        $rs= $this->db->select($field, $from, "mu.id = '$uid'");
+        $limit= $this->db->getRecordCount($rs);
+        if ($limit == 1) {
+            $result= $this->db->getRow($rs);
+            if (!$result['usertype']) {
+                $result['usertype'] = 'manager';
+            }
+        }
+
+        return $result;
+    } // getUserInfo
+    
+    /**
+     * Returns a record for the web user
+     *
+     * @category API-Function
+     * @param int $uid
+     * @return boolean|string
+     */
+    public function getWebUserInfo($uid) {
+        $result = false;
+        
+        $tbl_web_users = $this->getFullTableName('web_users');
+        $tbl_web_user_attributes = $this->getFullTableName('web_user_attributes');
+        $field = 'wu.username, wu.password, wua.*';
+        $from = "{$tbl_web_users} wu INNER JOIN {$tbl_web_user_attributes} wua ON wua.internalkey=wu.id";
+        $rs= $this->db->select($field, $from, "wu.id='$uid'");
+        $limit= $this->db->getRecordCount($rs);
+        if ($limit == 1) {
+            $result = $this->db->getRow($rs);
+            if (!$result['usertype']) {
+                $result['usertype'] = 'web';
+            }
+        }
+
+        return $result;
+    } // getWebUserInfo
+
+    /**
+     * Returns an array of document groups that current user is assigned to.
+     * This function will first return the web user doc groups when running from
+     * frontend otherwise it will return manager user's docgroup.
+     *
+     * @category API-Function
+     * @param boolean $resolveIds Set to true to return the document group names
+     *                            Default: false
+     * @return string|array
+     */
+    public function getUserDocGroups($resolveIds=false) {
+        $result = '';
+
+        $dg  = array(); // add so
+        $dgn = array();
+        if ($this->isFrontend() && isset($_SESSION['webDocgroups']) 
+                && !empty($_SESSION['webDocgroups']) && isset($_SESSION['webValidated'])) {
+            $dg = $_SESSION['webDocgroups'];
+            if(isset($_SESSION['webDocgrpNames'])) {
+                $dgn = $_SESSION['webDocgrpNames']; //add so
+            }
+        }
+        if (isset($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) 
+                && isset($_SESSION['mgrValidated'])) {
+            if ($this->config['allow_mgr2web']==='1' || $this->isBackend()) {
+                $dg = array_merge($dg, $_SESSION['mgrDocgroups']);
+                if (isset($_SESSION['mgrDocgrpNames'])) {
+                    $dgn = array_merge($dgn, $_SESSION['mgrDocgrpNames']);
+                }
+            }
+        }
+        if (!$resolveIds) {
+            $result = $dg;
+        } elseif(!empty($dgn) || empty($dg)) {
+            $result = $dgn; // add so
+        } elseif(is_array($dg)) {
+            // resolve ids to names
+            $dgn = array ();
+            $tbl_dgn = $this->getFullTableName('documentgroup_names');
+            $imploded_dg = implode(',', $dg);
+            $ds = $this->db->select('name', $tbl_dgn, "id IN ({$imploded_dg})");
+            while ($row = $this->db->getRow($ds)) {
+                $dgn[count($dgn)] = $row['name'];
+            }
+            // cache docgroup names to session
+            if ($this->isFrontend()) {
+                $_SESSION['webDocgrpNames'] = $dgn;
+            } else {
+                $_SESSION['mgrDocgrpNames'] = $dgn;
+            }
+            $result = $dgn;
+        }
+
+        return $result;
+    } // getUserDocGroups
+    
+    /**
+     * Returns an array of document groups that current user is assigned to.
+     * This function will first return the web user doc groups when running from
+     * frontend otherwise it will return manager user's docgroup.
+     *
+     * @deprecated
+     * @category API-Function
+     * @return string|array
+     */
+    public function getDocGroups() {
+        return $this->getUserDocGroups();
+    } // getDocGroups
+
+    /**
+     * Change current web user's password
+     *
+     * @category API-Function
+     * @todo Make password length configurable, allow rules for passwords and translation of messages
+     * @param string $oldPwd
+     * @param string $newPwd
+     * @return string|boolean Returns true if successful, oterhwise return error
+     *                        message
+     */
+    public function changeWebUserPassword($oldPwd, $newPwd) {
+        $result = false;
+
+        $rt= false;
+        if ($_SESSION["webValidated"] == 1) {
+            $tbl_web_users= $this->getFullTableName("web_users");
+            $uid = $this->getLoginUserID();
+            $ds= $this->db->select('id,username,password', $tbl_web_users, "`id`='{$uid}'");
+            $limit= $this->db->getRecordCount($ds);
+            if ($limit == 1) {
+                $row = $this->db->getRow($ds);
+                if ($row["password"] == md5($oldPwd)) {
+                    if (strlen($newPwd) < 6) {
+                        $result = 'Password is too short!';
+                    } elseif ($newPwd == '') {
+                        $result = "You didn't specify a password for this user!";
+                    } else {
+                        $newPwd = $this->db->escape($newPwd);
+                        $this->db->update("password = md5('{$newPwd}')", $tbl_web_users, "id='{$uid}'");
+                        // invoke OnWebChangePassword event
+                        $this->invokeEvent("OnWebChangePassword",
+                        array
+                        (
+                            "userid" => $row["id"],
+                            "username" => $row["username"],
+                            "userpassword" => $newPwd
+                        ));
+                        $result = true;
+                    }
+                } else {
+                    $result = 'Incorrect password.';
+                }
+            }
+        }
+
+        return $result;
+    } // changeWebUserPassword
+    
+    /**
+     * Change current web user's password
+     *
+     * @category API-Function
+     * @deprecated
+     * @param string $oldPwd
+     * @param string $newPwd
+     * @return string|boolean Returns true if successful, oterhwise return error
+     *                        message
+     */
+    public function changePassword($o, $n) {
+        return changeWebUserPassword($o, $n);
+    } // changePassword
+
+    /**
+     * Returns true if the current web user is a member the specified groups
+     *
+     * @category API-Function
+     * @param array $groupNames
+     * @return boolean
+     */
+    public function isMemberOfWebGroup($groupNames=array ()) {
+        if (!is_array($groupNames)) {
+            $result = false;
+        } else {
+            // check cache
+            $grpNames= isset ($_SESSION['webUserGroupNames']) ? $_SESSION['webUserGroupNames'] : false;
+            if (!is_array($grpNames)) {
+                $tbl= $this->getFullTableName("webgroup_names");
+                $tbl2= $this->getFullTableName("web_groups");
+                $sql= "SELECT wgn.name
+                        FROM $tbl wgn
+                        INNER JOIN $tbl2 wg ON wg.webgroup=wgn.id AND wg.webuser='" . $this->getLoginUserID() . "'";
+                $grpNames= $this->db->getColumn("name", $sql);
+                // save to cache
+                $_SESSION['webUserGroupNames']= $grpNames;
+            }
+            foreach ($groupNames as $k => $v)
+                if (in_array(trim($v), $grpNames))
+                    return true;
+            $result = false;
+        }
+
+        return $result;
+    } // isMemberOfWebGroup
+
+    /**
+     * Registers Client-side CSS scripts - these scripts are loaded at inside
+     * the <head> tag
+     *
+     * @category API-Function
+     * @param string $src
+     * @param string $media Default: Empty string
+     */
+    public function regClientCSS($src, $media='') {
+        if (!empty($src) || !isset($this->loadedjscripts[$src])) {
+            $nextpos= max(array_merge(array(0),array_keys($this->sjscripts)))+1;
+            $this->loadedjscripts[$src]['startup']= true;
+            $this->loadedjscripts[$src]['version']= '0';
+            $this->loadedjscripts[$src]['pos']= $nextpos;
+            if (strpos(strtolower($src), "<style") !== false || strpos(strtolower($src), "<link") !== false) {
+                $this->sjscripts[$nextpos]= $src;
+            } else {
+                $this->sjscripts[$nextpos]= "\t" . '<link rel="stylesheet" type="text/css" href="'.$src.'" '.($media ? 'media="'.$media.'" ' : '').'/>';
+            }
+        }
+    } // regClientCSS
+
+    /**
+     * Registers Startup Client-side JavaScript - these scripts are loaded at
+     * inside the <head> tag
+     *
+     * @category API-Function
+     * @param string $src
+     * @param array $options Default: 'name'=>'', 'version'=>'0', 'plaintext'=>false
+     */
+    public function regClientStartupScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false)) {
+        $this->regClientScript($src, $options, true);
+    } // regClientStartupScript
+
+    /**
+     * Registers Client-side JavaScript
+     * these scripts are loaded at the end of the page unless $startup is true
+     *
+     * @category API-Function
+     * @param string $src
+     * @param array $options Default: 'name'=>'', 'version'=>'0', 'plaintext'=>false
+     * @param boolean $startup Default: false
+     * @return string
+     */
+    public function regClientScript($src, $options=array('name'=>'', 'version'=>'0', 'plaintext'=>false), $startup=false) {
+        $registered = false;
+
+        // Empty = nothing to register
+        if (!empty($src)) {
+            if (!is_array($options)) {
+                if (is_bool($options))  // backward compatibility with old plaintext parameter
+                    $options=array('plaintext'=>$options);
+                elseif (is_string($options)) // Also allow script name as 2nd param
+                    $options=array('name'=>$options);
+                else
+                    $options=array();
+            }
+            $name= isset($options['name']) ? strtolower($options['name']) : '';
+            $version= isset($options['version']) ? $options['version'] : '0';
+            $plaintext= isset($options['plaintext']) ? $options['plaintext'] : false;
+            $key= !empty($name) ? $name : $src;
+            unset($overwritepos); // probably unnecessary--just making sure
+
+            $useThisVer= true;
+            if (isset($this->loadedjscripts[$key])) { // a matching script was found
+                // if existing script is a startup script, make sure the candidate is also a startup script
+                if ($this->loadedjscripts[$key]['startup'])
+                    $startup= true;
+
+                if (empty($name)) {
+                    $useThisVer= false; // if the match was based on identical source code, no need to replace the old one
+                } else {
+                    $useThisVer = version_compare($this->loadedjscripts[$key]['version'], $version, '<');
+                }
+
+                if ($useThisVer) {
+                    if ($startup==true && $this->loadedjscripts[$key]['startup']==false) {
+                        // remove old script from the bottom of the page (new one will be at the top)
+                        unset($this->jscripts[$this->loadedjscripts[$key]['pos']]);
+                    } else {
+                        // overwrite the old script (the position may be important for dependent scripts)
+                        $overwritepos= $this->loadedjscripts[$key]['pos'];
+                    }
+                } else { // Use the original version
+                    if ($startup==true && $this->loadedjscripts[$key]['startup']==false) {
+                        // need to move the exisiting script to the head
+                        $version= $this->loadedjscripts[$key][$version];
+                        $src= $this->jscripts[$this->loadedjscripts[$key]['pos']];
+                        unset($this->jscripts[$this->loadedjscripts[$key]['pos']]);
+                    } else {
+                        $registered = true; // the script is already in the right place
+                    }
+                }
+            }
+
+            if (!$registered) {
+                if ($useThisVer && $plaintext!=true && (strpos(strtolower($src), "<script") === false)) {
+                    $src= "\t" . '<script type="text/javascript" src="' . $src . '"></script>';
+                }
+                if ($startup) {
+                    $pos= isset($overwritepos) ? $overwritepos : max(array_merge(array(0),array_keys($this->sjscripts)))+1;
+                    $this->sjscripts[$pos]= $src;
+                } else {
+                    $pos= isset($overwritepos) ? $overwritepos : max(array_merge(array(0),array_keys($this->jscripts)))+1;
+                    $this->jscripts[$pos]= $src;
+                }
+                $this->loadedjscripts[$key]['version']= $version;
+                $this->loadedjscripts[$key]['startup']= $startup;
+                $this->loadedjscripts[$key]['pos']= $pos;
+            }
+        }
+    } // regClientScript
+
+    /**
+     * Registers Client-side Startup HTML block
+     *
+     * @category API-Function
+     * @param string $html
+     */
+    public function regClientStartupHTMLBlock($html) {
+        $this->regClientScript($html, true, true);
+    } // regClientStartupHTMLBlock
+
+    /**
+     * Registers Client-side HTML block
+     *
+     * @param string $html
+     */
+    public function regClientHTMLBlock($html) {
+        $this->regClientScript($html, true);
+    } // regClientHTMLBlock
+
+    /**
+     * Remove unwanted html tags and snippet, settings and tags
+     *
+     * @category API-Function
+     * @param string $html
+     * @param string $allowed Default: Empty string
+     * @return string
+     */
+    public function stripTags($html, $allowed='') {
+        $result = strip_tags($html, $allowed);
+        $result = preg_replace('~\[\*(.*?)\*\]~', '', $result); //tv
+        $result = preg_replace('~\[\[(.*?)\]\]~', '', $result); //snippet
+        $result = preg_replace('~\[\!(.*?)\!\]~', '', $result); //snippet
+        $result = preg_replace('~\[\((.*?)\)\]~', '', $result); //settings
+        $result = preg_replace('~\[\+(.*?)\+\]~', '', $result); //placeholders
+        $result = preg_replace('~{{(.*?)}}~', '', $result); //chunks
+
+        return $result;
+    } // stripTags
+
+    /**
+     * Add an event listner to a plugin - only for use within the current
+     * execution cycle
+     *
+     * @category API-Function
+     * @param string $evtName
+     * @param string $pluginName
+     * @return boolean|int
+     */
+    public function addEventListener($evtName, $pluginName) {
+        if (!$evtName || !$pluginName) {
+            $result = false;
+        } else {
+            if (!array_key_exists($evtName,$this->pluginEvent)) {
+                $this->pluginEvent[$evtName] = array();
+            }
+            $result = array_push($this->pluginEvent[$evtName], $pluginName); // return array count
+        }
+
+        return $result;
+    } // addEventListener
+
+    /**
+     * Remove event listner - only for use within the current execution cycle
+     *
+     * @category API-Function
+     * @param string $evtName
+     * @return boolean
+     */
+    public function removeEventListener($evtName) {
+        if (!$evtName) {
+            $result = false;
+        } else {
+            unset ($this->pluginEvent[$evtName]);
+            $result = true;
+        }
+
+        return $result;
+    } // removeEventListener
+
+    /**
+     * Remove all event listners - only for use within the current execution
+     * cycle
+     * @category API-Function
+     */
+    public function removeAllEventListener() {
+        unset ($this->pluginEvent);
+        $this->pluginEvent= array ();
+    } // removeAllEventListener
+
+    /**
+     * Invoke an event. $extParams - hash array: name=>value
+     *
+     * @param string $evtName
+     * @param array $extParams
+     * @return boolean|array
+     */
+    public function invokeEvent($evtName, $extParams=array()) {
+        if ($this->safeMode == true || !$evtName || !isset($this->pluginEvent[$evtName])) {
+            $result = false;
+        } else {
+            $el= $this->pluginEvent[$evtName];
+            $result= array ();
+            $numEvents= count($el);
+            if ($numEvents > 0) {
+                for ($i= 0; $i < $numEvents; $i++) { // start for loop
+                    $pluginName= $el[$i];
+                    $pluginName = stripslashes($pluginName);
+                    // reset event object
+                    $e= & $this->event;
+                    $e->_resetEventObject();
+                    $e->name= $evtName;
+                    $e->activePlugin= $pluginName;
+
+                    // get plugin code
+                    if (isset ($this->pluginCache[$pluginName])) {
+                        $pluginCode= $this->pluginCache[$pluginName];
+                        $pluginProperties= isset($this->pluginCache["{$pluginName}Props"]) ? $this->pluginCache["{$pluginName}Props"] : '';
+                    } else {
+                        $fields = '`name`, plugincode, properties';
+                        $tbl_site_plugins = $this->getFullTableName('site_plugins');
+                        $where = "`name`='{$pluginName}' AND disabled=0";
+                        $result= $this->db->select($fields,$tbl_site_plugins,$where);
+                        if ($this->db->getRecordCount($result) == 1) {
+                            $row= $this->db->getRow($result);
+
+                            $pluginCode = $row['plugincode'];
+                            $this->pluginCache[$row['name']] = $row['plugincode']; 
+                            $pluginProperties= $this->pluginCache["{$row['name']}Props"]= $row['properties'];
+                        } else {
+                            $pluginCode = 'return false;';
+                            $this->pluginCache[$pluginName] = 'return false;';
+                            $pluginProperties= '';
+                        }
+                    }
+
+                    // load default params/properties
+                    $parameter= $this->parseProperties($pluginProperties);
+                    if (!empty($extParams)) {
+                        $parameter= array_merge($parameter, $extParams);
+                    }
+
+                    // eval plugin
+                    $this->evalPlugin($pluginCode, $parameter);
+                    $e->setAllGlobalVariables();
+                    if ($e->_output != '') {
+                        $result[]= $e->_output;
+                    }
+                    if ($e->_propagate != true) {
+                        break;
+                    }
+                }
+            }
+            $e->activePlugin= '';
+        }
+        return $result;
+    } // invokeEvent
+
+    /**
+     * Parses a resource property string and returns the result as an array
+     *
+     * @category API-Function
+     * @param string $propertyString
+     * @return type
+     */
+    public function parseProperties($propertyString) {
+        $result = array ();
+
+        if (!empty($propertyString)) {
+            $tmpParams= explode('&', $propertyString);
+            for ($x= 0; $x < count($tmpParams); $x++) {
+                if (strpos($tmpParams[$x], '=', 0)) {
+                    $pTmp= explode('=', $tmpParams[$x]);
+                    $pvTmp= explode(';', trim($pTmp[1]));
+                    if ($pvTmp[1] == 'list' && $pvTmp[3] != '') {
+                        $result[trim($pTmp[0])]= $pvTmp[3]; //list default
+                    } else {
+                        if ($pvTmp[1] != 'list' && $pvTmp[2] != '') {
+                            $result[trim($pTmp[0])]= $pvTmp[2];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $result;
+    } // parseProperties
+
+    /**
+     * Sends a mail to the recipients. The mail fields are managed in the
+     * params array. The minium parameters are sendto and subject.
+     *
+     * @category API-Function
+     * @param type $params The parameters that are used to send the mail.
+     *                     Possible parameters in the array are sendto, subject,
+     *                     from, and fromname. The configuration parameters 
+     *                     emailsender is used, if from is empty, and site_name
+     *                     is used, when fromname is empty.
+     *                     Default: Empty array
+     * @param array $msg The body of the mail
+     *                   Default: Empty string
+     * @return boolean
+     */
+    public function sendmail($params=array(), $msg='') {
+        if (isset($params) && is_string($params)) {
+            if (strpos($params, '=') === false) {
+                if (strpos($params,'@') !== false) {
+                    $p['sendto']  = $params;
+                } else {
+                    $p['subject'] = $params;
+                }
+            } else {
                 $params_array = explode(',',$params);
-                foreach($params_array as $k=>$v)
-                {
+                foreach ($params_array as $k=>$v) {
                     $k = trim($k);
                     $v = trim($v);
                     $p[$k] = $v;
                 }
             }
-        }
-        else
-        {
+        } else {
             $p = $params;
             unset($params);
         }
@@ -3275,636 +3974,466 @@ class DocumentParser {
         $sendto         = (!isset($p['sendto']))   ? $this->config['emailsender']  : $p['sendto'];
         $mail->Body     = $msg;
         $mail->AddAddress($sendto);
-        $rs = $mail->Send();
-        return $rs;
-    }
+        $result = $mail->Send();
+
+        return $result;
+    } // sendmail
     
-    function rotate_log($target='event_log',$limit=2000, $trim=100)
-    {
+    /**
+     * Reduces the records in a given table.
+     *
+     * @category API-Function
+     * @global type $dbase
+     * @param string $target Default: event_log
+     * @param int $limit Default: 2000
+     * @param int $trim Default: 100
+     * @todo This method is not database independent, we need to move it to the DBAPI class
+     */
+    public function rotate_log($target='event_log', $limit=2000, $trim=100) {
         global $dbase;
         
-        if($limit < $trim) $trim = $limit;
+        if ($limit < $trim) {
+            $trim = $limit;
+        }
         
         $target = $this->getFullTableName($target);
-        $count = $this->db->getValue($this->db->select('COUNT(id)',$target));
+        $count = $this->db->getValue($this->db->select('COUNT(id)', $target));
         $over = $count - $limit;
-        if(0 < $over)
-        {
+        if (0 < $over) {
             $trim = ($over + $trim);
-            $this->db->delete($target,'',$trim);
+            $this->db->delete($target, '', $trim);
         }
         $result = $this->db->query("SHOW TABLE STATUS FROM {$dbase}");
-        while ($row = $this->db->getRow($result))
-        {
+        while ($row = $this->db->getRow($result)) {
             $tbl_name = $row['Name'];
             $this->db->query("OPTIMIZE TABLE {$tbl_name}");
         }
-    }
+    } // rotate_log
     
-    function remove_locks($action='all',$limit_time=86400)
-    {
+    /**
+     * Removes inactive users from the activ users table.
+     *
+     * @category API-Function
+     * @param string $action Default: all
+     * @param int $limit_time Default: 86400
+     */
+    public function remove_locks($action='all', $limit_time=86400) {
         $limit_time = time() - $limit_time;
-        if($action === 'all')
-        {
+        if ($action === 'all') {
             $action = '';
-        }
-        else
-        {
-        $action     = intval($action);
+        } else {
+            $action     = intval($action);
             $action = "action={$action} and";
         }
         $tbl_active_users = $this->getFullTableName('active_users');
         $this->db->delete($tbl_active_users,"{$action} lasthit < {$limit_time}");
-    }
+    } // remove_locks
     
-    function parseChunk($chunkName, $chunkArr, $prefix= '{', $suffix= '}',$mode='chunk')
-    {
-        if (!is_array($chunkArr)) return false;
-        
-        if($mode==='chunk') $src= $this->getChunk($chunkName);
-        else                $src = $chunkName;
-        
-        foreach ($chunkArr as $key => $value)
-        {
-            $src= str_replace("{$prefix}{$key}{$suffix}", $value, $src);
+    /**
+     * Parse a chunk
+     *
+     * @category API-Function
+     * @param string $chunkName
+     * @param array $chunkArr
+     * @param string $prefix Default: {
+     * @param string $suffix Default: }
+     * @return boolean|string
+     */
+    function parseChunk($chunkName, $chunkArr, $prefix="{", $suffix="}") {
+        $result = false;
+        if (is_array($chunkArr)) {
+            $chunk= $this->getChunk($chunkName);
+            foreach ($chunkArr as $key => $value) {
+                $chunk= str_replace($prefix . $key . $suffix, $value, $chunk);
+            }
+            $result = $chunk;
         }
-        return $src;
-    }
 
-    function parsePlaceholder($src='', $ph=array(), $left= '[+', $right= '+]',$mode='ph')
-    { // jp-edition only
-        if(!$ph) return $src;
-        elseif(is_string($ph) && strpos($ph,'='))
-        {
-            if(strpos($ph,',')) $pairs   = explode(',',$ph);
-            else                $pairs[] = $ph;
+        return $result;
+    } // parseChunk
+
+    /**
+     * Parse placeholders and call parseChunk with the result.
+     * 
+     * @category API-Function
+     * @param string $src Default: Empty string
+     * @param array $ph Default: Empty array
+     * @param string $left Default: [+
+     * @param string $right Default: +]
+     * @param string $mode Default: ph
+     * @return string
+     */
+    public function parsePlaceholder($src='', $ph=array(), $left='[+', $right= '+]',$mode='ph') {
+        if (!$ph) {
+            $result = $src;
+        } elseif (is_string($ph) && strpos($ph, '=')) {
+            if (strpos($ph,',')) {
+                $pairs   = explode(',',$ph);
+            } else {
+                $pairs[] = $ph;
+            }
             
             unset($ph);
             $ph = array();
-            foreach($pairs as $pair)
-            {
+            foreach ($pairs as $pair) {
                 list($k,$v) = explode('=',$pair);
                 $ph[$k] = $v;
             }
+            $result = $this->parseChunk($src, $ph, $left, $right, $mode);
         }
-        return $this->parseChunk($src, $ph, $left, $right, $mode);
-    }
+
+        return $result;
+    } // parsePlaceholder
     
-    function mb_strftime($format='%Y/%m/%d', $timestamp='')
-    {
-        $a = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-        $A = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
-        $w         = strftime('%w', $timestamp);
-        $p = array('am'=>'AM', 'pm'=>'PM');
-        $P = array('am'=>'am', 'pm'=>'pm');
+    /**
+     * Returns a formatted string with weekday information.
+     * 
+     * @category API-Function
+     * @param string $format 
+     * @param string $timestamp
+     * @return string
+     * @todo Check, if this funktion isn't really needed, and if it is needed,
+     *       then it has to be internaionlalized.
+     */
+    public function mb_strftime($format='%Y/%m/%d', $timestamp='') {
+        $a = array(
+            'Sun', 
+            'Mon', 
+            'Tue', 
+            'Wed', 
+            'Thu', 
+            'Fri', 
+            'Sat'
+        );
+        $A = array(
+            'Sunday', 
+            'Monday', 
+            'Tuesday', 
+            'Wednesday', 
+            'Thursday', 
+            'Friday',
+            'Saturday'
+        );
+        $w = strftime('%w', $timestamp);
+        $p = array(
+            'am'=>'AM', 
+            'pm'=>'PM'
+        );
+        $P = array(
+            'am'=>'am', 
+            'pm'=>'pm'
+        );
         $ampm = (strftime('%H', $timestamp) < 12) ? 'am' : 'pm';
-        if($timestamp==='') return '';
-        if(substr(PHP_OS,0,3) == 'WIN') $format = str_replace('%-', '%#', $format);
-        $pieces    = preg_split('@(%[\-#]?[a-zA-Z%])@',$format,null,PREG_SPLIT_DELIM_CAPTURE);
         
-        $str = '';
-        foreach($pieces as $v)
-        {
-        if    ($v == '%a')             $str .= $a[$w];
-        elseif($v == '%A')             $str .= $A[$w];
-        elseif($v == '%p')             $str .= $p[$ampm];
-        elseif($v == '%P')             $str .= $P[$ampm];
-        elseif(strpos($v,'%')!==false) $str .= strftime($v, $timestamp);
-        else                           $str .= $v;
-        }
-        return $str;
-    }
-    
-    #::::::::::::::::::::::::::::::::::::::::
-    # Added By: Raymond Irving - MODx
-    #
-    
-    # returns the virtual relative path to the cache folder
-    function getCachePath() {
-        return $this->config['base_url'] . 'assets/cache/';
-    }
-
-    # sends a message to a user's message box
-    function sendAlert($type, $to, $from, $subject, $msg, $private= 0)
-    {
-        $tbl_manager_users = $this->getFullTableName('manager_users');
-        $private= ($private) ? 1 : 0;
-        if (!is_numeric($to))
-        {
-            // Query for the To ID
-            $rs= $this->db->select('id',$tbl_manager_users,"username='{$to}'");
-            if ($this->db->getRecordCount($rs))
-            {
-                $rs= $this->db->getRow($rs);
-                $to= $rs['id'];
-            }
-        }
-        if (!is_numeric($from))
-        {
-            // Query for the From ID
-            $rs= $this->db->select('id',$tbl_manager_users,"username='{$from}'");
-            if ($this->db->getRecordCount($rs))
-            {
-                $rs= $this->db->getRow($rs);
-                $from= $rs['id'];
-            }
-        }
-        // insert a new message into user_messages
-        $f['id']          = '';
-        $f['type']        = $type;
-        $f['subject']     = $subject;
-        $f['message']     = $msg;
-        $f['sender']      = $from;
-        $f['recipient']   = $to;
-        $f['private']     = $private;
-        $f['postdate']    = time();
-        $f['messageread'] = 0;
-        $rs= $this->db->insert($f,$this->getFullTableName('user_messages'));
-    }
-    
-    # Returns current user id
-    function getLoginUserID($context= '')
-    {
-        if ($context && isset ($_SESSION["{$context}Validated"]))
-        {
-            return $_SESSION["{$context}InternalKey"];
-        }
-        elseif ($this->isFrontend() && isset ($_SESSION['webValidated']))
-        {
-            return $_SESSION['webInternalKey'];
-        }
-        elseif ($this->isBackend() && isset ($_SESSION['mgrValidated']))
-        {
-            return $_SESSION['mgrInternalKey'];
-        }
-        else return false;
-    }
-
-    # Returns current user name
-    function getLoginUserName($context= '') {
-        if (!empty($context) && isset ($_SESSION[$context . 'Validated'])) {
-            return $_SESSION[$context . 'Shortname'];
-        }
-        elseif ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
-            return $_SESSION['webShortname'];
-        }
-        elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
-            return $_SESSION['mgrShortname'];
-        }
-        else return false;
-    }
-
-    # Returns current login user type - web or manager
-    function getLoginUserType() {
-        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
-            return 'web';
-        }
-        elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
-            return 'manager';
+        if ($timestamp === '') {
+            $result = '';
         } else {
-            return '';
-        }
-    }
-
-    # Returns a record for the manager user
-    function getUserInfo($uid)
-    {
-        $tbl_manager_users = $this->getFullTableName('manager_users');
-        $tbl_user_attributes = $this->getFullTableName('user_attributes');
-        $field = 'mu.username, mu.password, mua.*';
-        $from  = "{$tbl_manager_users} mu INNER JOIN {$tbl_user_attributes} mua ON mua.internalkey=mu.id";
-        $rs= $this->db->select($field,$from,"mu.id = '$uid'");
-        $limit= $this->db->getRecordCount($rs);
-        if ($limit == 1)
-        {
-            $row= $this->db->getRow($rs);
-            if (!$row['usertype']) $row['usertype']= 'manager';
-            return $row;
-        }
-        else return false;
-    }
-    
-    # Returns a record for the web user
-    function getWebUserInfo($uid)
-    {
-        $tbl_web_users = $this->getFullTableName('web_users');
-        $tbl_web_user_attributes = $this->getFullTableName('web_user_attributes');
-        $field = 'wu.username, wu.password, wua.*';
-        $from = "{$tbl_web_users} wu INNER JOIN {$tbl_web_user_attributes} wua ON wua.internalkey=wu.id";
-        $rs= $this->db->select($field,$from,"wu.id='$uid'");
-        $limit= $this->db->getRecordCount($rs);
-        if ($limit == 1)
-        {
-            $row= $this->db->getRow($rs);
-            if (!$row['usertype']) $row['usertype']= 'web';
-            return $row;
-        }
-        else return false;
-    }
-
-    # Returns an array of document groups that current user is assigned to.
-    # This function will first return the web user doc groups when running from frontend otherwise it will return manager user's docgroup
-    # Set $resolveIds to true to return the document group names
-    function getUserDocGroups($resolveIds= false)
-    {
-        $dg  = array(); // add so
-        $dgn = array();
-        if($this->isFrontend() && isset($_SESSION['webDocgroups']) && !empty($_SESSION['webDocgroups']) && isset($_SESSION['webValidated']))
-        {
-            $dg = $_SESSION['webDocgroups'];
-            if(isset($_SESSION['webDocgrpNames']))
-            {
-                $dgn = $_SESSION['webDocgrpNames']; //add so
+            if (substr(PHP_OS, 0, 3) == 'WIN') {
+                $format = str_replace('%-', '%#', $format);
             }
-        }
-        if(isset($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) && isset($_SESSION['mgrValidated']))
-        {
-            if($this->config['allow_mgr2web']==='1' || $this->isBackend())
-            {
-                $dg = array_merge($dg, $_SESSION['mgrDocgroups']);
-                if(isset($_SESSION['mgrDocgrpNames']))
-                {
-                    $dgn = array_merge($dgn, $_SESSION['mgrDocgrpNames']);
+            $pieces = preg_split('@(%[\-#]?[a-zA-Z%])@', $format, null, PREG_SPLIT_DELIM_CAPTURE);
+
+            $result = '';
+            foreach ($pieces as $v) {
+                if($v == '%a') {
+                    $result .= $a[$w];
+                } elseif ($v == '%A') { 
+                    $result .= $A[$w];
+                } elseif ($v == '%p') {
+                    $result .= $p[$ampm];
+                } elseif ($v == '%P') {
+                    $result .= $P[$ampm];
+                } elseif (strpos($v,'%') !== false) {
+                    $result .= strftime($v, $timestamp);
+                } else {
+                    $result .= $v;
                 }
             }
         }
-        if(!$resolveIds)
-        {
-            return $dg;
-        }
-        elseif(!empty($dgn) || empty($dg))
-        {
-            return $dgn; // add so
-        }
-        elseif(is_array($dg))
-        {
-            // resolve ids to names
-            $dgn = array ();
-            $tbl_dgn = $this->getFullTableName('documentgroup_names');
-            $imploded_dg = implode(',', $dg);
-            $ds = $this->db->select('name', $tbl_dgn, "id IN ({$imploded_dg})");
-            while ($row = $this->db->getRow($ds))
-            {
-                $dgn[count($dgn)] = $row['name'];
-            }
-            // cache docgroup names to session
-            if($this->isFrontend()) $_SESSION['webDocgrpNames'] = $dgn;
-            else                    $_SESSION['mgrDocgrpNames'] = $dgn;
-            return $dgn;
-        }
-    }
-    
-    # Change current web user's password - returns true if successful, oterhwise return error message
-    function changeWebUserPassword($oldPwd, $newPwd)
-    {
-        $rt= false;
-        if ($_SESSION["webValidated"] == 1)
-        {
-            $tbl_web_users= $this->getFullTableName("web_users");
-            $uid = $this->getLoginUserID();
-            $ds= $this->db->select('id,username,password', $tbl_web_users, "`id`='{$uid}'");
-            $limit= $this->db->getRecordCount($ds);
-            if ($limit == 1)
-            {
-                $row= $this->db->getRow($ds);
-                if ($row["password"] == md5($oldPwd))
-                {
-                    if (strlen($newPwd) < 6)
-                    {
-                        return 'Password is too short!';
-                    }
-                    elseif ($newPwd == '')
-                    {
-                        return "You didn't specify a password for this user!";
-                    }
-                    else
-                    {
-                        $newPwd = $this->db->escape($newPwd);
-                        $this->db->update("password = md5('{$newPwd}')", $tbl_web_users, "id='{$uid}'");
-                        // invoke OnWebChangePassword event
-                        $this->invokeEvent("OnWebChangePassword",
-                        array
-                        (
-                            "userid" => $row["id"],
-                            "username" => $row["username"],
-                            "userpassword" => $newPwd
-                        ));
-                        return true;
-                    }
-                }
-                else
-                {
-                    return 'Incorrect password.';
-                }
-            }
-        }
-    }
-    
-    # returns true if the current web user is a member the specified groups
-    function isMemberOfWebGroup($groupNames= array ())
-    {
-        if (!is_array($groupNames)) return false;
-        
-        // check cache
-        $grpNames= isset ($_SESSION['webUserGroupNames']) ? $_SESSION['webUserGroupNames'] : false;
-        if (!is_array($grpNames))
-        {
-            $tbl_webgroup_names= $this->getFullTableName("webgroup_names");
-            $tbl_web_groups= $this->getFullTableName("web_groups");
-            $uid = $this->getLoginUserID();
-            $sql= "SELECT wgn.name
-            FROM {$tbl_webgroup_names} wgn
-            INNER JOIN {$tbl_web_groups} wg ON wg.webgroup=wgn.id AND wg.webuser='{$uid}'";
-            $grpNames= $this->db->getColumn("name", $sql);
-            
-            // save to cache
-            $_SESSION['webUserGroupNames']= $grpNames;
-        }
-        foreach ($groupNames as $k => $v)
-        {
-            if (in_array(trim($v), $grpNames)) return true;
-        }
-        return false;
-    }
 
-    # Registers Client-side CSS scripts - these scripts are loaded at inside the <head> tag
-    function regClientCSS($src, $media='') {
-        if (empty($src) || isset ($this->loadedjscripts[$src]))
-            return '';
-        $nextpos= max(array_merge(array(0),array_keys($this->sjscripts)))+1;
-        $this->loadedjscripts[$src]['startup']= true;
-        $this->loadedjscripts[$src]['version']= '0';
-        $this->loadedjscripts[$src]['pos']= $nextpos;
-        if (strpos(strtolower($src), "<style") !== false || strpos(strtolower($src), "<link") !== false) {
-            $this->sjscripts[$nextpos]= $src;
+        return $result;
+    } // mb_strftime
+
+
+    /*############################################
+      Etomite_dbFunctions.php
+      New database functions for Etomite CMS
+    Author: Ralph A. Dahlgren - rad14701@yahoo.com
+    Etomite ID: rad14701
+    See documentation for usage details
+    ############################################*/
+    /**
+     * @deprecated And set to private
+     * @param type $fields
+     * @param type $from
+     * @param type $where
+     * @param type $sort
+     * @param type $dir
+     * @param type $limit
+     * @return boolean|array 
+     */
+    private function getIntTableRows($fields= "*", $from= "", $where= "", $sort= "", $dir= "ASC", $limit= "") {
+        // function to get rows from ANY internal database table
+        if ($from == "") {
+            return false;
         } else {
-            $this->sjscripts[$nextpos]= "\t" . '<link rel="stylesheet" type="text/css" href="'.$src.'" '.($media ? 'media="'.$media.'" ' : '').'/>';
+            $where= ($where != "") ? "WHERE $where" : "";
+            $sort= ($sort != "") ? "ORDER BY $sort $dir" : "";
+            $limit= ($limit != "") ? "LIMIT $limit" : "";
+            $tbl= $this->getFullTableName($from);
+            $sql= "SELECT $fields FROM $tbl $where $sort $limit;";
+            $result= $this->db->query($sql);
+            $resourceArray= array ();
+            for ($i= 0; $i < @ $this->db->getRecordCount($result); $i++) {
+                array_push($resourceArray, @ $this->db->getRow($result));
+            }
+            return $resourceArray;
         }
-    }
+    } // getIntTableRows
 
-    # Registers Client-side JavaScript     - these scripts are loaded at the end of the page unless $startup is true
-    function regClientScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false), $startup= false)
-    {
-        if (empty($src)) return ''; // nothing to register
-        
-        if (!is_array($options))
-        {
-            if (is_bool($options))  // backward compatibility with old plaintext parameter
-                $options = array('plaintext'=>$options);
-            elseif (is_string($options)) // Also allow script name as 2nd param
-                $options = array('name'=>$options);
-            else
-                $options = array();
-        }
-        $name      = isset($options['name'])      ? strtolower($options['name']) : '';
-        $version   = isset($options['version'])   ? $options['version'] : '0';
-        $plaintext = isset($options['plaintext']) ? $options['plaintext'] : false;
-        $key       = !empty($name)                ? $name : $src;
-        
-        $useThisVer= true;
-        if (isset($this->loadedjscripts[$key]))
-        { // a matching script was found
-            // if existing script is a startup script, make sure the candidate is also a startup script
-            if ($this->loadedjscripts[$key]['startup'])
-                $startup= true;
-            
-            if (empty($name))
-            {
-                $useThisVer= false; // if the match was based on identical source code, no need to replace the old one
-            }
-            else
-            {
-                $useThisVer = version_compare($this->loadedjscripts[$key]['version'], $version, '<');
-            }
-            
-            if ($useThisVer)
-            {
-                if ($startup==true && $this->loadedjscripts[$key]['startup']==false)
-                {
-                    // remove old script from the bottom of the page (new one will be at the top)
-                    unset($this->jscripts[$this->loadedjscripts[$key]['pos']]);
-                }
-                else
-                {
-                    // overwrite the old script (the position may be important for dependent scripts)
-                    $overwritepos= $this->loadedjscripts[$key]['pos'];
-                }
-            }
-            else
-            { // Use the original version
-                if ($startup==true && $this->loadedjscripts[$key]['startup']==false)
-                {
-                    // need to move the exisiting script to the head
-                    $version= $this->loadedjscripts[$key][$version];
-                    $src= $this->jscripts[$this->loadedjscripts[$key]['pos']];
-                    unset($this->jscripts[$this->loadedjscripts[$key]['pos']]);
-                }
-                else
-                {
-                    return ''; // the script is already in the right place
-                }
-            }
-        }
-        
-        if ($useThisVer && $plaintext!=true && (strpos(strtolower($src), "<script") === false))
-            $src= "\t" . '<script type="text/javascript" src="' . $src . '"></script>';
-        if ($startup)
-        {
-            $pos= isset($overwritepos) ? $overwritepos : max(array_merge(array(0),array_keys($this->sjscripts)))+1;
-            $this->sjscripts[$pos]= $src;
-        }
-        else
-        {
-            $pos= isset($overwritepos) ? $overwritepos : max(array_merge(array(0),array_keys($this->jscripts)))+1;
-            $this->jscripts[$pos]= $src;
-        }
-        $this->loadedjscripts[$key]['version']= $version;
-        $this->loadedjscripts[$key]['startup']= $startup;
-        $this->loadedjscripts[$key]['pos']= $pos;
-    }
-    
-    function regClientStartupHTMLBlock($html) {$this->regClientScript($html, true, true);} // Registers Client-side Startup HTML block
-    function regClientHTMLBlock($html)        {$this->regClientScript($html, true);} // Registers Client-side HTML block
-    
-    # Registers Startup Client-side JavaScript - these scripts are loaded at inside the <head> tag
-    function regClientStartupScript($src, $options= array('name'=>'', 'version'=>'0', 'plaintext'=>false))
-    {
-                                               $this->regClientScript($src, $options, true);
-    }
-    
-    # Remove unwanted html tags and snippet, settings and tags
-    function stripTags($html, $allowed= '')
-    {
-        $t= strip_tags($html, $allowed);
-        $t= preg_replace('~\[\*(.*?)\*\]~', '', $t); //tv
-        $t= preg_replace('~\[\[(.*?)\]\]~', '', $t); //snippet
-        $t= preg_replace('~\[\!(.*?)\!\]~', '', $t); //snippet
-        $t= preg_replace('~\[\((.*?)\)\]~', '', $t); //settings
-        $t= preg_replace('~\[\+(.*?)\+\]~', '', $t); //placeholders
-        $t= preg_replace('~{{(.*?)}}~', '', $t); //chunks
-        return $t;
-    }
-
-    # add an event listner to a plugin - only for use within the current execution cycle
-    function addEventListener($evtName, $pluginName) {
-        if (!$evtName || !$pluginName)
+    /**
+     * @deprecated And set to private
+     * @param type $fields
+     * @param type $into
+     * @return boolean 
+     */
+    private function putIntTableRow($fields= "", $into= "") {
+        // function to put a row into ANY internal database table
+        if (($fields == "") || ($into == "")) {
             return false;
-        if (!isset($this->pluginEvent[$evtName]))
-            $this->pluginEvent[$evtName] = array();
-        return $this->pluginEvent[$evtName][] = $pluginName; // return array count
-    }
-
-    # remove event listner - only for use within the current execution cycle
-    function removeEventListener($evtName, $pluginName='') {
-        if (!$evtName)
-            return false;
-        if ( $pluginName == '' ){
-            unset ($this->pluginEvent[$evtName]);
-            return true;
-        }else{
-            foreach($this->pluginEvent[$evtName] as $key => $val){
-                if ($this->pluginEvent[$evtName][$key] == $pluginName){
-                    unset ($this->pluginEvent[$evtName][$key]);
-                    return true;
-                }
+        } else {
+            $tbl= $this->getFullTableName($into);
+            $sql= "INSERT INTO $tbl SET ";
+            foreach ($fields as $key => $value) {
+                $sql .= $key . "=";
+                if (is_numeric($value))
+                    $sql .= $value . ",";
+                else
+                    $sql .= "'" . $value . "',";
             }
+            $sql= rtrim($sql, ",");
+            $sql .= ";";
+            $result= $this->db->query($sql);
+            return $result;
         }
-        return false;
-    }
+    } // putIntTableRow
 
-    # remove all event listners - only for use within the current execution cycle
-    function removeAllEventListener() {
-        unset ($this->pluginEvent);
-        $this->pluginEvent= array ();
-    }
+    /**
+     * @deprecated And set to private
+     * @param type $fields
+     * @param type $into
+     * @param type $where
+     * @param type $sort
+     * @param type $dir
+     * @param type $limit
+     * @return boolean 
+     */
+    private function updIntTableRow($fields= "", $into= "", $where= "", $sort= "", $dir= "ASC", $limit= "") {
+        // function to update a row into ANY internal database table
+        if (($fields == "") || ($into == "")) {
+            return false;
+        } else {
+            $where= ($where != "") ? "WHERE $where" : "";
+            $sort= ($sort != "") ? "ORDER BY $sort $dir" : "";
+            $limit= ($limit != "") ? "LIMIT $limit" : "";
+            $tbl= $this->getFullTableName($into);
+            $sql= "UPDATE $tbl SET ";
+            foreach ($fields as $key => $value) {
+                $sql .= $key . "=";
+                if (is_numeric($value))
+                    $sql .= $value . ",";
+                else
+                    $sql .= "'" . $value . "',";
+            }
+            $sql= rtrim($sql, ",");
+            $sql .= " $where $sort $limit;";
+            $result= $this->db->query($sql);
+            return $result;
+        }
+    } // updIntTableRow
 
-    # invoke an event. $extParams - hash array: name=>value
-    function invokeEvent($evtName, $extParams= array ())
-    {
-        if ($this->safeMode == true)               return false;
-        if (!$evtName)                             return false;
-        if (!isset ($this->pluginEvent[$evtName])) return false;
-        
-        $el= $this->pluginEvent[$evtName];
+    /**
+     * @deprecated And set to private
+     * @param type $host
+     * @param type $user
+     * @param type $pass
+     * @param type $dbase
+     * @param type $fields
+     * @param type $from
+     * @param type $where
+     * @param type $sort
+     * @param type $dir
+     * @param type $limit
+     * @return boolean|array 
+     */
+    private function getExtTableRows($host= "", $user= "", $pass= "", $dbase= "", $fields= "*", $from= "", $where= "", $sort= "", $dir= "ASC", $limit= "") {
+        // function to get table rows from an external MySQL database
+        if (($host == "") || ($user == "") || ($pass == "") || ($dbase == "") || ($from == "")) {
+            return false;
+        } else {
+            $where= ($where != "") ? "WHERE  $where" : "";
+            $sort= ($sort != "") ? "ORDER BY $sort $dir" : "";
+            $limit= ($limit != "") ? "LIMIT $limit" : "";
+            $tbl= $dbase . "." . $from;
+            $this->dbExtConnect($host, $user, $pass, $dbase);
+            $sql= "SELECT $fields FROM $tbl $where $sort $limit;";
+            $result= $this->db->query($sql);
+            $resourceArray= array ();
+            for ($i= 0; $i < @ $this->db->getRecordCount($result); $i++) {
+                array_push($resourceArray, @ $this->db->getRow($result));
+            }
+            return $resourceArray;
+        }
+    } // getExtTableRows
+
+    /**
+     * @deprecated And set to private
+     * @param type $host
+     * @param type $user
+     * @param type $pass
+     * @param type $dbase
+     * @param type $fields
+     * @param type $into
+     * @return boolean 
+     */
+    private function putExtTableRow($host= "", $user= "", $pass= "", $dbase= "", $fields= "", $into= "") {
+        // function to put a row into an external database table
+        if (($host == "") || ($user == "") || ($pass == "") || ($dbase == "") || ($fields == "") || ($into == "")) {
+            return false;
+        } else {
+            $this->dbExtConnect($host, $user, $pass, $dbase);
+            $tbl= $dbase . "." . $into;
+            $sql= "INSERT INTO $tbl SET ";
+            foreach ($fields as $key => $value) {
+                $sql .= $key . "=";
+                if (is_numeric($value))
+                    $sql .= $value . ",";
+                else
+                    $sql .= "'" . $value . "',";
+            }
+            $sql= rtrim($sql, ",");
+            $sql .= ";";
+            $result= $this->db->query($sql);
+            return $result;
+        }
+    } // putExtTableRow
+
+    /**
+     * @deprecated And set to private
+     * @param type $host
+     * @param type $user
+     * @param type $pass
+     * @param type $dbase
+     * @param type $fields
+     * @param type $into
+     * @param type $where
+     * @param type $sort
+     * @param type $dir
+     * @param type $limit
+     * @return boolean 
+     */
+    private function updExtTableRow($host= "", $user= "", $pass= "", $dbase= "", $fields= "", $into= "", $where= "", $sort= "", $dir= "ASC", $limit= "") {
+        // function to update a row into an external database table
+        if (($fields == "") || ($into == "")) {
+            return false;
+        } else {
+            $this->dbExtConnect($host, $user, $pass, $dbase);
+            $tbl= $dbase . "." . $into;
+            $where= ($where != "") ? "WHERE $where" : "";
+            $sort= ($sort != "") ? "ORDER BY $sort $dir" : "";
+            $limit= ($limit != "") ? "LIMIT $limit" : "";
+            $sql= "UPDATE $tbl SET ";
+            foreach ($fields as $key => $value) {
+                $sql .= $key . "=";
+                if (is_numeric($value))
+                    $sql .= $value . ",";
+                else
+                    $sql .= "'" . $value . "',";
+            }
+            $sql= rtrim($sql, ",");
+            $sql .= " $where $sort $limit;";
+            $result= $this->db->query($sql);
+            return $result;
+        }
+    } // updExtTableRow
+
+    /**
+     * @deprecated And set to private
+     * @param type $host
+     * @param type $user
+     * @param type $pass
+     * @param type $dbase 
+     */
+    private function dbExtConnect($host, $user, $pass, $dbase) {
+        // function to connect to external database
+        $tstart= $this->getMicroTime();
+        if (@ !$this->rs= mysql_connect($host, $user, $pass)) {
+            $this->messageQuit("Failed to create connection to the $dbase database!");
+        } else {
+            mysql_select_db($dbase);
+            $tend= $this->getMicroTime();
+            $totaltime= $tend - $tstart;
+            if ($this->dumpSQL) {
+                $this->queryCode .= "<fieldset style='text-align:left'><legend>Database connection</legend>" . sprintf("Database connection to %s was created in %2.4f s", $dbase, $totaltime) . "</fieldset><br />";
+            }
+            $this->queryTime= $this->queryTime + $totaltime;
+        }
+    } // dbExtConnect
+
+    /**
+     * @deprecated And set to private
+     * @param type $method
+     * @param type $prefix
+     * @param type $trim
+     * @param type $REQUEST_METHOD
+     * @return boolean 
+     */
+    private function getFormVars($method= "", $prefix= "", $trim= "", $REQUEST_METHOD) {
+        //  function to retrieve form results into an associative array
         $results= array ();
-        $numEvents= count($el);
-        if ($numEvents > 0)
-        {
-            for ($i= 0; $i < $numEvents; $i++)
-            { // start for loop
-                $pluginName= $el[$i];
-                $pluginName = stripslashes($pluginName);
-                // reset event object
-                $e= & $this->event;
-                $e->_resetEventObject();
-                $e->name= $evtName;
-                $e->activePlugin= $pluginName;
-                
-                // get plugin code
-                if (isset ($this->pluginCache[$pluginName]))
-                {
-                    $pluginCode= $this->pluginCache[$pluginName];
-                    $pluginProperties= isset($this->pluginCache["{$pluginName}Props"]) ? $this->pluginCache["{$pluginName}Props"] : '';
-                }
-                else
-                {
-                    $fields = '`name`, plugincode, properties';
-                    $tbl_site_plugins = $this->getFullTableName('site_plugins');
-                    $where = "`name`='{$pluginName}' AND disabled=0";
-                    $result= $this->db->select($fields,$tbl_site_plugins,$where);
-                    if ($this->db->getRecordCount($result) == 1)
-                    {
-                        $row= $this->db->getRow($result);
-                        
-                        $pluginCode                      = $row['plugincode'];
-                        $this->pluginCache[$row['name']] = $row['plugincode']; 
-                        $pluginProperties= $this->pluginCache["{$row['name']}Props"]= $row['properties'];
-                    }
-                    else
-                    {
-                        $pluginCode                      = 'return false;';
-                        $this->pluginCache[$pluginName]  = 'return false;';
-                        $pluginProperties= '';
-                    }
-                }
-                
-                // load default params/properties
-                $parameter= $this->parseProperties($pluginProperties);
-                if (!empty($extParams))
-                    $parameter= array_merge($parameter, $extParams);
-                
-                // eval plugin
-                $this->evalPlugin($pluginCode, $parameter);
-                $e->setAllGlobalVariables();
-                if ($e->_output != '')
-                    $results[]= $e->_output;
-                if ($e->_propagate != true)
-                    break;
+        $method= strtoupper($method);
+        if ($method == "")
+            $method= $REQUEST_METHOD;
+        if ($method == "POST")
+            $method= & $_POST;
+        elseif ($method == "GET") $method= & $_GET;
+        else
+            return false;
+        reset($method);
+        foreach ($method as $key => $value) {
+            if (($prefix != "") && (substr($key, 0, strlen($prefix)) == $prefix)) {
+                if ($trim) {
+                    $pieces= explode($prefix, $key, 2);
+                    $key= $pieces[1];
+                    $results[$key]= $value;
+                } else
+                    $results[$key]= $value;
             }
+            elseif ($prefix == "") $results[$key]= $value;
         }
-        $e->activePlugin= '';
         return $results;
-    }
+    } // getFormVars
 
-    # parses a resource property string and returns the result as an array
-    function parseProperties($propertyString)
-    {
-        $parameter= array ();
-        if (empty($propertyString)) return $parameter;
-        
-        $tmpParams= explode('&', $propertyString);
-        foreach ($tmpParams as $tmpParam)
-        {
-            if (strpos($tmpParam, '=') !== false)
-            {
-                $pTmp  = explode('=', $tmpParam);
-                $pvTmp = explode(';', trim($pTmp[1]));
-                if ($pvTmp[1] == 'list' && $pvTmp[3] != '')
-                {
-                    $parameter[trim($pTmp[0])]= $pvTmp[3]; //list default
-                }
-                elseif ($pvTmp[1] != 'list' && $pvTmp[2] != '')
-                {
-                    $parameter[trim($pTmp[0])]= $pvTmp[2];
-                }
-            }
-        }
-        foreach($parameter as $k=>$v)
-        {
-            $v = str_replace('%3D','=',$v);
-            $v = str_replace('%26','&',$v);
-            $parameter[$k] = $v;
-        }
-        return $parameter;
-    }
-
-    // deprecated
-    function insideManager()
-    {
-        $m= false;
-        if (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true')
-        {
-            $m= true;
-            if(defined('SNIPPET_INTERACTIVE_MODE') && SNIPPET_INTERACTIVE_MODE == 'true')
-            {
-                $m= "interact";
-            }
-            elseif(defined('SNIPPET_INSTALL_MODE') && SNIPPET_INSTALL_MODE == 'true')
-            {
-                $m= "install";
-            }
-        }
-        return $m;
-    }
-
-    function getDocGroups() {return $this->getUserDocGroups();} // deprecated
-    function changePassword($o, $n) {return changeWebUserPassword($o, $n);} // deprecated
+    ########################################
+    // END New database functions - rad14701
+    ########################################
 
     /***************************************************************************************/
     /* End of API functions                                       */
     /***************************************************************************************/
 
-    function phpError($nr, $text, $file, $line) {
+    /**
+     * Checks the PHP error and calls messageQuit. messageQuit is not called
+     * when error_reporting is 0, $nr is 0, or $nr is 8 and stopOnNotice is
+     * false
+     *
+     * @param int $nr
+     * @param string $text
+     * @param string $file
+     * @param string $line
+     * @return boolean
+     */
+    public function phpError($nr, $text, $file, $line) {
         if (error_reporting() == 0 || $nr == 0 || ($nr == 8 && $this->stopOnNotice == false)) {
             return true;
         }
@@ -3914,10 +4443,22 @@ class DocumentParser {
         } else {
             $source= '';
         } //Error $nr in $file at $line: <div><code>$source</code></div>
-        $this->messageQuit("PHP Parse Error", '', true, $nr, $file, $source, $text, $line);
-    }
+        $this->messageQuit('PHP Parse Error', '', true, $nr, $file, $source, $text, $line);
+    } // phpError
 
-    function messageQuit($msg= 'unspecified error', $query= '', $is_error= true, $nr= '', $file= '', $source= '', $text= '', $line= '') {
+    /**
+     * Returns an error page with detailed informations about the error.
+     *
+     * @param string $msg Default: unspecified error
+     * @param string $query Default: Empty string
+     * @param boolean $is_error Default: true
+     * @param string $nr Default: Empty string
+     * @param string $file Default: Empty string
+     * @param string $source Default: Empty string
+     * @param string $text Default: Empty string
+     * @param string $line Default: Empty string
+     */
+    public function messageQuit($msg='unspecified error', $query='', $is_error=true, $nr='', $file='', $source='', $text='', $line='') {
 
         $version= isset ($GLOBALS['version']) ? $GLOBALS['version'] : '';
         $release_date= isset ($GLOBALS['release_date']) ? $GLOBALS['release_date'] : '';
@@ -4060,34 +4601,54 @@ class DocumentParser {
         $str= str_replace("[^t^]", $totalTime, $str);
         $str= str_replace("[^m^]", $total_mem, $str);
 
-        if(isset($php_errormsg) && !empty($php_errormsg)) $str = "<b>{$php_errormsg}</b><br />\n{$str}";
+        if (isset($php_errormsg) && !empty($php_errormsg)) {
+            $str = "<b>{$php_errormsg}</b><br />\n{$str}";
+        }
         $str .= '<br />' . $this->get_backtrace(debug_backtrace());
 
         // Log error
-        if($source!=='') $source = 'Parser - ' . $source;
-        else             $source = 'Parser';
-        $this->logEvent(0, 3, $str,$source);
-        if($nr == E_DEPRECATED) return true;
+        if ($source!=='') {
+            $source = 'Parser - ' . $source;
+        } else { 
+            $source = 'Parser';
+        }
+        $this->logEvent(0, 3, $str, $source);
+        if ($nr == E_DEPRECATED) {
+            return true;
+        }
 
         // Set 500 response header
         header('HTTP/1.1 500 Internal Server Error');
 
         // Display error
-        if (isset($_SESSION['mgrValidated'])) echo $str;
-        else  echo 'Error';
+        if (isset($_SESSION['mgrValidated'])) {
+            echo $str;
+        } else {
+            echo 'Error';
+        }
         ob_end_flush();
 
         // Make sure and die!
         exit();
-    }
+    } // messageQuit
 
-    function getRegisteredClientScripts() {
+    /**
+     * Returns all registered JavaScripts
+     *
+     * @return string
+     */
+    public function getRegisteredClientScripts() {
         return implode("\n", $this->jscripts);
-    }
+    } // getRegisteredClientScripts
 
-    function getRegisteredClientStartupScripts() {
+    /**
+     * Returns all registered startup scripts
+     *
+     * @return string
+     */
+    public function getRegisteredClientStartupScripts() {
         return implode("\n", $this->sjscripts);
-    }
+    } // getRegisteredClientStartupScripts
     
     /**
      * Format alias to be URL-safe. Strip invalid characters.
@@ -4100,7 +4661,7 @@ class DocumentParser {
         $results = $this->invokeEvent('OnStripAlias', array ('alias'=>$alias));
         if (!empty($results)) {
             // if multiple plugins are registered, only the last one is used
-            return end($results);
+            $result = end($results);
         } else {
             // default behavior: strip invalid characters and replace spaces with dashes.
             $alias = strip_tags($alias); // strip HTML
@@ -4109,96 +4670,131 @@ class DocumentParser {
 //          $alias = preg_replace('/-+/', '-', $alias);  // convert multiple dashes to one
 //          $alias = trim($alias, '-'); // trim excess
             $alias = urlencode($alias);
-            return $alias;
+            $result = $alias;
         }
-    }
+
+        return $result;
+    } // stripAlias
     
-    function nicesize($size) {
-        $a = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
+    /**
+     * Returns a nice readable size in B, KB, MB, GB, TB, or PB.
+     *
+     * @param int $size
+     * @return float
+     */
+    public function nicesize($size) {
+        $a = array(
+            'B', 
+            'KB', 
+            'MB', 
+            'GB', 
+            'TB', 
+            'PB'
+        );
         $pos = 0;
         while ($size >= 1024) {
                $size /= 1024;
                $pos++;
         }
+
         return round($size,2)." ".$a[$pos];
-    }
+    } // nicesize
     // End of class.
 }
 
-// SystemEvent Class
+/**
+ * SystemEvent Class
+ * Function: This class does handle MODX system events
+ *
+ * @author  The MODX community
+ * @todo    Set all class variables to private or protected
+ * @name    SystemEvent
+ * @package MODX
+ */
 class SystemEvent {
-    var $name;
-    var $_propagate;
-    var $_output;
-    var $_globalVariables;
-    var $activated;
-    var $activePlugin;
+    /**
+     * Name of the event
+     * @var string
+     */
+    public $name;
+    
+    /**
+     * Whether to propagate events, or not
+     * @var boolean
+     */
+    public $_propagate;
+    
+    /**
+     * Message output
+     * @var string
+     */
+    public $_output;
+    
+    /**
+     * Whether the event is active, or not
+     * @var false
+     */
+    public $activated;
+    
+    /**
+     * The name of the active plugin
+     * @var string
+     */
+    public $activePlugin;
 
-    function SystemEvent($name= '') {
+    /**
+     * Constructor of SystemEvents, initializes the object
+     *
+     * @param string $name Name of the event
+     */
+    public function __construct($name= "") {
         $this->_resetEventObject();
-        $this->name= $name;
-    }
+        $this->name = $name;
+    } // __construct
 
-    // used for displaying a message to the user
-    function alert($msg) {
+    /**
+     * Used for displaying a message to the user
+     *
+     * @global array $SystemAlertMsgQueque
+     * @param string $msg The message
+     */
+    public function alert($msg) {
         global $SystemAlertMsgQueque;
-        if ($msg == '')
-            return;
-        if (is_array($SystemAlertMsgQueque)) {
-            if ($this->name && $this->activePlugin)
-                $title= "<div><b>" . $this->activePlugin . "</b> - <span style='color:maroon;'>" . $this->name . "</span></div>";
-            $SystemAlertMsgQueque[]= "$title<div style='margin-left:10px;margin-top:3px;'>$msg</div>";
-        }
-    }
 
-    // used for rendering an out on the screen
-    function output($msg) {
+        if ($msg != '') {
+            if (is_array($SystemAlertMsgQueque)) {
+                if ($this->name && $this->activePlugin)
+                    $title= "<div><b>" . $this->activePlugin . "</b> - <span style='color:maroon;'>" . $this->name . "</span></div>";
+                $SystemAlertMsgQueque[]= "$title<div style='margin-left:10px;margin-top:3px;'>$msg</div>";
+            }
+        }
+    } // alert
+
+    /**
+     * Used for rendering an out on the screen
+     *
+     * @param string $msg 
+     */
+    public function output($msg) {
         $this->_output .= $msg;
-    }
+    } // output
 
-    // get global variables
-    function getGlobalVariable($key) {
-        if( isset( $GLOBALS[$key] ) )
-        {
-            return $GLOBALS[$key];
-        }
-        return false;
-    }
+    /**
+     * Sets _propagate to false
+     */
+    public function stopPropagation() {
+        $this->_propagate = false;
+    } // stopPropagation
 
-    // set global variables
-    function setGlobalVariable($key,$val,$now=0) {
-        if (! isset( $GLOBALS[$key] ) ) { return false; }
-        if ( $now === 1 || $now === 'now' )
-        {
-            $GLOBALS[$key] = $val;
-        }
-        else
-        {
-            $this->_globalVariables[$key]=$val;
-        }
-        return true;
-    }
-
-    // set all global variables
-    function setAllGlobalVariables() {
-        if ( empty( $this->_globalVariables ) ) { return false; }
-        foreach ( $this->_globalVariables as $key => $val )
-        {
-            $GLOBALS[$key] = $val;
-        }
-        return true;
-    }
-
-    function stopPropagation() {
-        $this->_propagate= false;
-    }
-
-    function _resetEventObject() {
+    /**
+     * Sets all class variables back to defaults 
+     */
+    public function _resetEventObject() {
         unset ($this->returnedValues);
-        $this->name= '';
-        $this->_output= '';
+        $this->name = '';
+        $this->_output = '';
         $this->_globalVariables=array();
-        $this->_propagate= true;
-        $this->activated= false;
-    }
-}
+        $this->_propagate = true;
+        $this->activated = false;
+    } // _resetEventObject
+} // SystemEvent
