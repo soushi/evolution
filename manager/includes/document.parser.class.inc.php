@@ -4017,6 +4017,7 @@ class DocumentParser {
     /**
      * Parse placeholders and call parseChunk with the result.
      * 
+     * @category API-Function
      * @param string $src Default: Empty string
      * @param array $ph Default: Empty array
      * @param string $left Default: [+
