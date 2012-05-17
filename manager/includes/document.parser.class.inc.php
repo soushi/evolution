@@ -199,15 +199,13 @@ class DocumentParser {
                     }
                 }
             }
-            if ($type == 'REDIRECT_REFRESH') {
+            if ($type == self::REDIRECT_REFRESH) {
                 $header= 'Refresh: 0;URL=' . $url;
-            }
-            elseif ($type == 'REDIRECT_META') {
+            } elseif ($type == self::REDIRECT_META) {
                 $header= '<META HTTP-EQUIV="Refresh" CONTENT="0; URL=' . $url . '" />';
                 echo $header;
                 exit;
-            }
-            elseif ($type == 'REDIRECT_HEADER' || empty ($type)) {
+            } elseif ($type == self::REDIRECT_HEADER || empty ($type)) {
                 // check if url has /$base_url
                 global $base_url, $site_url;
                 if (substr($url, 0, strlen($base_url)) == $base_url) {
@@ -238,8 +236,8 @@ class DocumentParser {
         if ($this->forwards > 0) {
             $this->forwards= $this->forwards - 1;
             $this->documentIdentifier= $id;
-            $this->documentMethod= 'id';
-            $this->documentObject= $this->getDocumentObject('id', $id);
+            $this->documentMethod= self::PAGE_BY_ID;
+            $this->documentObject= $this->getDocumentObject(self::PAGE_BY_ID, $id);
             if ($responseCode) {
                 header($responseCode);
             }
@@ -452,10 +450,9 @@ class DocumentParser {
     private function getDocumentMethod() {
         // function to test the query and find the retrieval method
         if (isset ($_REQUEST['q'])) {
-            $result = "alias";
-        }
-        elseif (isset ($_REQUEST['id'])) {
-            $result = "id";
+            return self::PAGE_BY_ALIAS;
+        } elseif (isset ($_REQUEST[self::PAGE_BY_ID])) {
+            return self::PAGE_BY_ID;
         } else {
             $result = "none";
         }
@@ -473,14 +470,14 @@ class DocumentParser {
         // function to test the query and find the retrieval method
         $docIdentifier= $this->config['site_start'];
         switch ($method) {
-            case 'alias' :
+            case self::PAGE_BY_ALIAS :
                 $docIdentifier= $this->db->escape($_REQUEST['q']);
                 break;
-            case 'id' :
-                if (!is_numeric($_REQUEST['id'])) {
+            case self::PAGE_BY_ID :
+                if (!is_numeric($_REQUEST[self::PAGE_BY_ID])) {
                     $this->sendErrorPage();
                 } else {
-                    $docIdentifier= intval($_REQUEST['id']);
+                    $docIdentifier= intval($_REQUEST[self::PAGE_BY_ID]);
                 }
                 break;
         }
@@ -556,11 +553,11 @@ class DocumentParser {
         /* Save path if any */
         /* FS#476 and FS#308: only return virtualDir if friendly paths are enabled */
         if ($this->config['use_alias_path'] == 1) {
-            $this->virtualDir= dirname($q);
-            $this->virtualDir= ($this->virtualDir == '.' ? '' : $this->virtualDir);
+            $this->virtualDir = dirname($q);
+            $this->virtualDir = ($this->virtualDir == '.' ? '' : $this->virtualDir);
             $q= basename($q);
         } else {
-            $this->virtualDir= '';
+            $this->virtualDir = '';
         }
         $q= str_replace($this->config['friendly_url_prefix'], "", $q);
         $q= str_replace($this->config['friendly_url_suffix'], "", $q);
@@ -568,21 +565,21 @@ class DocumentParser {
             /* FS#476 and FS#308: check that id is valid in terms of virtualDir structure */
             if ($this->config['use_alias_path'] == 1) {
                 if ((($this->virtualDir != '' && !$this->documentListing[$this->virtualDir . '/' . $q]) || ($this->virtualDir == '' && !$this->documentListing[$q])) && (($this->virtualDir != '' && in_array($q, $this->getChildIds($this->documentListing[$this->virtualDir], 1))) || ($this->virtualDir == '' && in_array($q, $this->getChildIds(0, 1))))) {
-                    $this->documentMethod= 'id';
+                    $this->documentMethod = self::PAGE_BY_ID;
                     return $q;
                 } else { /* not a valid id in terms of virtualDir, treat as alias */
-                    $this->documentMethod= 'alias';
+                    $this->documentMethod = self::PAGE_BY_ALIAS;
                     return $q;
                 }
             } else {
-                $this->documentMethod= 'id';
+                $this->documentMethod = self::PAGE_BY_ID;
                 return $q;
             }
         } else { /* we didn't get an ID back, so instead we assume it's an alias */
             if ($this->config['friendly_alias_urls'] != 1) {
                 $q= $qOrig;
             }
-            $this->documentMethod= 'alias';
+            $this->documentMethod= self::PAGE_BY_ALIAS;
             return $q;
         }
     } // cleanDocumentIdentifier
@@ -730,7 +727,7 @@ class DocumentParser {
             }
         }
         
-        if(strpos($this->documentOutput,'[~')!==false) {
+        if (strpos($this->documentOutput,'[~') !== false) {
             $this->documentOutput = $this->rewriteUrls($this->documentOutput);
         }
         
@@ -824,25 +821,25 @@ class DocumentParser {
         // update publish time file
         $timesArr= array ();
         $rs = $this->db->select('MIN(pub_date) AS minpub', $tbl_site_content, "{$timeNow} < pub_date");
-        $minpub= $this->db->getValue($rs);
+        $minpub = $this->db->getValue($rs);
         if ($minpub != NULL) {
             $timesArr[]= $minpub;
         }
         
         $rs = $this->db->select('MIN(unpub_date) AS minunpub', $tbl_site_content, "{$timeNow} < unpub_date");
-        $minunpub= $this->db->getValue($rs);
+        $minunpub = $this->db->getValue($rs);
         if ($minunpub != NULL) {
             $timesArr[]= $minunpub;
         }
         
         $rs = $this->db->select('MIN(pub_date) AS minpub', $tbl_site_htmlsnippets, "{$timeNow} < pub_date");
-        $minpub= $this->db->getValue($rs);
+        $minpub = $this->db->getValue($rs);
         if ($minpub != NULL) {
             $timesArr[]= $minpub;
         }
         
         $rs = $this->db->select('MIN(unpub_date) AS minunpub', $tbl_site_htmlsnippets, "{$timeNow} < unpub_date");
-        $minunpub= $this->db->getValue($rs);
+        $minunpub = $this->db->getValue($rs);
         if ($minunpub != NULL) {
             $timesArr[]= $minunpub;
         }
@@ -1297,12 +1294,12 @@ class DocumentParser {
         $tbldg= $this->getFullTableName("document_groups");
 
         // allow alias to be full path
-        if($method == 'alias') {
+        if($method == self::PAGE_BY_ALIAS) {
             $identifier = $this->cleanDocumentIdentifier($identifier);
             $method = $this->documentMethod;
         }
-        if($method == 'alias' && $this->config['use_alias_path'] && array_key_exists($identifier, $this->documentListing)) {
-            $method = 'id';
+        if($method == self::PAGE_BY_ALIAS && $this->config['use_alias_path'] && array_key_exists($identifier, $this->documentListing)) {
+            $method = self::PAGE_BY_ID;
             $identifier = $this->documentListing[$identifier];
         }
         // get document groups for current user
@@ -1321,7 +1318,7 @@ class DocumentParser {
         if ($rowCount < 1) {
             if ($this->config['unauthorized_page']) {
                 // method may still be alias, while identifier is not full path alias, e.g. id not found above
-                if ($method === 'alias') {
+                if ($method === self::PAGE_BY_ALIAS) {
                     $q = "SELECT dg.id FROM $tbldg dg, $tblsc sc WHERE dg.document = sc.id AND sc.alias = '{$identifier}' LIMIT 1;";
                 } else {
                     $q = "SELECT id FROM $tbldg WHERE document = '{$identifier}' LIMIT 1;";
@@ -1348,7 +1345,7 @@ class DocumentParser {
         $sql= "SELECT tv.*, IF(tvc.value!='',tvc.value,tv.default_text) as value ";
         $sql .= "FROM " . $this->getFullTableName("site_tmplvars") . " tv ";
         $sql .= "INNER JOIN " . $this->getFullTableName("site_tmplvar_templates")." tvtpl ON tvtpl.tmplvarid = tv.id ";
-        $sql .= "LEFT JOIN " . $this->getFullTableName("site_tmplvar_contentvalues")." tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '" . $documentObject['id'] . "' ";
+        $sql .= "LEFT JOIN " . $this->getFullTableName("site_tmplvar_contentvalues")." tvc ON tvc.tmplvarid=tv.id AND tvc.contentid = '" . $documentObject[self::PAGE_BY_ID] . "' ";
         $sql .= "WHERE tvtpl.templateid = '" . $documentObject['template'] . "'";
         $rs= $this->db->query($sql);
         $rowCount= $this->db->getRecordCount($rs);
@@ -1505,7 +1502,7 @@ class DocumentParser {
                 exit; // stop processing here, as the site's offline
             } else {
                 // setup offline page document settings
-                $this->documentMethod= 'id';
+                $this->documentMethod= self::PAGE_BY_ID;
                 $this->documentIdentifier= $this->config['site_unavailable_page'];
             }
         } else {
@@ -1518,9 +1515,9 @@ class DocumentParser {
         }
         
         if ($this->documentMethod == 'none' || $_SERVER['REQUEST_URI']===$this->config['base_url']){
-            $this->documentMethod= 'id'; // now we know the site_start, change the none method to id
+            $this->documentMethod = self::PAGE_BY_ID; // now we know the site_start, change the none method to id
             $this->documentIdentifier = $this->config['site_start'];
-        } elseif ($this->documentMethod == 'alias') {
+        } elseif ($this->documentMethod == self::PAGE_BY_ALIAS) {
             $this->documentIdentifier = $this->cleanDocumentIdentifier($this->documentIdentifier);
         }
         
