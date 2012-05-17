@@ -4400,7 +4400,18 @@ class DocumentParser {
     /* End of API functions                                       */
     /***************************************************************************************/
 
-    function phpError($nr, $text, $file, $line) {
+    /**
+     * Checks the PHP error and calls messageQuit. messageQuit is not called
+     * when error_reporting is 0, $nr is 0, or $nr is 8 and stopOnNotice is
+     * false
+     *
+     * @param int $nr
+     * @param string $text
+     * @param string $file
+     * @param string $line
+     * @return boolean
+     */
+    public function phpError($nr, $text, $file, $line) {
         if (error_reporting() == 0 || $nr == 0 || ($nr == 8 && $this->stopOnNotice == false)) {
             return true;
         }
@@ -4410,8 +4421,8 @@ class DocumentParser {
         } else {
             $source= '';
         } //Error $nr in $file at $line: <div><code>$source</code></div>
-        $this->messageQuit("PHP Parse Error", '', true, $nr, $file, $source, $text, $line);
-    }
+        $this->messageQuit('PHP Parse Error', '', true, $nr, $file, $source, $text, $line);
+    } // phpError
 
     function messageQuit($msg= 'unspecified error', $query= '', $is_error= true, $nr= '', $file= '', $source= '', $text= '', $line= '') {
 
