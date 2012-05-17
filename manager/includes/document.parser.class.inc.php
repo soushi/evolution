@@ -3358,6 +3358,24 @@ class DocumentParser {
         return $result;
     } // getLoginUserName
 
+    /**
+     * Returns current login user type - web or manager
+     *
+     * @category API-Function
+     * @return string
+     */
+    public function getLoginUserType() {
+        $result = '';
+
+        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
+            $result = 'web';
+        } elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
+            $result = 'manager';
+        }
+
+        return $result;
+    } // getLoginUserType
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3497,18 +3515,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # Returns current login user type - web or manager
-    function getLoginUserType() {
-        if ($this->isFrontend() && isset ($_SESSION['webValidated'])) {
-            return 'web';
-        }
-        elseif ($this->isBackend() && isset ($_SESSION['mgrValidated'])) {
-            return 'manager';
-        } else {
-            return '';
-        }
-    }
-
     # Returns a record for the manager user
     function getUserInfo($uid)
     {
