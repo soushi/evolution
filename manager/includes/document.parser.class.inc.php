@@ -4680,80 +4680,99 @@ class DocumentParser {
     // End of class.
 }
 
-// SystemEvent Class
+/**
+ * SystemEvent Class
+ * Function: This class does handle MODX system events
+ *
+ * @author  The MODX community
+ * @todo    Set all class variables to private or protected
+ * @name    SystemEvent
+ * @package MODX
+ */
 class SystemEvent {
-    var $name;
-    var $_propagate;
-    var $_output;
-    var $_globalVariables;
-    var $activated;
-    var $activePlugin;
+    /**
+     * Name of the event
+     * @var string
+     */
+    public $name;
+    
+    /**
+     * Whether to propagate events, or not
+     * @var boolean
+     */
+    public $_propagate;
+    
+    /**
+     * Message output
+     * @var string
+     */
+    public $_output;
+    
+    /**
+     * Whether the event is active, or not
+     * @var false
+     */
+    public $activated;
+    
+    /**
+     * The name of the active plugin
+     * @var string
+     */
+    public $activePlugin;
 
-    function SystemEvent($name= '') {
+    /**
+     * Constructor of SystemEvents, initializes the object
+     *
+     * @param string $name Name of the event
+     */
+    public function __construct($name= "") {
         $this->_resetEventObject();
-        $this->name= $name;
-    }
+        $this->name = $name;
+    } // __construct
 
-    // used for displaying a message to the user
-    function alert($msg) {
+    /**
+     * Used for displaying a message to the user
+     *
+     * @global array $SystemAlertMsgQueque
+     * @param string $msg The message
+     */
+    public function alert($msg) {
         global $SystemAlertMsgQueque;
-        if ($msg == '')
-            return;
-        if (is_array($SystemAlertMsgQueque)) {
-            if ($this->name && $this->activePlugin)
-                $title= "<div><b>" . $this->activePlugin . "</b> - <span style='color:maroon;'>" . $this->name . "</span></div>";
-            $SystemAlertMsgQueque[]= "$title<div style='margin-left:10px;margin-top:3px;'>$msg</div>";
-        }
-    }
 
-    // used for rendering an out on the screen
-    function output($msg) {
+        if ($msg != '') {
+            if (is_array($SystemAlertMsgQueque)) {
+                if ($this->name && $this->activePlugin)
+                    $title= "<div><b>" . $this->activePlugin . "</b> - <span style='color:maroon;'>" . $this->name . "</span></div>";
+                $SystemAlertMsgQueque[]= "$title<div style='margin-left:10px;margin-top:3px;'>$msg</div>";
+            }
+        }
+    } // alert
+
+    /**
+     * Used for rendering an out on the screen
+     *
+     * @param string $msg 
+     */
+    public function output($msg) {
         $this->_output .= $msg;
-    }
+    } // output
 
-    // get global variables
-    function getGlobalVariable($key) {
-        if( isset( $GLOBALS[$key] ) )
-        {
-            return $GLOBALS[$key];
-        }
-        return false;
-    }
+    /**
+     * Sets _propagate to false
+     */
+    public function stopPropagation() {
+        $this->_propagate = false;
+    } // stopPropagation
 
-    // set global variables
-    function setGlobalVariable($key,$val,$now=0) {
-        if (! isset( $GLOBALS[$key] ) ) { return false; }
-        if ( $now === 1 || $now === 'now' )
-        {
-            $GLOBALS[$key] = $val;
-        }
-        else
-        {
-            $this->_globalVariables[$key]=$val;
-        }
-        return true;
-    }
-
-    // set all global variables
-    function setAllGlobalVariables() {
-        if ( empty( $this->_globalVariables ) ) { return false; }
-        foreach ( $this->_globalVariables as $key => $val )
-        {
-            $GLOBALS[$key] = $val;
-        }
-        return true;
-    }
-
-    function stopPropagation() {
-        $this->_propagate= false;
-    }
-
-    function _resetEventObject() {
+    /**
+     * Sets all class variables back to defaults 
+     */
+    public function _resetEventObject() {
         unset ($this->returnedValues);
-        $this->name= '';
-        $this->_output= '';
+        $this->name = '';
+        $this->_output = '';
         $this->_globalVariables=array();
-        $this->_propagate= true;
-        $this->activated= false;
-    }
-}
+        $this->_propagate = true;
+        $this->activated = false;
+    } // _resetEventObject
+} // SystemEvent
