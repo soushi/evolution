@@ -3562,6 +3562,7 @@ class DocumentParser {
     /**
      * Returns true if the current web user is a member the specified groups
      *
+     * @category API-Function
      * @param array $groupNames
      * @return boolean
      */
@@ -3594,6 +3595,7 @@ class DocumentParser {
      * Registers Client-side CSS scripts - these scripts are loaded at inside
      * the <head> tag
      *
+     * @category API-Function
      * @param string $src
      * @param string $media Default: Empty string
      */
@@ -3615,6 +3617,7 @@ class DocumentParser {
      * Registers Startup Client-side JavaScript - these scripts are loaded at
      * inside the <head> tag
      *
+     * @category API-Function
      * @param string $src
      * @param array $options Default: 'name'=>'', 'version'=>'0', 'plaintext'=>false
      */
@@ -3626,6 +3629,7 @@ class DocumentParser {
      * Registers Client-side JavaScript
      * these scripts are loaded at the end of the page unless $startup is true
      *
+     * @category API-Function
      * @param string $src
      * @param array $options Default: 'name'=>'', 'version'=>'0', 'plaintext'=>false
      * @param boolean $startup Default: false
@@ -3703,6 +3707,7 @@ class DocumentParser {
     /**
      * Registers Client-side Startup HTML block
      *
+     * @category API-Function
      * @param string $html
      */
     public function regClientStartupHTMLBlock($html) {
@@ -3721,6 +3726,7 @@ class DocumentParser {
     /**
      * Remove unwanted html tags and snippet, settings and tags
      *
+     * @category API-Function
      * @param string $html
      * @param string $allowed Default: Empty string
      * @return string
@@ -3741,6 +3747,7 @@ class DocumentParser {
      * Add an event listner to a plugin - only for use within the current
      * execution cycle
      *
+     * @category API-Function
      * @param string $evtName
      * @param string $pluginName
      * @return boolean|int
@@ -3761,6 +3768,7 @@ class DocumentParser {
     /**
      * Remove event listner - only for use within the current execution cycle
      *
+     * @category API-Function
      * @param string $evtName
      * @return boolean
      */
@@ -3778,6 +3786,7 @@ class DocumentParser {
     /**
      * Remove all event listners - only for use within the current execution
      * cycle
+     * @category API-Function
      */
     public function removeAllEventListener() {
         unset ($this->pluginEvent);
@@ -3855,6 +3864,7 @@ class DocumentParser {
     /**
      * Parses a resource property string and returns the result as an array
      *
+     * @category API-Function
      * @param string $propertyString
      * @return type
      */
@@ -3885,6 +3895,7 @@ class DocumentParser {
      * Sends a mail to the recipients. The mail fields are managed in the
      * params array. The minium parameters are sendto and subject.
      *
+     * @category API-Function
      * @param type $params The parameters that are used to send the mail.
      *                     Possible parameters in the array are sendto, subject,
      *                     from, and fromname. The configuration parameters 
@@ -3933,6 +3944,7 @@ class DocumentParser {
     /**
      * Reduces the records in a given table.
      *
+     * @category API-Function
      * @global type $dbase
      * @param string $target Default: event_log
      * @param int $limit Default: 2000
@@ -3963,6 +3975,7 @@ class DocumentParser {
     /**
      * Removes inactive users from the activ users table.
      *
+     * @category API-Function
      * @param string $action Default: all
      * @param int $limit_time Default: 86400
      */
