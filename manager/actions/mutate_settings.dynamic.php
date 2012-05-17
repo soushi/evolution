@@ -43,6 +43,7 @@ $suffix_mode             = '0';
 $cache_type              = '1';
 $send_errormail          = '3';
 $limit_by_container       = '100';
+$allow_mgr2web           = '0';
 
 $tbl_system_settings = $modx->getFullTableName('system_settings');
 $rs = $modx->db->select('setting_name, setting_value',$tbl_system_settings);
