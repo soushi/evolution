@@ -12,6 +12,31 @@
  */
 class DocumentParser {
     /**
+     * Constant string for redirect refresh
+     */
+    const REDIRECT_REFRESH = 'REDIRECT_REFRESH';
+
+    /**
+     * Constant string for redirect meta
+     */
+    const REDIRECT_META = 'REDIRECT_META';
+
+    /**
+     * Constant string for redirect header
+     */
+    const REDIRECT_HEADER = 'REDIRECT_HEADER';
+
+    /**
+     * Constant string for getting the page by alias
+     */
+    const PAGE_BY_ALIAS = 'alias';
+
+    /**
+     * Constant string for getting the page by ID
+     */
+    const PAGE_BY_ID = 'id';
+
+    /**
      * Database object
      * @var DBAPI
      */
