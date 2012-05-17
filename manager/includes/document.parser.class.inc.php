@@ -3428,6 +3428,62 @@ class DocumentParser {
         return $result;
     } // getWebUserInfo
 
+    /**
+     * Returns an array of document groups that current user is assigned to.
+     * This function will first return the web user doc groups when running from
+     * frontend otherwise it will return manager user's docgroup.
+     *
+     * @category API-Function
+     * @param boolean $resolveIds Set to true to return the document group names
+     *                            Default: false
+     * @return string|array
+     */
+    public function getUserDocGroups($resolveIds=false) {
+        $result = '';
+
+        $dg  = array(); // add so
+        $dgn = array();
+        if ($this->isFrontend() && isset($_SESSION['webDocgroups']) 
+                && !empty($_SESSION['webDocgroups']) && isset($_SESSION['webValidated'])) {
+            $dg = $_SESSION['webDocgroups'];
+            if(isset($_SESSION['webDocgrpNames'])) {
+                $dgn = $_SESSION['webDocgrpNames']; //add so
+            }
+        }
+        if (isset($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) 
+                && isset($_SESSION['mgrValidated'])) {
+            if ($this->config['allow_mgr2web']==='1' || $this->isBackend()) {
+                $dg = array_merge($dg, $_SESSION['mgrDocgroups']);
+                if (isset($_SESSION['mgrDocgrpNames'])) {
+                    $dgn = array_merge($dgn, $_SESSION['mgrDocgrpNames']);
+                }
+            }
+        }
+        if (!$resolveIds) {
+            $result = $dg;
+        } elseif(!empty($dgn) || empty($dg)) {
+            $result = $dgn; // add so
+        } elseif(is_array($dg)) {
+            // resolve ids to names
+            $dgn = array ();
+            $tbl_dgn = $this->getFullTableName('documentgroup_names');
+            $imploded_dg = implode(',', $dg);
+            $ds = $this->db->select('name', $tbl_dgn, "id IN ({$imploded_dg})");
+            while ($row = $this->db->getRow($ds)) {
+                $dgn[count($dgn)] = $row['name'];
+            }
+            // cache docgroup names to session
+            if ($this->isFrontend()) {
+                $_SESSION['webDocgrpNames'] = $dgn;
+            } else {
+                $_SESSION['mgrDocgrpNames'] = $dgn;
+            }
+            $result = $dgn;
+        }
+
+        return $result;
+    } // getUserDocGroups
+    
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3566,58 +3622,6 @@ class DocumentParser {
     #::::::::::::::::::::::::::::::::::::::::
     # Added By: Raymond Irving - MODx
     #
-    
-    # Returns an array of document groups that current user is assigned to.
-    # This function will first return the web user doc groups when running from frontend otherwise it will return manager user's docgroup
-    # Set $resolveIds to true to return the document group names
-    function getUserDocGroups($resolveIds= false)
-    {
-        $dg  = array(); // add so
-        $dgn = array();
-        if($this->isFrontend() && isset($_SESSION['webDocgroups']) && !empty($_SESSION['webDocgroups']) && isset($_SESSION['webValidated']))
-        {
-            $dg = $_SESSION['webDocgroups'];
-            if(isset($_SESSION['webDocgrpNames']))
-            {
-                $dgn = $_SESSION['webDocgrpNames']; //add so
-            }
-        }
-        if(isset($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) && isset($_SESSION['mgrValidated']))
-        {
-            if($this->config['allow_mgr2web']==='1' || $this->isBackend())
-            {
-                $dg = array_merge($dg, $_SESSION['mgrDocgroups']);
-                if(isset($_SESSION['mgrDocgrpNames']))
-                {
-                    $dgn = array_merge($dgn, $_SESSION['mgrDocgrpNames']);
-                }
-            }
-        }
-        if(!$resolveIds)
-        {
-            return $dg;
-        }
-        elseif(!empty($dgn) || empty($dg))
-        {
-            return $dgn; // add so
-        }
-        elseif(is_array($dg))
-        {
-            // resolve ids to names
-            $dgn = array ();
-            $tbl_dgn = $this->getFullTableName('documentgroup_names');
-            $imploded_dg = implode(',', $dg);
-            $ds = $this->db->select('name', $tbl_dgn, "id IN ({$imploded_dg})");
-            while ($row = $this->db->getRow($ds))
-            {
-                $dgn[count($dgn)] = $row['name'];
-            }
-            // cache docgroup names to session
-            if($this->isFrontend()) $_SESSION['webDocgrpNames'] = $dgn;
-            else                    $_SESSION['mgrDocgrpNames'] = $dgn;
-            return $dgn;
-        }
-    }
     
     # Change current web user's password - returns true if successful, oterhwise return error message
     function changeWebUserPassword($oldPwd, $newPwd)
