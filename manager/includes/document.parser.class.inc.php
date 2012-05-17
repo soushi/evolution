@@ -3299,12 +3299,20 @@ class DocumentParser {
         }
     }
     
-    function remove_locks($action=27,$limit_time=86400)
+    function remove_locks($action='all',$limit_time=86400)
     {
         $limit_time = time() - $limit_time;
+        if($action === 'all')
+        {
+            $action = '';
+        }
+        else
+        {
         $action     = intval($action);
+            $action = "action={$action} and";
+        }
         $tbl_active_users = $this->getFullTableName('active_users');
-        $this->db->delete($tbl_active_users,"action={$action} and lasthit < {$limit_time}");
+        $this->db->delete($tbl_active_users,"{$action} lasthit < {$limit_time}");
     }
     
     function parseChunk($chunkName, $chunkArr, $prefix= '{', $suffix= '}',$mode='chunk')
