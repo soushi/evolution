@@ -4654,15 +4654,29 @@ class DocumentParser {
         return $result;
     } // stripAlias
     
-    function nicesize($size) {
-        $a = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
+    /**
+     * Returns a nice readable size in B, KB, MB, GB, TB, or PB.
+     *
+     * @param int $size
+     * @return float
+     */
+    public function nicesize($size) {
+        $a = array(
+            'B', 
+            'KB', 
+            'MB', 
+            'GB', 
+            'TB', 
+            'PB'
+        );
         $pos = 0;
         while ($size >= 1024) {
                $size /= 1024;
                $pos++;
         }
+
         return round($size,2)." ".$a[$pos];
-    }
+    } // nicesize
     // End of class.
 }
 
