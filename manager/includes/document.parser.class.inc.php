@@ -4014,24 +4014,37 @@ class DocumentParser {
         return $result;
     } // parseChunk
 
-    function parsePlaceholder($src='', $ph=array(), $left= '[+', $right= '+]',$mode='ph')
-    {
-        if(!$ph) return $src;
-        elseif(is_string($ph) && strpos($ph,'='))
-        {
-            if(strpos($ph,',')) $pairs   = explode(',',$ph);
-            else                $pairs[] = $ph;
+    /**
+     * Parse placeholders and call parseChunk with the result.
+     * 
+     * @param string $src Default: Empty string
+     * @param array $ph Default: Empty array
+     * @param string $left Default: [+
+     * @param string $right Default: +]
+     * @param string $mode Default: ph
+     * @return string
+     */
+    public function parsePlaceholder($src='', $ph=array(), $left='[+', $right= '+]',$mode='ph') {
+        if (!$ph) {
+            $result = $src;
+        } elseif (is_string($ph) && strpos($ph, '=')) {
+            if (strpos($ph,',')) {
+                $pairs   = explode(',',$ph);
+            } else {
+                $pairs[] = $ph;
+            }
             
             unset($ph);
             $ph = array();
-            foreach($pairs as $pair)
-            {
+            foreach ($pairs as $pair) {
                 list($k,$v) = explode('=',$pair);
                 $ph[$k] = $v;
             }
+            $result = $this->parseChunk($src, $ph, $left, $right, $mode);
         }
-        return $this->parseChunk($src, $ph, $left, $right, $mode);
-    }
+
+        return $result;
+    } // parsePlaceholder
     
     function mb_strftime($format='%Y/%m/%d', $timestamp='')
     {
