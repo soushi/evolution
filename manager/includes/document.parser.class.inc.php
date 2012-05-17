@@ -3881,28 +3881,37 @@ class DocumentParser {
         return $result;
     } // parseProperties
 
-    function sendmail($params=array(), $msg='')
-    {
-        if(isset($params) && is_string($params))
-        {
-            if(strpos($params,'=')===false)
-            {
-                if(strpos($params,'@')!==false) $p['sendto']  = $params;
-                else                            $p['subject'] = $params;
-            }
-            else
-            {
+    /**
+     * Sends a mail to the recipients. The mail fields are managed in the
+     * params array. The minium parameters are sendto and subject.
+     *
+     * @param type $params The parameters that are used to send the mail.
+     *                     Possible parameters in the array are sendto, subject,
+     *                     from, and fromname. The configuration parameters 
+     *                     emailsender is used, if from is empty, and site_name
+     *                     is used, when fromname is empty.
+     *                     Default: Empty array
+     * @param array $msg The body of the mail
+     *                   Default: Empty string
+     * @return boolean
+     */
+    public function sendmail($params=array(), $msg='') {
+        if (isset($params) && is_string($params)) {
+            if (strpos($params, '=') === false) {
+                if (strpos($params,'@') !== false) {
+                    $p['sendto']  = $params;
+                } else {
+                    $p['subject'] = $params;
+                }
+            } else {
                 $params_array = explode(',',$params);
-                foreach($params_array as $k=>$v)
-                {
+                foreach ($params_array as $k=>$v) {
                     $k = trim($k);
                     $v = trim($v);
                     $p[$k] = $v;
                 }
             }
-        }
-        else
-        {
+        } else {
             $p = $params;
             unset($params);
         }
@@ -3916,9 +3925,10 @@ class DocumentParser {
         $sendto         = (!isset($p['sendto']))   ? $this->config['emailsender']  : $p['sendto'];
         $mail->Body     = $msg;
         $mail->AddAddress($sendto);
-        $rs = $mail->Send();
-        return $rs;
-    }
+        $result = $mail->Send();
+
+        return $result;
+    } // sendmail
     
     function rotate_log($target='event_log',$limit=2000, $trim=100)
     {
