@@ -4619,9 +4619,14 @@ class DocumentParser {
         return implode("\n", $this->jscripts);
     } // getRegisteredClientScripts
 
-    function getRegisteredClientStartupScripts() {
+    /**
+     * Returns all registered startup scripts
+     *
+     * @return string
+     */
+    public function getRegisteredClientStartupScripts() {
         return implode("\n", $this->sjscripts);
-    }
+    } // getRegisteredClientStartupScripts
     
     /**
      * Format alias to be URL-safe. Strip invalid characters.
