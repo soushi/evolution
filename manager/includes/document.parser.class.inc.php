@@ -3402,6 +3402,32 @@ class DocumentParser {
         return $result;
     } // getUserInfo
     
+    /**
+     * Returns a record for the web user
+     *
+     * @category API-Function
+     * @param int $uid
+     * @return boolean|string
+     */
+    public function getWebUserInfo($uid) {
+        $result = false;
+        
+        $tbl_web_users = $this->getFullTableName('web_users');
+        $tbl_web_user_attributes = $this->getFullTableName('web_user_attributes');
+        $field = 'wu.username, wu.password, wua.*';
+        $from = "{$tbl_web_users} wu INNER JOIN {$tbl_web_user_attributes} wua ON wua.internalkey=wu.id";
+        $rs= $this->db->select($field, $from, "wu.id='$uid'");
+        $limit= $this->db->getRecordCount($rs);
+        if ($limit == 1) {
+            $result = $this->db->getRow($rs);
+            if (!$result['usertype']) {
+                $result['usertype'] = 'web';
+            }
+        }
+
+        return $result;
+    } // getWebUserInfo
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3541,24 +3567,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # Returns a record for the web user
-    function getWebUserInfo($uid)
-    {
-        $tbl_web_users = $this->getFullTableName('web_users');
-        $tbl_web_user_attributes = $this->getFullTableName('web_user_attributes');
-        $field = 'wu.username, wu.password, wua.*';
-        $from = "{$tbl_web_users} wu INNER JOIN {$tbl_web_user_attributes} wua ON wua.internalkey=wu.id";
-        $rs= $this->db->select($field,$from,"wu.id='$uid'");
-        $limit= $this->db->getRecordCount($rs);
-        if ($limit == 1)
-        {
-            $row= $this->db->getRow($rs);
-            if (!$row['usertype']) $row['usertype']= 'web';
-            return $row;
-        }
-        else return false;
-    }
-
     # Returns an array of document groups that current user is assigned to.
     # This function will first return the web user doc groups when running from frontend otherwise it will return manager user's docgroup
     # Set $resolveIds to true to return the document group names
