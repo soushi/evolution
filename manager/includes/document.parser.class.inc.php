@@ -4639,7 +4639,7 @@ class DocumentParser {
         $results = $this->invokeEvent('OnStripAlias', array ('alias'=>$alias));
         if (!empty($results)) {
             // if multiple plugins are registered, only the last one is used
-            return end($results);
+            $result = end($results);
         } else {
             // default behavior: strip invalid characters and replace spaces with dashes.
             $alias = strip_tags($alias); // strip HTML
@@ -4648,9 +4648,11 @@ class DocumentParser {
 //          $alias = preg_replace('/-+/', '-', $alias);  // convert multiple dashes to one
 //          $alias = trim($alias, '-'); // trim excess
             $alias = urlencode($alias);
-            return $alias;
+            $result = $alias;
         }
-    }
+
+        return $result;
+    } // stripAlias
     
     function nicesize($size) {
         $a = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
