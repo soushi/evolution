@@ -3700,6 +3700,15 @@ class DocumentParser {
         }
     } // regClientScript
 
+    /**
+     * Registers Client-side Startup HTML block
+     *
+     * @param string $html
+     */
+    public function regClientStartupHTMLBlock($html) {
+        $this->regClientScript($html, true, true);
+    } // regClientStartupHTMLBlock
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3839,7 +3848,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    function regClientStartupHTMLBlock($html) {$this->regClientScript($html, true, true);} // Registers Client-side Startup HTML block
     function regClientHTMLBlock($html)        {$this->regClientScript($html, true);} // Registers Client-side HTML block
     
     # Remove unwanted html tags and snippet, settings and tags
