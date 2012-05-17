@@ -3240,6 +3240,18 @@ class DocumentParser {
         return $base_url . 'manager/';
     } // getManagerPath
 
+    /**
+     * Returns the virtual relative path to the cache folder
+     *
+     * @category API-Function
+     * @global string $base_url
+     * @return string The complete URL to the cache folder
+     */
+    public function getCachePath() {
+        global $base_url;
+        return $base_url . 'assets/cache/';
+    } // getCachePath
+
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3379,11 +3391,6 @@ class DocumentParser {
     # Added By: Raymond Irving - MODx
     #
     
-    # returns the virtual relative path to the cache folder
-    function getCachePath() {
-        return $this->config['base_url'] . 'assets/cache/';
-    }
-
     # sends a message to a user's message box
     function sendAlert($type, $to, $from, $subject, $msg, $private= 0)
     {
