@@ -2929,10 +2929,6 @@ class DocumentParser {
         return $result;
     } // toTimeStamp
 
-    #::::::::::::::::::::::::::::::::::::::::
-    # Added By: Raymond Irving - MODx
-    #
-
     /**
      * Returns the template varialble as assosiative array.
      *
