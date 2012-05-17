@@ -3930,27 +3930,35 @@ class DocumentParser {
         return $result;
     } // sendmail
     
-    function rotate_log($target='event_log',$limit=2000, $trim=100)
-    {
+    /**
+     * Reduces the records in a given table.
+     *
+     * @global type $dbase
+     * @param string $target Default: event_log
+     * @param int $limit Default: 2000
+     * @param int $trim Default: 100
+     * @todo This method is not database independent, we need to move it to the DBAPI class
+     */
+    public function rotate_log($target='event_log', $limit=2000, $trim=100) {
         global $dbase;
         
-        if($limit < $trim) $trim = $limit;
+        if ($limit < $trim) {
+            $trim = $limit;
+        }
         
         $target = $this->getFullTableName($target);
-        $count = $this->db->getValue($this->db->select('COUNT(id)',$target));
+        $count = $this->db->getValue($this->db->select('COUNT(id)', $target));
         $over = $count - $limit;
-        if(0 < $over)
-        {
+        if (0 < $over) {
             $trim = ($over + $trim);
-            $this->db->delete($target,'',$trim);
+            $this->db->delete($target, '', $trim);
         }
         $result = $this->db->query("SHOW TABLE STATUS FROM {$dbase}");
-        while ($row = $this->db->getRow($result))
-        {
+        while ($row = $this->db->getRow($result)) {
             $tbl_name = $row['Name'];
             $this->db->query("OPTIMIZE TABLE {$tbl_name}");
         }
-    }
+    } // rotate_log
     
     function remove_locks($action='all',$limit_time=86400)
     {
