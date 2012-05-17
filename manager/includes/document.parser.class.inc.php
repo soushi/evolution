@@ -4424,7 +4424,19 @@ class DocumentParser {
         $this->messageQuit('PHP Parse Error', '', true, $nr, $file, $source, $text, $line);
     } // phpError
 
-    function messageQuit($msg= 'unspecified error', $query= '', $is_error= true, $nr= '', $file= '', $source= '', $text= '', $line= '') {
+    /**
+     * Returns an error page with detailed informations about the error.
+     *
+     * @param string $msg Default: unspecified error
+     * @param string $query Default: Empty string
+     * @param boolean $is_error Default: true
+     * @param string $nr Default: Empty string
+     * @param string $file Default: Empty string
+     * @param string $source Default: Empty string
+     * @param string $text Default: Empty string
+     * @param string $line Default: Empty string
+     */
+    public function messageQuit($msg='unspecified error', $query='', $is_error=true, $nr='', $file='', $source='', $text='', $line='') {
 
         $version= isset ($GLOBALS['version']) ? $GLOBALS['version'] : '';
         $release_date= isset ($GLOBALS['release_date']) ? $GLOBALS['release_date'] : '';
@@ -4567,26 +4579,36 @@ class DocumentParser {
         $str= str_replace("[^t^]", $totalTime, $str);
         $str= str_replace("[^m^]", $total_mem, $str);
 
-        if(isset($php_errormsg) && !empty($php_errormsg)) $str = "<b>{$php_errormsg}</b><br />\n{$str}";
+        if (isset($php_errormsg) && !empty($php_errormsg)) {
+            $str = "<b>{$php_errormsg}</b><br />\n{$str}";
+        }
         $str .= '<br />' . $this->get_backtrace(debug_backtrace());
 
         // Log error
-        if($source!=='') $source = 'Parser - ' . $source;
-        else             $source = 'Parser';
-        $this->logEvent(0, 3, $str,$source);
-        if($nr == E_DEPRECATED) return true;
+        if ($source!=='') {
+            $source = 'Parser - ' . $source;
+        } else { 
+            $source = 'Parser';
+        }
+        $this->logEvent(0, 3, $str, $source);
+        if ($nr == E_DEPRECATED) {
+            return true;
+        }
 
         // Set 500 response header
         header('HTTP/1.1 500 Internal Server Error');
 
         // Display error
-        if (isset($_SESSION['mgrValidated'])) echo $str;
-        else  echo 'Error';
+        if (isset($_SESSION['mgrValidated'])) {
+            echo $str;
+        } else {
+            echo 'Error';
+        }
         ob_end_flush();
 
         // Make sure and die!
         exit();
-    }
+    } // messageQuit
 
     function getRegisteredClientScripts() {
         return implode("\n", $this->jscripts);
