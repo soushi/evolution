@@ -3497,6 +3497,54 @@ class DocumentParser {
         return $this->getUserDocGroups();
     } // getDocGroups
 
+    /**
+     * Change current web user's password
+     *
+     * @category API-Function
+     * @todo Make password length configurable, allow rules for passwords and translation of messages
+     * @param string $oldPwd
+     * @param string $newPwd
+     * @return string|boolean Returns true if successful, oterhwise return error
+     *                        message
+     */
+    public function changeWebUserPassword($oldPwd, $newPwd) {
+        $result = false;
+
+        $rt= false;
+        if ($_SESSION["webValidated"] == 1) {
+            $tbl_web_users= $this->getFullTableName("web_users");
+            $uid = $this->getLoginUserID();
+            $ds= $this->db->select('id,username,password', $tbl_web_users, "`id`='{$uid}'");
+            $limit= $this->db->getRecordCount($ds);
+            if ($limit == 1) {
+                $row = $this->db->getRow($ds);
+                if ($row["password"] == md5($oldPwd)) {
+                    if (strlen($newPwd) < 6) {
+                        $result = 'Password is too short!';
+                    } elseif ($newPwd == '') {
+                        $result = "You didn't specify a password for this user!";
+                    } else {
+                        $newPwd = $this->db->escape($newPwd);
+                        $this->db->update("password = md5('{$newPwd}')", $tbl_web_users, "id='{$uid}'");
+                        // invoke OnWebChangePassword event
+                        $this->invokeEvent("OnWebChangePassword",
+                        array
+                        (
+                            "userid" => $row["id"],
+                            "username" => $row["username"],
+                            "userpassword" => $newPwd
+                        ));
+                        $result = true;
+                    }
+                } else {
+                    $result = 'Incorrect password.';
+                }
+            }
+        }
+
+        return $result;
+    } // changeWebUserPassword
+    
     function sendmail($params=array(), $msg='')
     {
         if(isset($params) && is_string($params))
@@ -3635,52 +3683,6 @@ class DocumentParser {
     #::::::::::::::::::::::::::::::::::::::::
     # Added By: Raymond Irving - MODx
     #
-    
-    # Change current web user's password - returns true if successful, oterhwise return error message
-    function changeWebUserPassword($oldPwd, $newPwd)
-    {
-        $rt= false;
-        if ($_SESSION["webValidated"] == 1)
-        {
-            $tbl_web_users= $this->getFullTableName("web_users");
-            $uid = $this->getLoginUserID();
-            $ds= $this->db->select('id,username,password', $tbl_web_users, "`id`='{$uid}'");
-            $limit= $this->db->getRecordCount($ds);
-            if ($limit == 1)
-            {
-                $row= $this->db->getRow($ds);
-                if ($row["password"] == md5($oldPwd))
-                {
-                    if (strlen($newPwd) < 6)
-                    {
-                        return 'Password is too short!';
-                    }
-                    elseif ($newPwd == '')
-                    {
-                        return "You didn't specify a password for this user!";
-                    }
-                    else
-                    {
-                        $newPwd = $this->db->escape($newPwd);
-                        $this->db->update("password = md5('{$newPwd}')", $tbl_web_users, "id='{$uid}'");
-                        // invoke OnWebChangePassword event
-                        $this->invokeEvent("OnWebChangePassword",
-                        array
-                        (
-                            "userid" => $row["id"],
-                            "username" => $row["username"],
-                            "userpassword" => $newPwd
-                        ));
-                        return true;
-                    }
-                }
-                else
-                {
-                    return 'Incorrect password.';
-                }
-            }
-        }
-    }
     
     # returns true if the current web user is a member the specified groups
     function isMemberOfWebGroup($groupNames= array ())
