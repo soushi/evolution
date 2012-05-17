@@ -2087,6 +2087,7 @@ class DocumentParser {
         $fields['description'] = $msg;
         $fields['user']        = $LoginUserID;
         $insert_id = $this->db->insert($fields,$this->getFullTableName('event_log'));
+        if(!$this->db->conn) $source = 'DB connect error';
         if (isset($this->config['send_errormail']) && $this->config['send_errormail'] !== '0') {
             if ($this->config['send_errormail'] <= $type) {
                 $subject = 'Notice of error from ' . $this->config['site_name'];
