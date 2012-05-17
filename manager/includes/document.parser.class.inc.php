@@ -3960,21 +3960,23 @@ class DocumentParser {
         }
     } // rotate_log
     
-    function remove_locks($action='all',$limit_time=86400)
-    {
+    /**
+     * Removes inactive users from the activ users table.
+     *
+     * @param string $action Default: all
+     * @param int $limit_time Default: 86400
+     */
+    public function remove_locks($action='all', $limit_time=86400) {
         $limit_time = time() - $limit_time;
-        if($action === 'all')
-        {
+        if ($action === 'all') {
             $action = '';
-        }
-        else
-        {
-        $action     = intval($action);
+        } else {
+            $action     = intval($action);
             $action = "action={$action} and";
         }
         $tbl_active_users = $this->getFullTableName('active_users');
         $this->db->delete($tbl_active_users,"{$action} lasthit < {$limit_time}");
-    }
+    } // remove_locks
     
     function parseChunk($chunkName, $chunkArr, $prefix= '{', $suffix= '}',$mode='chunk')
     {
