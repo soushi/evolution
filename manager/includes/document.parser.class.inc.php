@@ -3518,10 +3518,13 @@ class DocumentParser {
         }
         if(isset($_SESSION['mgrDocgroups']) && !empty($_SESSION['mgrDocgroups']) && isset($_SESSION['mgrValidated']))
         {
-            $dg = array_merge($dg, $_SESSION['mgrDocgroups']);
-            if(isset($_SESSION['mgrDocgrpNames']))
+            if($this->config['allow_mgr2web']==='1' || $this->isBackend())
             {
-                $dgn = array_merge($dgn, $_SESSION['mgrDocgrpNames']);
+                $dg = array_merge($dg, $_SESSION['mgrDocgroups']);
+                if(isset($_SESSION['mgrDocgrpNames']))
+                {
+                    $dgn = array_merge($dgn, $_SESSION['mgrDocgrpNames']);
+                }
             }
         }
         if(!$resolveIds)
