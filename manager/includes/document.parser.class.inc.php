@@ -241,7 +241,8 @@ class DocumentParser {
             if ($responseCode) {
                 header($responseCode);
             }
-            $this->prepareResponse();
+            $result = $this->prepareResponse();
+            echo $result;
         } else {
             header('HTTP/1.0 500 Internal Server Error');
             die('<h1>ERROR: Too many forward attempts!</h1><p>The request could not be completed due to too many unsuccessful forward attempts.</p>');
@@ -775,7 +776,8 @@ class DocumentParser {
         } else { 
             echo $this->documentOutput;
         }
-        ob_end_flush();
+        $result = ob_get_clean();
+        return $result;
     } // outputContent
     
     /**
@@ -1498,7 +1500,8 @@ class DocumentParser {
             if (!$this->config['site_unavailable_page']) {
                 // display offline message
                 $this->documentContent= $this->config['site_unavailable_message'];
-                $this->outputContent();
+                $result = $this->outputContent();
+                echo $result;
                 exit; // stop processing here, as the site's offline
             } else {
                 // setup offline page document settings
@@ -1539,7 +1542,8 @@ class DocumentParser {
         // invoke OnWebPageInit event
         $this->invokeEvent('OnWebPageInit');
         
-        $this->prepareResponse();
+        $result = $this->prepareResponse();
+        return $result;
     } // executeParser
     
     /**
@@ -1616,7 +1620,8 @@ class DocumentParser {
             & $this,
             'postProcess'
         )); // tell PHP to call postProcess when it shuts down
-        $this->outputContent();
+        $result = $this->outputContent();
+        return $result;
     } // evalSnippets
     
     /**
