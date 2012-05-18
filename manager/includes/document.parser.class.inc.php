@@ -4458,6 +4458,7 @@ class DocumentParser {
      */
     public function messageQuit($msg='unspecified error', $query='', $is_error=true, $nr='', $file='', $source='', $text='', $line='') {
 
+        if(!empty($file)) $file = str_replace('\\', '/', $file);
         $version= isset ($GLOBALS['version']) ? $GLOBALS['version'] : '';
         $release_date= isset ($GLOBALS['release_date']) ? $GLOBALS['release_date'] : '';
         $request_uri = $_SERVER['REQUEST_URI'];
