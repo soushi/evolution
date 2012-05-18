@@ -15,7 +15,6 @@ $lastInstallTime             = [+lastInstallTime+];
 $site_sessionname            = '[+site_sessionname+]';
 $https_port                  = '[+https_port+]';
 
-error_reporting(E_ALL & ~E_NOTICE);
 // setlocale (LC_TIME, 'ja_JP.UTF-8');
 // if(function_exists('date_default_timezone_set')) date_default_timezone_set('Asia/Tokyo');
 
