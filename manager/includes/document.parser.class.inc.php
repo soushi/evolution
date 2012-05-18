@@ -4731,6 +4731,12 @@ class SystemEvent {
     public $_output;
     
     /**
+     * Replaces $GLOBALS
+     * @var array
+     */
+    public $_globalVariables;
+    
+    /**
      * Whether the event is active, or not
      * @var false
      */
@@ -4778,6 +4784,38 @@ class SystemEvent {
     public function output($msg) {
         $this->_output .= $msg;
     } // output
+    
+    /**
+     * Set $GLOBALS
+     *
+     * @param string $key
+     * @param string $val
+     * @param string $now
+     */
+    public function setGlobalVariable($key,$val,$now=0) {
+        if (! isset( $GLOBALS[$key] ) ) {
+            return false;
+        }
+        if ( $now === 1 || $now === 'now' ) {
+            $GLOBALS[$key] = $val;
+        } else {
+            $this->_globalVariables[$key]=$val;
+        }
+        return true;
+    }
+    
+    /**
+     * Set all $GLOBALS
+     */
+    public function setAllGlobalVariables() {
+        if (empty($this->_globalVariables)) {
+            return false;
+        }
+        foreach ( $this->_globalVariables as $key => $val ) {
+            $GLOBALS[$key] = $val;
+        }
+        return true;
+    }
 
     /**
      * Sets _propagate to false
