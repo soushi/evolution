@@ -121,6 +121,7 @@ extract($modx->config);
 // include_once the language file
 if(!isset($manager_language)) $manager_language = 'english';
 $_lang = array();
+include_once "{$core_path}lang/english.inc.php";
 include_once("{$core_path}lang/{$manager_language}.inc.php");
 
 // send the charset header
