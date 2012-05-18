@@ -2910,7 +2910,7 @@ class DocumentParser {
             switch($this->config['datetime_format']) {
                 case 'YYYY/mm/dd':
                     if (!preg_match('/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}[0-9 :]*$/', $str)) {
-                        $result = '';
+                        $str = '';
                     } else {
                         list ($Y, $m, $d, $H, $M, $S) = sscanf($str, '%4d/%2d/%2d %2d:%2d:%2d');
                     }
@@ -2918,7 +2918,7 @@ class DocumentParser {
 
                 case 'dd-mm-YYYY':
                     if (!preg_match('/^[0-9]{2}-[0-9]{2}-[0-9]{4}[0-9 :]*$/', $str)) {
-                        $result = '';
+                        $str = '';
                     } else {
                         list ($d, $m, $Y, $H, $M, $S) = sscanf($str, '%2d-%2d-%4d %2d:%2d:%2d');
                     }
@@ -2926,22 +2926,13 @@ class DocumentParser {
 
                 case 'mm/dd/YYYY':
                     if (!preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}[0-9 :]*$/', $str)) {
-                        $result = '';
+                        $str = '';
                     } else {
                         list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d/%2d/%4d %2d:%2d:%2d');
                     }
                     break;
-                /*
-                case 'dd-mmm-YYYY':
-                    if (!preg_match('/^[0-9]{2}-[0-9a-z]+-[0-9]{4}[0-9 :]*$/i', $str)) {
-                        $result = '';
-                    } else {
-                        list ($m, $d, $Y, $H, $M, $S) = sscanf($str, '%2d-%3s-%4d %2d:%2d:%2d');
-                    }
-                    break;
-                */
             }
-            if (!empty($result)) {
+            if (!empty($str)) {
                 if (!$H && !$M && !$S) {
                     $H = 0;
                     $M = 0;
@@ -2952,7 +2943,6 @@ class DocumentParser {
                 $result = $timeStamp;
             }
         }
-
         return $result;
     } // toTimeStamp
 
