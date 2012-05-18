@@ -59,7 +59,9 @@ function assign_base_url()
 {
 	$init_path = str_replace("\\", '/',__FILE__);
 	$_1 = substr($init_path, 0, strpos($init_path, '/manager/includes/initialize.inc.php'));
-	$_2 = substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'],'/'));
+	$_2 = $_SERVER['REQUEST_URI'];
+	if(strpos($_2, '?')) $_2 = substr($_2, 0, strpos($_2, '?'));
+	$_2 = substr($_2, 0, strrpos($_2,'/'));
 	$limit = 10;
 	while(0 < $limit)
 	{
