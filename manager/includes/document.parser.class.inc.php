@@ -4039,16 +4039,20 @@ class DocumentParser {
      * @param string $suffix Default: }
      * @return boolean|string
      */
-    function parseChunk($chunkName, $chunkArr, $prefix="{", $suffix="}") {
-        $result = false;
-        if (is_array($chunkArr)) {
-            $chunk= $this->getChunk($chunkName);
-            foreach ($chunkArr as $key => $value) {
-                $chunk= str_replace($prefix . $key . $suffix, $value, $chunk);
-            }
-            $result = $chunk;
+    function parseChunk($chunkName, $chunkArr, $prefix= '{', $suffix= '}',$mode='chunk')
+    {
+        if (!is_array($chunkArr)) return false;
+        
+        if($mode==='chunk') {
+            $_ = $this->getChunk($chunkName);
+        } else {
+            $_ = $chunkName;
         }
-
+        
+        foreach ($chunkArr as $key => $value) {
+            $_ = str_replace("{$prefix}{$key}{$suffix}", $value, $_);
+        }
+        $result = $_;
         return $result;
     } // parseChunk
 
@@ -4079,9 +4083,8 @@ class DocumentParser {
                 list($k,$v) = explode('=',$pair);
                 $ph[$k] = $v;
             }
-            $result = $this->parseChunk($src, $ph, $left, $right, $mode);
         }
-
+        $result = $this->parseChunk($src, $ph, $left, $right, $mode);
         return $result;
     } // parsePlaceholder
     
