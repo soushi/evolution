@@ -4783,7 +4783,19 @@ class SystemEvent {
     public function output($msg) {
         $this->_output .= $msg;
     } // output
-    
+
+    /**
+     * Get $GLOBALS
+     *
+     * @param string $key
+     */
+    function getGlobalVariable($key) {
+        if( isset( $GLOBALS[$key] ) ) {
+            return $GLOBALS[$key];
+        }
+        return false;
+    }
+
     /**
      * Set $GLOBALS
      *
